@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.5.0 unreleased
-----------------
+0.5.0
+-----
 
 - Basic library added capable of searching on YouTube and SoundCloud
 - Two different clients (YT & SC)
