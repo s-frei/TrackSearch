@@ -20,8 +20,9 @@ import java.util.Optional;
 public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
 
     public static final String HOSTNAME = "https://soundcloud.com";
-    public static final String POSITION_KEY = "sc" + TrackSearchConfig.POSITION_KEY_SUFFIX;
-    public static final String OFFSET_KEY = "sc" + TrackSearchConfig.OFFSET_KEY_SUFFIX;
+    private static final String INFORMATION_PREFIX = "sc";
+    public static final String POSITION_KEY = INFORMATION_PREFIX + TrackSearchConfig.POSITION_KEY_SUFFIX;
+    public static final String OFFSET_KEY = INFORMATION_PREFIX + TrackSearchConfig.OFFSET_KEY_SUFFIX;
     private static final String PAGING_OFFSET = "limit";
     private static final String PAGING_POSITION = "position";
 

@@ -24,8 +24,10 @@ import java.util.Map;
 public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
     public static final String HOSTNAME = "https://youtube.com";
-    public static final String POSITION_KEY = "yt" + TrackSearchConfig.POSITION_KEY_SUFFIX;
-    public static final String OFFSET_KEY = "yt" + TrackSearchConfig.OFFSET_KEY_SUFFIX;
+    private static final String INFORMATION_PREFIX = "yt";
+    public static final String POSITION_KEY = INFORMATION_PREFIX + TrackSearchConfig.POSITION_KEY_SUFFIX;
+    public static final String OFFSET_KEY = INFORMATION_PREFIX + TrackSearchConfig.OFFSET_KEY_SUFFIX;
+    private static final String PAGING_INFORMATION = INFORMATION_PREFIX + "PagingToken";
     public static final String PAGING_KEY = "ctoken";
     private static final String ADDITIONAL_PAGING_KEY = "continuation";
 
@@ -108,17 +110,17 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     }
 
     private Map<String, String> getPagingParams(Map<String, String> queryInformation) {
-        String pagingToken = queryInformation.get(PAGING_KEY);
+        String pagingToken = queryInformation.get(PAGING_INFORMATION);
         return MapUtility.get(PAGING_KEY, pagingToken, ADDITIONAL_PAGING_KEY, pagingToken);
     }
 
-    public static Map<String, String> makeQueryInformation(String query, String ctoken) {
-        return MapUtility.get(TrackList.QUERY_PARAM, query, PAGING_KEY, ctoken);
+    public static Map<String, String> makeQueryInformation(String query, String pagingToken) {
+        return MapUtility.get(TrackList.QUERY_PARAM, query, PAGING_INFORMATION, pagingToken);
     }
 
     @Override
     public boolean hasPagingValues(TrackList<? extends Track> trackList) {
-        return TrackListHelper.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY, PAGING_KEY);
+        return TrackListHelper.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY, PAGING_INFORMATION);
     }
 
 }
