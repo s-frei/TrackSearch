@@ -90,6 +90,9 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
         YouTubeTrackFormat youtubeTrackFormat = TrackFormatUtility.getBestTrackFormat(trackInfo);
 
+        if (youtubeTrackFormat.isStreamReady())
+            return youtubeTrackFormat.getUrl();
+
         String content = scriptResponse.getContentOrThrow();
         String signatureKey = youTubeUtility.getSignature(youtubeTrackFormat, content);
 
