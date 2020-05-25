@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.6.0 - unreleased
-------------------
+0.5.2
+-----
 
 - Removed redundant logback configuration
 - Added some documentation to main interfaces
