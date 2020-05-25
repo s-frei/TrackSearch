@@ -7,6 +7,7 @@ Changelog
 - Removed redundant logback configuration
 - Added some documentation to main interfaces
 - Build sources and documentation
+- Deploy GitHub packages
 
 0.5.1
 -----
