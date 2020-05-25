@@ -6,17 +6,29 @@
 
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch-parent</artifactId>
-    <version>0.5.1</version>
-
+    <version>0.5.2</version>
     <packaging>pom</packaging>
+
+    <name>TrackSearch Parent</name>
+    <url>https://github.com/s-frei/TrackSearch</url>
 
     <modules>
         <module>library</module>
     </modules>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub s-frei Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/s-frei/TrackSearch</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
     </properties>
 
     <dependencyManagement>
