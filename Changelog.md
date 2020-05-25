@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.5.1
+-----
+
+- Fixed YouTube URL resolving bug
+
 0.5.0
 -----
 
