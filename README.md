@@ -27,3 +27,14 @@ private String = "add content";
 
 I haven't found anything which is capable of doing this kind of stuff, except it offered something similar and could
 be abused for this, or it wasn't written in Java.
+
+
+## Develop
+
+Run following commands in the root directory.
+
+#### Build
+
+```shell script
+mvnw clean package
+```
