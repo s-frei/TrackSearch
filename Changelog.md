@@ -1,10 +1,10 @@
 Changelog
 =========
 
-0.6.0 - unreleased
-------------------
+0.5.1
+-----
 
-Nothing to see...
+- Fixed YouTube URL resolving bug
 
 0.5.0
 -----
