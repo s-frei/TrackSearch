@@ -17,7 +17,7 @@
     <description>Library to gain track metadata from different sources</description>
 
     <properties>
-        <retrofit.version>2.8.1</retrofit.version>
+        <retrofit.version>2.9.0</retrofit.version>
         <jackson-databind.version>2.10.2</jackson-databind.version>
         <jsoup.version>1.12.1</jsoup.version>
         <logback-classic.version>1.2.3</logback-classic.version>
