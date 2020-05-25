@@ -4,7 +4,9 @@ Changelog
 0.6.0 - unreleased
 ------------------
 
-No changes yet
+- Removed redundant logback configuration
+- Added some documentation to main interfaces
+- Build sources and documentation
 
 0.5.1
 -----
