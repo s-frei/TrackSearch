@@ -1,4 +1,9 @@
-# TrackSearch
+<div align="center">
+  <b><h1>TrackSearch</h1></b><br>
+  <p>
+  ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
+  </p>
+</div>
 
 ## What is it ?
 
@@ -28,6 +33,26 @@ There could be more added if there is interesting content offered to go for.
 
 ## How to use it
 
+#### Dependency
+
+For now using jitpack. GitHub packages does not allow to download without authentication through token.
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+
+<dependency>
+    <groupId>com.github.s-frei.TrackSearch</groupId>
+    <artifactId>tracksearch</artifactId>
+    <version>0.5.3</version>
+</dependency>
+```
+
+#### Example usage
+
 ```java
 //Client to search on all available sources asynchronous
 MultiTrackSearchClient searchClient = new MultiSearchClient();
@@ -46,7 +71,6 @@ String streamUrl = searchClient.getStreamUrl(tracks.get(any))
 TrackList<Track> nextTracks = searchClient.getNext(tracksForSearch);
 ```
 
-
 ## Why is this done ?
 
 I haven't found anything which is capable of doing this kind of stuff, except it offered something similar and could
@@ -62,3 +86,11 @@ Run following commands in the root directory.
 ```shell script
 mvnw clean package
 ```
+
+#### Stuff to be added
+
+- Standalone web module offering a RESTful API and Frontend
+- Tests
+- More documentation
+- Playlist URL search
+- Direct audio stream URL resolving

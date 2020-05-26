@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.5.3
+-----
+
+- Added license
+- Added repository
+
 0.5.2
 -----
 
