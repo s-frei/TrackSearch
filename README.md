@@ -1,7 +1,9 @@
 <div align="center">
   <b><h1>TrackSearch</h1></b><br>
   <p>
+  <a href="CONTRIBUTING.md">
   <img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen">
+  </a> 
   <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/s-frei/tracksearch">
   </p>
 </div>
