@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.5.3 - unreleased
-------------------
+0.5.3
+-----
 
 - Added license
 - Added repository
