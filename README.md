@@ -47,7 +47,7 @@ For now using jitpack. GitHub packages does not allow to download without authen
 <dependency>
     <groupId>com.github.s-frei.TrackSearch</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.5.2</version>
+    <version>0.5.3</version>
 </dependency>
 ```
 
