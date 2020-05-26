@@ -1,7 +1,8 @@
 <div align="center">
   <b><h1>TrackSearch</h1></b><br>
   <p>
-  ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
+  <img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen">
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/s-frei/tracksearch">
   </p>
 </div>
 
@@ -31,7 +32,7 @@ There could be more added if there is interesting content offered to go for.
 - Expose audio stream url
 - Interact with multiple clients asynchronous
 
-## How to use it
+## How to use it ?
 
 #### Dependency
 
@@ -79,12 +80,12 @@ be abused for this, or it wasn't written in Java.
 
 ## Develop
 
-Run following commands in the root directory.
+Run following command in the root directory.
 
 #### Build
 
 ```shell script
-mvnw clean package
+mvnw clean install
 ```
 
 #### Stuff to be added
