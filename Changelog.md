@@ -4,7 +4,8 @@ Changelog
 0.5.3 - unreleased
 ------------------
 
-No changes yet
+- Added license
+- Added repository
 
 0.5.2
 -----

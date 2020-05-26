@@ -1,4 +1,9 @@
-# TrackSearch
+<div align="center">
+  <b><h1>TrackSearch</h1></b><br>
+  <p>
+  ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
+  </p>
+</div>
 
 ## What is it ?
 
@@ -81,3 +86,11 @@ Run following commands in the root directory.
 ```shell script
 mvnw clean package
 ```
+
+#### Stuff to be added
+
+- Standalone web module offering a RESTful API and Frontend
+- Tests
+- More documentation
+- Playlist URL search
+- Direct audio stream URL resolving
