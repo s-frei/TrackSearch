@@ -3,8 +3,10 @@
   <p>
   <a href="CONTRIBUTING.md">
   <img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen">
-  </a> 
+  </a>
+  <a href="https://github.com/s-frei/TrackSearch/releases"> 
   <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/s-frei/tracksearch">
+  </a>
   </p>
 </div>
 
