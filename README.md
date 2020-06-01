@@ -12,7 +12,7 @@
 
 ## What is it ?
 
-TrackSearch is to search for track metadata on different sources, like Youtube and SoundCloud for now and to expose the
+TrackSearch is for searching track metadata on different sources, like Youtube and SoundCloud for now and to expose the
 URL of the underlying audio stream in the highest resolution. That offers the possibility to hand them over to other
 programs which are able to process them, like [VLC](https://www.videolan.org/vlc/), or Firefox which can display the 
 audio directly for example.
