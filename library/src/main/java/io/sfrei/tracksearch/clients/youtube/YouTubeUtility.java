@@ -60,25 +60,41 @@ class YouTubeUtility {
     private static final String [] defaultRoute = {"contents", "twoColumnSearchResultsRenderer", "primaryContents",
     "sectionListRenderer", "contents"};
 
-    private static final String [] pagedRoute = {"continuationContents", "itemSectionContinuation"};
-
-    BaseTrackList<YouTubeTrack> getYouTubeTracks(String json, QueryType queryType, String query) throws YouTubeException {
+    protected BaseTrackList<YouTubeTrack> getYouTubeTracks(String json, QueryType queryType, String query) throws YouTubeException {
         try {
             JsonNode response = MAPPER.readTree(json).get(1).get("response");
             JsonElement responseElement = new JsonElement(response);
 
             JsonElement defaultElement = responseElement.get(defaultRoute);
 
+            //JSON list named "contents" (could be several)
             JsonElement contentHolder;
-            if (!defaultElement.isNull()) {
+            if (defaultElement.notNull()) {
                 contentHolder = defaultElement.getFirst().get("itemSectionRenderer");
             } else {
-                contentHolder = responseElement.get(pagedRoute);
+                JsonElement pagedElements = responseElement.get("continuationContents");
+                JsonElement pagedContentHolder;
+                pagedContentHolder = pagedElements.get("itemSectionContinuation");
+                if (pagedContentHolder.notNull())
+                    contentHolder = pagedContentHolder;
+                else
+                    contentHolder = pagedElements.get("sectionListContinuation", "contents").getFirst().get("itemSectionRenderer");
             }
 
-            String ctoken = contentHolder.get("continuations").getFirst().get("nextContinuationData").getStringFor("continuation");
+            String ctoken;
+            if (contentHolder.get("continuations").notNull()) {
+                ctoken = contentHolder.get("continuations").getFirst().get("nextContinuationData")
+                        .getStringFor("continuation");
+            } else {
+                ctoken = defaultElement.get(1).get("continuationItemRenderer", "continuationEndpoint", "continuationCommand")
+                        .getStringFor("token");
+            }
 
-            Iterator<JsonNode> elements = contentHolder.get("contents").getNode().elements();
+            JsonNode contents = contentHolder.get("contents").getNode();
+            if (contents == null)
+                throw new YouTubeException("Content section for tracks is empty");
+
+            Iterator<JsonNode> elements = contents.elements();
             List<YouTubeTrack> ytTracks = new ArrayList<>();
             while (elements.hasNext()) {
                 String jsonObject = elements.next().toString();

@@ -51,4 +51,8 @@ public class JsonElement extends JsonUtility {
         return jsonNode == null;
     }
 
+    public boolean notNull() {
+        return jsonNode != null;
+    }
+
 }
