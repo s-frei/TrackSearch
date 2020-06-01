@@ -4,7 +4,7 @@ Changelog
 0.5.4 - unreleased
 ------------------
 
-No changes yet
+- Fixed YouTube cipher field and added optional one
 
 0.5.3
 -----

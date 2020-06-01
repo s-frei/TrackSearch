@@ -125,7 +125,8 @@ class YouTubeUtility {
                         String mimeType = formatElement.getStringFor("mimeType");
                         String audioQuality = formatElement.getStringFor("audioQuality");
                         String audioSampleRate = formatElement.getStringFor("audioSampleRate");
-                        String cipher = formatElement.getStringFor("cipher");
+
+                        String cipher = formatElement.getStringForValues("cipher", "signatureCipher");
 
                         YouTubeTrackFormat trackFormat;
                         if (cipher == null) {
