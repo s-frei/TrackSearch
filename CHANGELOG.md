@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.5.4 - unreleased
-------------------
+0.5.4
+-----
 
 **Bugfix:**
 - Added optional path to YouTube tracks content
