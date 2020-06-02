@@ -14,6 +14,15 @@ public class JsonElement extends JsonUtility {
         return getStringFor(jsonNode, value);
     }
 
+    public String getStringForValues(String... values) {
+        for (String value : values) {
+            String result = getStringFor(jsonNode, value);
+            if (result != null)
+                return result;
+        }
+        return null;
+    }
+
     public Long getLongFor(String value) {
         return getLongFor(jsonNode, value);
     }
@@ -40,6 +49,10 @@ public class JsonElement extends JsonUtility {
 
     public boolean isNull() {
         return jsonNode == null;
+    }
+
+    public boolean notNull() {
+        return jsonNode != null;
     }
 
 }

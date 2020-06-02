@@ -121,7 +121,7 @@ public class MultiSearchClient implements MultiTrackSearchClient {
             try {
                 resultTrackList.mergeIn(trackList.get());
             } catch (InterruptedException | ExecutionException e) {
-                throw new TrackSearchException(e.getMessage());
+                throw new TrackSearchException("An error occurred acquiring a tracklist");
             }
         }
 

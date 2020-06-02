@@ -1,13 +1,18 @@
 <div align="center">
   <b><h1>TrackSearch</h1></b><br>
   <p>
-  ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
+  <a href="CONTRIBUTING.md">
+  <img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen">
+  </a>
+  <a href="https://github.com/s-frei/TrackSearch/releases"> 
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/s-frei/tracksearch">
+  </a>
   </p>
 </div>
 
 ## What is it ?
 
-TrackSearch is to search for track metadata on different sources, like Youtube and SoundCloud for now and to expose the
+TrackSearch is for searching track metadata on different sources, like Youtube and SoundCloud for now and to expose the
 URL of the underlying audio stream in the highest resolution. That offers the possibility to hand them over to other
 programs which are able to process them, like [VLC](https://www.videolan.org/vlc/), or Firefox which can display the 
 audio directly for example.
@@ -31,7 +36,7 @@ There could be more added if there is interesting content offered to go for.
 - Expose audio stream url
 - Interact with multiple clients asynchronous
 
-## How to use it
+## How to use it ?
 
 #### Dependency
 
@@ -47,7 +52,7 @@ For now using jitpack. GitHub packages does not allow to download without authen
 <dependency>
     <groupId>com.github.s-frei.TrackSearch</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.5.3</version>
+    <version>0.5.4</version>
 </dependency>
 ```
 
@@ -79,12 +84,12 @@ be abused for this, or it wasn't written in Java.
 
 ## Develop
 
-Run following commands in the root directory.
+Run following command in the root directory.
 
 #### Build
 
 ```shell script
-mvnw clean package
+mvnw clean install
 ```
 
 #### Stuff to be added
