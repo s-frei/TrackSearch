@@ -4,7 +4,8 @@ Changelog
 0.5.5 - unreleased
 ------------------
 
-No changes
+**Bugfix:**
+- Added another optional paging path
 
 0.5.4
 -----
