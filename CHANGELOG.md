@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.5.5
+-----
+
+**Feature:**
+- Added direct stream url exposing using the track object
+- Added some documentation to the track interface
+
+**Bugfix:**
+- Added another optional paging path
+
 0.5.4
 -----
 

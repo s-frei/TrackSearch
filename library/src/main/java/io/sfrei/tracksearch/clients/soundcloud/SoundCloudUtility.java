@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
-import io.sfrei.tracksearch.tracks.SoundCloudTrack;
+import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
+import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,6 +14,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -52,7 +54,10 @@ class SoundCloudUtility {
         return Optional.empty();
     }
 
-    BaseTrackList<SoundCloudTrack> getSoundCloudTracks(String json, QueryType queryType, String query) throws SoundCloudException {
+    BaseTrackList<SoundCloudTrack> getSoundCloudTracks(String json, QueryType queryType, String query,
+                                                       Function<SoundCloudTrack, String> streamUrlProvider)
+            throws TrackSearchException, SoundCloudException {
+
         try {
             JsonNode songCollection = MAPPER.readTree(json).get("collection");
             Iterator<JsonNode> elements = songCollection.elements();
@@ -61,7 +66,10 @@ class SoundCloudUtility {
             while (elements.hasNext()) {
                 String jsonObject = elements.next().toString();
                 SoundCloudTrack soundCloudTrack = MAPPER.readValue(jsonObject, SoundCloudTrack.class);
-                if (soundCloudTrack != null) scTracks.add(soundCloudTrack);
+                if (soundCloudTrack != null) {
+                    soundCloudTrack.setStreamUrlProvider(streamUrlProvider);
+                    scTracks.add(soundCloudTrack);
+                }
             }
 
             int foundTracks = scTracks.size();
@@ -82,7 +90,7 @@ class SoundCloudUtility {
             String progressiveStreamUrl = streamUrlMatcher.group()
                     .replace(SOUNDCLOUD_STREAM_PREFIX, "")
                     .replaceAll("\"", "");
-            log.debug("ProgressiveStreamURL was found: {}", progressiveStreamUrl);
+            log.trace("ProgressiveStreamURL was found: {}", progressiveStreamUrl);
             return Optional.of(progressiveStreamUrl);
         }
         return Optional.empty();

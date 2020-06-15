@@ -57,7 +57,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
         ResponseWrapper response = getSearch(search, true, pagingParams);
 
         String content = response.getContentOrThrow();
-        return soundCloudUtility.getSoundCloudTracks(content, QueryType.SEARCH, search);
+        return soundCloudUtility.getSoundCloudTracks(content, QueryType.SEARCH, search, this::provideStreamUrl);
     }
 
     @Override
@@ -72,6 +72,15 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
             return TrackListHelper.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw new SoundCloudException("Query type not supported");
+    }
+
+    private String provideStreamUrl(SoundCloudTrack track) {
+        try {
+            return getStreamUrl(track);
+        } catch (TrackSearchException e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 
     @Override

@@ -23,13 +23,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
 class YouTubeUtility {
-
-    private static final String YOUTUBE_HOSTNAME = "youtube.com";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String JS_SPLICE = ".splice";
@@ -52,15 +51,18 @@ class YouTubeUtility {
                     + SLICE + "|" + SPLICE + "|" + REVERSE + "|" + SWAP +
                     ")+)"
     );
+    private static final String[] defaultRoute = {"contents", "twoColumnSearchResultsRenderer", "primaryContents",
+            "sectionListRenderer", "contents"};
+    private static final String[] continuationItemRenderer = {"continuationItemRenderer", "continuationEndpoint", "continuationCommand"};
 
     private static String wrap(String functionContent) {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
 
-    private static final String [] defaultRoute = {"contents", "twoColumnSearchResultsRenderer", "primaryContents",
-    "sectionListRenderer", "contents"};
+    protected BaseTrackList<YouTubeTrack> getYouTubeTracks(String json, QueryType queryType, String query,
+                                                           Function<YouTubeTrack, String> streamUrlProvider)
+            throws YouTubeException {
 
-    protected BaseTrackList<YouTubeTrack> getYouTubeTracks(String json, QueryType queryType, String query) throws YouTubeException {
         try {
             JsonNode response = MAPPER.readTree(json).get(1).get("response");
             JsonElement responseElement = new JsonElement(response);
@@ -71,14 +73,17 @@ class YouTubeUtility {
             JsonElement contentHolder;
             if (defaultElement.notNull()) {
                 contentHolder = defaultElement.getFirst().get("itemSectionRenderer");
+            } else if (responseElement.get("onResponseReceivedCommands").notNull()) {
+                JsonElement pagedElements = responseElement.get("onResponseReceivedCommands");
+                contentHolder = pagedElements.get(0).get("appendContinuationItemsAction", "continuationItems").get(0).get("itemSectionRenderer");
             } else {
                 JsonElement pagedElements = responseElement.get("continuationContents");
-                JsonElement pagedContentHolder;
-                pagedContentHolder = pagedElements.get("itemSectionContinuation");
-                if (pagedContentHolder.notNull())
-                    contentHolder = pagedContentHolder;
-                else
-                    contentHolder = pagedElements.get("sectionListContinuation", "contents").getFirst().get("itemSectionRenderer");
+                if (pagedElements.get("itemSectionContinuation").notNull())
+                    contentHolder = pagedElements.get("itemSectionContinuation");
+                else {
+                    contentHolder = pagedElements.get("sectionListContinuation", "contents")
+                            .getFirst().get("itemSectionRenderer");
+                }
             }
 
             String ctoken;
@@ -86,8 +91,14 @@ class YouTubeUtility {
                 ctoken = contentHolder.get("continuations").getFirst().get("nextContinuationData")
                         .getStringFor("continuation");
             } else {
-                ctoken = defaultElement.get(1).get("continuationItemRenderer", "continuationEndpoint", "continuationCommand")
-                        .getStringFor("token");
+                JsonElement continuationItems;
+                if (responseElement.get("onResponseReceivedCommands").notNull()) {
+                    continuationItems = responseElement.get("onResponseReceivedCommands").get(0)
+                            .get("appendContinuationItemsAction", "continuationItems").get(1);
+                } else {
+                    continuationItems = defaultElement.get(1);
+                }
+                ctoken = continuationItems.get(continuationItemRenderer).getStringFor("token");
             }
 
             JsonNode contents = contentHolder.get("contents").getNode();
@@ -99,7 +110,10 @@ class YouTubeUtility {
             while (elements.hasNext()) {
                 String jsonObject = elements.next().toString();
                 YouTubeTrack youTubeTrack = MAPPER.readValue(jsonObject, YouTubeTrack.class);
-                if (youTubeTrack != null) ytTracks.add(youTubeTrack);
+                if (youTubeTrack != null) {
+                    youTubeTrack.setStreamUrlProvider(streamUrlProvider);
+                    ytTracks.add(youTubeTrack);
+                }
             }
 
             int foundTracks = ytTracks.size();

@@ -4,10 +4,7 @@ import io.sfrei.tracksearch.clients.setup.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
-import io.sfrei.tracksearch.tracks.BaseTrackList;
-import io.sfrei.tracksearch.tracks.Track;
-import io.sfrei.tracksearch.tracks.TrackList;
-import io.sfrei.tracksearch.tracks.YouTubeTrack;
+import io.sfrei.tracksearch.tracks.*;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.MapUtility;
@@ -60,7 +57,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         Call<ResponseWrapper> request = requestService.getSearchForKeywords(search, params);
         ResponseWrapper response = Client.request(request);
         String content = response.getContentOrThrow();
-        return youTubeUtility.getYouTubeTracks(content, QueryType.SEARCH, search);
+        return youTubeUtility.getYouTubeTracks(content, QueryType.SEARCH, search, this::provideStreamUrl);
     }
 
     @Override
@@ -75,6 +72,15 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
             return TrackListHelper.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw new YouTubeException("Query type not supported");
+    }
+
+    private String provideStreamUrl(YouTubeTrack track) {
+        try {
+            return getStreamUrl(track);
+        } catch (TrackSearchException e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 
     @Override

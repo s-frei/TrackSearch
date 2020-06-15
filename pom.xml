@@ -6,7 +6,7 @@
 
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch-parent</artifactId>
-    <version>0.5.4</version>
+    <version>0.5.5</version>
     <packaging>pom</packaging>
 
     <name>TrackSearch Parent</name>
@@ -27,8 +27,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
-        <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
+        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
     </properties>
 
     <dependencyManagement>
