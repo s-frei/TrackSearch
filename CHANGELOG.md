@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.5.5 - unreleased
-------------------
+0.5.5
+-----
 
 **Feature:**
 - Added direct stream url exposing using the track object
