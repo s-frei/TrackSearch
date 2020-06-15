@@ -13,7 +13,7 @@ public interface TrackSearchClient<T extends Track> {
     /**
      * Search for tracks using a string containing keywords.
      * @param search keywords to search for.
-     * @return A tracklist containing all found tracks.
+     * @return a tracklist containing all found tracks.
      * @throws TrackSearchException when the client encountered a problem on searching.
      */
     TrackList<T> getTracksForSearch(String search) throws TrackSearchException;
@@ -21,7 +21,7 @@ public interface TrackSearchClient<T extends Track> {
     /**
      * Search for the next tracks for last result.
      * @param trackList a previous search result for that client.
-     * @return A tracklist containing the next tracks available.
+     * @return a tracklist containing the next tracks available.
      * @throws TrackSearchException when the client encounters a problem on getting the next tracks.
      */
     TrackList<T> getNext(TrackList<? extends Track> trackList) throws TrackSearchException;
@@ -29,7 +29,7 @@ public interface TrackSearchClient<T extends Track> {
     /**
      * Get the audio stream URL in the highest possible audio resolution.
      * @param track from this client.
-     * @return The audio stream URL.
+     * @return the audio stream URL.
      * @throws TrackSearchException when the URL could not be exposed.
      */
     String getStreamUrl(T track) throws TrackSearchException;

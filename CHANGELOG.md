@@ -6,6 +6,7 @@ Changelog
 
 **Feature:**
 - Added direct stream url exposing using the track object
+- Added some documentation to the track interface
 
 **Bugfix:**
 - Added another optional paging path
