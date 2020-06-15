@@ -82,7 +82,7 @@ class SoundCloudUtility {
             String progressiveStreamUrl = streamUrlMatcher.group()
                     .replace(SOUNDCLOUD_STREAM_PREFIX, "")
                     .replaceAll("\"", "");
-            log.debug("ProgressiveStreamURL was found: {}", progressiveStreamUrl);
+            log.trace("ProgressiveStreamURL was found: {}", progressiveStreamUrl);
             return Optional.of(progressiveStreamUrl);
         }
         return Optional.empty();
