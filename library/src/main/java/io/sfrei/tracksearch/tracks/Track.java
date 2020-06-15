@@ -36,7 +36,7 @@ public interface Track {
 
     /**
      * Get the audio stream URL in the highest possible quality.
-     * @return the audio stream URL.
+     * @return the audio stream URL, null when exception occured.
      */
     String getStreamUrl();
 

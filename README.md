@@ -70,7 +70,7 @@ TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keyword
 
 //Get the audio stream
 List<Track> tracks = tracksForSearch.getTracks();
-String streamUrl = searchClient.getStreamUrl(tracks.get(any))
+String streamUrl = tracks.get(any).getStreamUrl();
 
 //Get next tracks
 TrackList<Track> nextTracks = searchClient.getNext(tracksForSearch);
