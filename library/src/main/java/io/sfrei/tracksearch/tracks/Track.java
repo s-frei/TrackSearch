@@ -14,6 +14,8 @@ public interface Track {
 
     String getUrl();
 
+    String getStreamUrl();
+
     boolean equals(Object o);
 
     String toPrettyString();

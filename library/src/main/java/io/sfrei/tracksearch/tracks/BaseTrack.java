@@ -2,7 +2,10 @@ package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.utils.ReplaceUtility;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @ToString

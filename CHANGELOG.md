@@ -4,6 +4,9 @@ Changelog
 0.5.5 - unreleased
 ------------------
 
+**Feature:**
+- Added direct stream url exposing using the track object
+
 **Bugfix:**
 - Added another optional paging path
 

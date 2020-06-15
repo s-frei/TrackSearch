@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,7 +59,10 @@ class YouTubeUtility {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
 
-    protected BaseTrackList<YouTubeTrack> getYouTubeTracks(String json, QueryType queryType, String query) throws YouTubeException {
+    protected BaseTrackList<YouTubeTrack> getYouTubeTracks(String json, QueryType queryType, String query,
+                                                           Function<YouTubeTrack, String> streamUrlProvider)
+            throws YouTubeException {
+
         try {
             JsonNode response = MAPPER.readTree(json).get(1).get("response");
             JsonElement responseElement = new JsonElement(response);
@@ -106,7 +110,10 @@ class YouTubeUtility {
             while (elements.hasNext()) {
                 String jsonObject = elements.next().toString();
                 YouTubeTrack youTubeTrack = MAPPER.readValue(jsonObject, YouTubeTrack.class);
-                if (youTubeTrack != null) ytTracks.add(youTubeTrack);
+                if (youTubeTrack != null) {
+                    youTubeTrack.setStreamUrlProvider(streamUrlProvider);
+                    ytTracks.add(youTubeTrack);
+                }
             }
 
             int foundTracks = ytTracks.size();
