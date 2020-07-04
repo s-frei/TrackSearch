@@ -7,7 +7,7 @@ public class ReplaceUtility {
                 .replaceAll("@", " at ")
                 .replaceAll("\\s+", " ")
                 .replaceAll("\\s(\\[]\\(\\))", "")
-                .replaceAll("[^A-Za-z0-9 &()\\[\\]\\-.]", "")
+                .replaceAll("[^A-Za-z0-9äöü&()\\[\\]\\-. ]", "")
                 .replaceAll("\\s?HD", "")
                 .replaceAll("(?i)\\(\\s?Official (Music )?Video\\s?\\)", "")
                 .replaceAll("(?i)\\(\\s?Official Audio\\s?\\)", "")
