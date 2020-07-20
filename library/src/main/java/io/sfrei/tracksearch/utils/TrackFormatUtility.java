@@ -1,17 +1,31 @@
 package io.sfrei.tracksearch.utils;
 
+import io.sfrei.tracksearch.exceptions.TrackSearchException;
+import io.sfrei.tracksearch.tracks.YouTubeTrack;
+import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
-import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 public class TrackFormatUtility {
 
-    public static YouTubeTrackFormat getBestTrackFormat(YouTubeTrackInfo youtubeTrackInfo) {
+    public static YouTubeTrackFormat getBestTrackFormat(YouTubeTrack youtubeTrack, boolean includeVideo)
+            throws TrackSearchException {
+
         AtomicReference<YouTubeTrackFormat> format = new AtomicReference<>(null);
-        for (YouTubeTrackFormat trackFormat : youtubeTrackInfo.getFormats()) {
-            if (format.get() == null)
+        for (YouTubeTrackFormat trackFormat : youtubeTrack.getTrackInfo().getFormats()) {
+            if (format.get() == null) {
+                if (trackFormat.getAudioQuality() == null || trackFormat.getAudioSampleRate() == null)
+                    continue;
+                if (trackFormat.getFormatType().equals(FormatType.Unknown))
+                    continue;
+                if (!trackFormat.getFormatType().equals(FormatType.Audio) && !includeVideo)
+                    continue;
+
                 format.set(trackFormat);
+            }
 
             String currentAudioQuality = format.get().getAudioQuality();
             String anotherAudioQuality = trackFormat.getAudioQuality();
@@ -20,16 +34,26 @@ public class TrackFormatUtility {
                 continue;
             }
 
-            Integer currentSamplerate = Integer.parseInt(format.get().getAudioSampleRate());
-            Integer anotherSamplerate = Integer.parseInt(trackFormat.getAudioSampleRate());
-            if (currentSamplerate < anotherSamplerate) {
+            int currentSampleRate = Integer.parseInt(format.get().getAudioSampleRate());
+            int anotherSampleRate = Integer.parseInt(trackFormat.getAudioSampleRate());
+            if (currentSampleRate < anotherSampleRate) {
                 format.set(trackFormat);
             }
         }
-        return format.get();
+        if (format.get() != null) {
+            return format.get();
+        }
+
+        if (!includeVideo) {
+            log.warn("No audio mime type found for: {} - {} - trying to get alternative",
+                    youtubeTrack.getCleanTitle(), youtubeTrack.getUrl());
+            return getBestTrackFormat(youtubeTrack, true);
+        }
+
+        throw new TrackSearchException("Could not get applicable track format");
     }
 
-    private static enum YoutubeAudioQualities {
+    private enum YoutubeAudioQualities {
         LOW("AUDIO_QUALITY_LOW"),
         MEDIUM("AUDIO_QUALITY_MEDIUM"),
         HIGH("AUDIO_QUALITY_HIGH"); //never seen

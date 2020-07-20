@@ -4,7 +4,10 @@ import io.sfrei.tracksearch.clients.setup.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
-import io.sfrei.tracksearch.tracks.*;
+import io.sfrei.tracksearch.tracks.BaseTrackList;
+import io.sfrei.tracksearch.tracks.Track;
+import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.MapUtility;
@@ -94,7 +97,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         String scriptUrl = trackInfo.getScriptUrl();
         ResponseWrapper scriptResponse = Client.requestURL(HOSTNAME + scriptUrl);
 
-        YouTubeTrackFormat youtubeTrackFormat = TrackFormatUtility.getBestTrackFormat(trackInfo);
+        YouTubeTrackFormat youtubeTrackFormat = TrackFormatUtility.getBestTrackFormat(youtubeTrack, false);
 
         if (youtubeTrackFormat.isStreamReady())
             return youtubeTrackFormat.getUrl();

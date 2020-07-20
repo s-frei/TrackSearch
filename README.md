@@ -52,7 +52,7 @@ For now using jitpack. GitHub packages does not allow to download without authen
 <dependency>
     <groupId>com.github.s-frei.TrackSearch</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.5.5</version>
+    <version>0.5.6</version>
 </dependency>
 ```
 
@@ -70,7 +70,7 @@ TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keyword
 
 //Get the audio stream
 List<Track> tracks = tracksForSearch.getTracks();
-String streamUrl = searchClient.getStreamUrl(tracks.get(any))
+String streamUrl = tracks.get(any).getStreamUrl();
 
 //Get next tracks
 TrackList<Track> nextTracks = searchClient.getNext(tracksForSearch);

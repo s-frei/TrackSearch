@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.sfrei</groupId>
         <artifactId>tracksearch-parent</artifactId>
-        <version>0.5.5</version>
+        <version>0.5.6</version>
     </parent>
 
     <artifactId>tracksearch</artifactId>
@@ -18,7 +18,7 @@
 
     <properties>
         <retrofit.version>2.9.0</retrofit.version>
-        <jackson-databind.version>2.11.0</jackson-databind.version>
+        <jackson-databind.version>2.11.1</jackson-databind.version>
         <jsoup.version>1.13.1</jsoup.version>
         <logback-classic.version>1.2.3</logback-classic.version>
     </properties>

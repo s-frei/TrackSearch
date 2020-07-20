@@ -1,6 +1,17 @@
 Changelog
 =========
 
+0.5.6
+-----
+
+**Feature:**
+- Alternative youtube track format route
+- Fallback to video stream when no applicable audio
+  stream could be resolved for youtube track
+
+**Bugfix:**
+- Cleaner title replacements
+
 0.5.5
 -----
 

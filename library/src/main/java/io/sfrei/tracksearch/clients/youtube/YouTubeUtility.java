@@ -7,6 +7,7 @@ import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
+import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.URLUtility;
@@ -145,14 +146,19 @@ class YouTubeUtility {
                     JsonNode playerResponseTextNode = args.get("player_response");
                     JsonNode playerResponseNode = MAPPER.readTree(playerResponseTextNode.textValue()); //re-read
 
-                    JsonNode formats = playerResponseNode.get("streamingData").get("adaptiveFormats");
-                    for (JsonNode format : formats) {
+                    JsonNode formats;
+                    JsonElement streamingData = new JsonElement(playerResponseNode.get("streamingData"));
+                    if (streamingData.get("adaptiveFormats").notNull()) {
+                        formats = streamingData.getNode("adaptiveFormats");
+                    } else  {
+                        formats = streamingData.get("formats").getNode();
+                    }
 
-                        if (!JsonUtility.getStringForContaining(format, "mimeType", "audio"))
-                            continue;
+                    for (JsonNode format : formats) {
 
                         JsonElement formatElement = new JsonElement(format);
                         String mimeType = formatElement.getStringFor("mimeType");
+                        FormatType formatType = FormatType.getFormatType(mimeType);
                         String audioQuality = formatElement.getStringFor("audioQuality");
                         String audioSampleRate = formatElement.getStringFor("audioSampleRate");
 
@@ -163,6 +169,7 @@ class YouTubeUtility {
                             String url = formatElement.getStringFor("url");
                             trackFormat = YouTubeTrackFormat.builder()
                                     .mimeType(mimeType)
+                                    .formatType(formatType)
                                     .audioQuality(audioQuality)
                                     .audioSampleRate(audioSampleRate)
                                     .streamReady(true)
@@ -174,6 +181,7 @@ class YouTubeUtility {
                             Map<String, String> params = URLUtility.splitAndDecodeUrl(cipher);
                             trackFormat = YouTubeTrackFormat.builder()
                                     .mimeType(mimeType)
+                                    .formatType(formatType)
                                     .audioQuality(audioQuality)
                                     .audioSampleRate(audioSampleRate)
                                     .streamReady(false)
