@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.5.6 - unreleased
-------------------
+0.5.6
+-----
 
 **Feature:**
 - Alternative youtube track format route
