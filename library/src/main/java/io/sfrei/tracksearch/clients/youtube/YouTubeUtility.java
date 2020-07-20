@@ -145,11 +145,15 @@ class YouTubeUtility {
                     JsonNode playerResponseTextNode = args.get("player_response");
                     JsonNode playerResponseNode = MAPPER.readTree(playerResponseTextNode.textValue()); //re-read
 
-                    JsonNode formats = playerResponseNode.get("streamingData").get("adaptiveFormats");
-                    for (JsonNode format : formats) {
+                    JsonNode formats;
+                    JsonElement streamingData = new JsonElement(playerResponseNode.get("streamingData"));
+                    if (streamingData.get("adaptiveFormats").notNull()) {
+                        formats = streamingData.getNode("adaptiveFormats");
+                    } else  {
+                        formats = streamingData.get("formats").getNode();
+                    }
 
-                        if (!JsonUtility.getStringForContaining(format, "mimeType", "audio"))
-                            continue;
+                    for (JsonNode format : formats) {
 
                         JsonElement formatElement = new JsonElement(format);
                         String mimeType = formatElement.getStringFor("mimeType");
