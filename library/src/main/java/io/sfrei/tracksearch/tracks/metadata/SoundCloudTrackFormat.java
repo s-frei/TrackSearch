@@ -9,9 +9,9 @@ public class SoundCloudTrackFormat extends TrackFormat {
     private final String protocol;
 
     @Builder
-    public SoundCloudTrackFormat(String mimeType, String audioQuality, boolean streamReady, String url,
+    public SoundCloudTrackFormat(String mimeType, FormatType formatType, String audioQuality, boolean streamReady, String url,
                                  String protocol) {
-        super(mimeType, audioQuality, streamReady, url);
+        super(mimeType, formatType, audioQuality, streamReady, url);
         this.protocol = protocol;
     }
 

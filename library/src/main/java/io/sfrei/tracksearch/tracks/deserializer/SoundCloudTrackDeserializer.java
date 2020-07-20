@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
+import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.utils.TimeUtility;
@@ -53,6 +54,7 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
 
                 SoundCloudTrackFormat trackFormat = SoundCloudTrackFormat.builder()
                         .mimeType(mimeType)
+                        .formatType(FormatType.Audio)
                         .audioQuality(audioQuality)
                         .streamReady(false)
                         .protocol(protocol)

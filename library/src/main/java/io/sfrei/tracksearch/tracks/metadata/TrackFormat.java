@@ -12,6 +12,8 @@ public class TrackFormat {
 
     private final String mimeType;
 
+    private final FormatType formatType;
+
     private final String audioQuality;
 
     @Setter

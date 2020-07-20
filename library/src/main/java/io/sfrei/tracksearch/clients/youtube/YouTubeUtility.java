@@ -7,6 +7,7 @@ import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
+import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.URLUtility;
@@ -157,6 +158,7 @@ class YouTubeUtility {
 
                         JsonElement formatElement = new JsonElement(format);
                         String mimeType = formatElement.getStringFor("mimeType");
+                        FormatType formatType = FormatType.getFormatType(mimeType);
                         String audioQuality = formatElement.getStringFor("audioQuality");
                         String audioSampleRate = formatElement.getStringFor("audioSampleRate");
 
@@ -167,6 +169,7 @@ class YouTubeUtility {
                             String url = formatElement.getStringFor("url");
                             trackFormat = YouTubeTrackFormat.builder()
                                     .mimeType(mimeType)
+                                    .formatType(formatType)
                                     .audioQuality(audioQuality)
                                     .audioSampleRate(audioSampleRate)
                                     .streamReady(true)
@@ -178,6 +181,7 @@ class YouTubeUtility {
                             Map<String, String> params = URLUtility.splitAndDecodeUrl(cipher);
                             trackFormat = YouTubeTrackFormat.builder()
                                     .mimeType(mimeType)
+                                    .formatType(formatType)
                                     .audioQuality(audioQuality)
                                     .audioSampleRate(audioSampleRate)
                                     .streamReady(false)

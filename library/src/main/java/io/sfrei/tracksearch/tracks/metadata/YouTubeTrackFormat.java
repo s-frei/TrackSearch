@@ -11,9 +11,9 @@ public class YouTubeTrackFormat extends TrackFormat {
     private final String sigValue;
 
     @Builder
-    public YouTubeTrackFormat(String mimeType, String audioQuality, boolean streamReady, String url,
+    public YouTubeTrackFormat(String mimeType, FormatType formatType, String audioQuality, boolean streamReady, String url,
                               String audioSampleRate, String sigParam, String sigValue) {
-        super(mimeType, audioQuality, streamReady, url);
+        super(mimeType, formatType, audioQuality, streamReady, url);
         this.audioSampleRate = audioSampleRate;
         this.sigParam = sigParam;
         this.sigValue = sigValue;
