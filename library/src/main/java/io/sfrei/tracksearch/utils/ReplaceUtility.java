@@ -5,13 +5,14 @@ public class ReplaceUtility {
     public static String replaceUnnecessary(String chars) {
         return chars
                 .replaceAll("@", " at ")
-                .replaceAll("\\s+", " ")
+                .replaceAll("_", " ")
                 .replaceAll("\\s(\\[]\\(\\))", "")
-                .replaceAll("[^A-Za-z0-9äöü&()\\[\\]\\-. ]", "")
+                .replaceAll("[^\\p{javaAlphabetic}0-9&()\\[\\]\\-.\\s]", "")
                 .replaceAll("\\s?HD", "")
                 .replaceAll("(?i)\\(\\s?Official (Music )?Video\\s?\\)", "")
                 .replaceAll("(?i)\\(\\s?Official Audio\\s?\\)", "")
                 .replaceAll("(?i)\\s?\\(HQ Audio\\s?\\)", "")
+                .replaceAll("\\s+", " ")
                 .trim();
     }
 
