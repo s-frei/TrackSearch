@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class ClientTestImpl<T extends Track> implements ClientTest {
 
-    private final TrackSearchClient<T> searchClient;
+    protected final TrackSearchClient<T> searchClient;
 
     private TrackList<T> tracksForSearch;
 
