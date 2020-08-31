@@ -34,17 +34,17 @@ public abstract class ClientTestImpl<T extends Track> implements ClientTest {
     @Override
     @Order(2)
     @Test
-    public void getNextTracks() throws TrackSearchException {
-        TrackList<T> nextTracksForSearch = searchClient.getNext(tracksForSearch);
-        log.debug("Found tracks: {}", nextTracksForSearch.getTracks().size());
-        assertFalse(nextTracksForSearch.isEmpty());
+    public void trackListGotPagingValues() {
+        assertTrue(searchClient.hasPagingValues(tracksForSearch));
     }
 
     @Override
     @Order(3)
     @Test
-    public void trackListGotPagingValues() {
-        assertTrue(searchClient.hasPagingValues(tracksForSearch));
+    public void getNextTracks() throws TrackSearchException {
+        TrackList<T> nextTracksForSearch = searchClient.getNext(tracksForSearch);
+        log.debug("Found tracks: {}", nextTracksForSearch.getTracks().size());
+        assertFalse(nextTracksForSearch.isEmpty());
     }
 
     @Override
