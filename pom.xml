@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
 
     <name>TrackSearch Parent</name>
+    <description>TrackSearch Parent POM</description>
     <url>https://github.com/s-frei/TrackSearch</url>
 
     <developers>
