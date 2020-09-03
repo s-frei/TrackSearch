@@ -6,25 +6,20 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class JsonUtility {
 
-    public static String getStringFor(JsonNode node, String value) {
-        return node != null ? getStringFor(node.get(value)) : null;
+    public static String getAsString(JsonNode node, String value) {
+        return node != null ? getAsText(node.get(value)) : null;
     }
 
-    public static String getStringFor(JsonNode node) {
+    public static String getAsText(JsonNode node) {
         return node != null ? node.asText() : null;
     }
 
-    public static Long getLongFor(JsonNode node, String value) {
-        return node != null ? getLongFor(node.get(value)) : null;
+    public static Long getAsLong(JsonNode node, String value) {
+        return node != null ? getAsLong(node.get(value)) : null;
     }
 
-    public static Long getLongFor(JsonNode node) {
+    public static Long getAsLong(JsonNode node) {
         return node != null ? node.asLong() : null;
-    }
-
-    public static boolean getStringForContaining(JsonNode node, String value, String containing) {
-        String jsonString = getStringFor(node, value);
-        return jsonString != null && jsonString.contains(containing);
     }
 
     public static JsonNode get(JsonNode node, String... route) {
@@ -38,7 +33,7 @@ public class JsonUtility {
         return tempNode.get();
     }
 
-    public static JsonNode getFirst(JsonNode node) {
+    public static JsonNode getFirstField(JsonNode node) {
         return get(node, 0);
     }
 
