@@ -52,9 +52,10 @@ public abstract class ClientTestImpl<T extends Track> implements ClientTest {
     @Test
     public void getStreamUrl() {
         tracksForSearch.getTracks().forEach(track -> {
+            log.info("Trying to get stream url for: {}", track.toString());
             String streamUrl = track.getStreamUrl();
-            log.debug("Stream URL for: {} is: {}", track.getUrl(), streamUrl);
             assertNotNull(streamUrl);
+            log.info("URL found: {}", streamUrl);
         });
     }
 }
