@@ -21,7 +21,7 @@ audio directly for example.
 
 ## Supported sources
 
-Since TrackSearch focuses on just exposing the audio streams and to search for music (I know YouTube offers more than 
+Since TrackSearch focuses on just exposing the audio streams and to search for music (although YouTube offers more than 
 music) I decided to add following providers first for now:
 
 - YouTube
@@ -92,10 +92,13 @@ Run following command in the root directory.
 mvnw clean install
 ```
 
+For detailed tests activate the `detailed-client-test` maven profile.
+
 #### Stuff to be added
 
+Feel free to contribute!
+
 - Standalone web module offering a RESTful API and Frontend
-- Tests
 - More documentation
 - Playlist URL search
 - Direct audio stream URL resolving
