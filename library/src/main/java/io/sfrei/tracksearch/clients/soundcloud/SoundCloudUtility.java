@@ -1,19 +1,22 @@
 package io.sfrei.tracksearch.clients.soundcloud;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
-import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
+import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,24 +59,22 @@ class SoundCloudUtility {
 
     BaseTrackList<SoundCloudTrack> getSoundCloudTracks(String json, QueryType queryType, String query,
                                                        Function<SoundCloudTrack, String> streamUrlProvider)
-            throws TrackSearchException, SoundCloudException {
+            throws SoundCloudException {
 
         try {
-            JsonNode songCollection = MAPPER.readTree(json).get("collection");
-            Iterator<JsonNode> elements = songCollection.elements();
 
-            List<SoundCloudTrack> scTracks = new ArrayList<>();
-            while (elements.hasNext()) {
-                String jsonObject = elements.next().toString();
-                SoundCloudTrack soundCloudTrack = MAPPER.readValue(jsonObject, SoundCloudTrack.class);
-                if (soundCloudTrack != null) {
-                    soundCloudTrack.setStreamUrlProvider(streamUrlProvider);
-                    scTracks.add(soundCloudTrack);
-                }
-            }
+            List<SoundCloudTrack> scTracks = JsonElement.read(MAPPER, json).get("collection").elements()
+                    .map(content -> {
+                        try {
+                            return content.mapToObject(MAPPER, SoundCloudTrack.class);
+                        } catch (JsonProcessingException e) {
+                            return null;
+                        }
+                    }).filter(Objects::nonNull)
+                    .peek(soundCloudTrack -> soundCloudTrack.setStreamUrlProvider(streamUrlProvider))
+                    .collect(Collectors.toList());
 
             int foundTracks = scTracks.size();
-
             Map<String, String> queryInformation = SoundCloudClient.makeQueryInformation(query);
             BaseTrackList<SoundCloudTrack> trackList = new BaseTrackList<>(scTracks, queryType, queryInformation);
             trackList.setQueryInformationValue(SoundCloudClient.OFFSET_KEY, foundTracks);
@@ -97,11 +98,10 @@ class SoundCloudUtility {
     }
 
     String getStreamUrl(String body) {
-        String streamUrl = body
+        return body
                 .replace(SOUNDCLOUD_STREAM_PREFIX, "")
                 .replace("{\"", "")
                 .replace("\"}", "");
-        return streamUrl;
     }
 
 }

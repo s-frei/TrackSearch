@@ -38,27 +38,27 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
 
         SoundCloudTrack soundcloudTrack = new SoundCloudTrack(title, length, url);
 
-        List<JsonElement> transcodings = rootElement.get("media", "transcodings").arrayElements();
+        List<SoundCloudTrackFormat> trackFormats = rootElement.get("media", "transcodings")
+                .arrayElements()
+                .map(transcoding -> {
 
-        List<SoundCloudTrackFormat> trackFormats = transcodings.stream().map(transcoding -> {
+                    String formatUrl = transcoding.getAsString("url");
+                    String audioQuality = transcoding.getAsString("quality");
 
-            String formatUrl = transcoding.getAsString("url");
-            String audioQuality = transcoding.getAsString("quality");
+                    JsonElement formatElement = transcoding.get("format");
+                    String mimeType = formatElement.getAsString("mime_type");
+                    String protocol = formatElement.getAsString("protocol");
 
-            JsonElement formatElement = transcoding.get("format");
-            String mimeType = formatElement.getAsString("mime_type");
-            String protocol = formatElement.getAsString("protocol");
+                    return SoundCloudTrackFormat.builder()
+                            .mimeType(mimeType)
+                            .formatType(FormatType.Audio)
+                            .audioQuality(audioQuality)
+                            .streamReady(false)
+                            .protocol(protocol)
+                            .url(formatUrl)
+                            .build();
 
-            return SoundCloudTrackFormat.builder()
-                    .mimeType(mimeType)
-                    .formatType(FormatType.Audio)
-                    .audioQuality(audioQuality)
-                    .streamReady(false)
-                    .protocol(protocol)
-                    .url(formatUrl)
-                    .build();
-
-        }).collect(Collectors.toList());
+                }).collect(Collectors.toList());
 
         SoundCloudTrackInfo trackInfo = new SoundCloudTrackInfo(trackFormats);
         soundcloudTrack.setTrackInfo(trackInfo);

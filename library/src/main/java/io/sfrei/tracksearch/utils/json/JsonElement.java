@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,24 +24,25 @@ public class JsonElement extends JsonUtility {
         return new JsonElement(mapper.readTree(jsonString));
     }
 
-    private List<JsonElement> elements(Stream<JsonNode> nodeStream) {
-        return nodeStream.map(JsonElement::new).collect(Collectors.toList());
+    public Stream<JsonElement> elements() {
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(node.elements(), Spliterator.ORDERED), false)
+                .map(JsonElement::new);
     }
 
-    public List<JsonElement> elements(String path) {
-        return elements(node.findValues(path).stream());
+    public JsonElement firstElementFor(String path) {
+        return node.findValues(path).stream().map(JsonElement::new).collect(Collectors.toList()).get(0);
     }
 
-    public JsonElement firstElement(String path) {
-        return elements(path).get(0);
+    public boolean isArray() {
+        return node.isArray();
     }
 
-    public List<JsonElement> arrayElements() {
-        if (node.isArray()) {
+    public Stream<JsonElement> arrayElements() {
+        if (isArray()) {
             ArrayNode arrayNode = (ArrayNode) this.node;
-            return elements(StreamSupport.stream(arrayNode.spliterator(), false));
+            return StreamSupport.stream(arrayNode.spliterator(), false).map(JsonElement::new);
         }
-        return Collections.emptyList();
+        return Stream.empty();
     }
 
     public String getAsString(String path) {
@@ -79,6 +80,10 @@ public class JsonElement extends JsonUtility {
 
     public JsonElement reRead(ObjectMapper mapper) throws JsonProcessingException {
         return new JsonElement(mapper.readTree(getAsText(node)));
+    }
+
+    public <T> T mapToObject(ObjectMapper mapper, Class<T> clazz) throws JsonProcessingException {
+        return mapper.treeToValue(node, clazz);
     }
 
     public boolean isNull() {

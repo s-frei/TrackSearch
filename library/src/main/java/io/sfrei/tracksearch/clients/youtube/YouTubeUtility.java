@@ -1,7 +1,6 @@
 package io.sfrei.tracksearch.clients.youtube;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
@@ -18,13 +17,11 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 class YouTubeUtility {
@@ -84,42 +81,38 @@ class YouTubeUtility {
                             .getFirstField()
                             .get("itemSectionRenderer"));
 
-            String ctoken;
+            String cToken;
             if (contentHolder.get("continuations").present()) {
-                ctoken = contentHolder
+                cToken = contentHolder
                         .get("continuations")
                         .getFirstField()
                         .get("nextContinuationData")
                         .getAsString("continuation");
             } else {
-                ctoken = responseElement
+                cToken = responseElement
                         .get("oneResponseReceivedCommands")
                         .getFirstField()
                         .get("appendContinuationItemsAction", "continuationItems")
                         .getIndex(1)
                         .orElseGet(() -> defaultElement
                                 .getIndex(1))
-                        .get(continuationItemRenderer).getAsString("token");
+                        .get(continuationItemRenderer)
+                        .getAsString("token");
             }
 
-            JsonNode contents = contentHolder.get("contents").getNode();
-            if (contents == null)
-                throw new YouTubeException("Content section for tracks is empty");
-
-            Iterator<JsonNode> elements = contents.elements();
-            List<YouTubeTrack> ytTracks = new ArrayList<>();
-            while (elements.hasNext()) {
-                String jsonObject = elements.next().toString();
-                YouTubeTrack youTubeTrack = MAPPER.readValue(jsonObject, YouTubeTrack.class);
-                if (youTubeTrack != null) {
-                    youTubeTrack.setStreamUrlProvider(streamUrlProvider);
-                    ytTracks.add(youTubeTrack);
+            JsonElement contents = contentHolder.get("contents");
+            List<YouTubeTrack> ytTracks = contents.elements().map(content -> {
+                try {
+                    return content.mapToObject(MAPPER, YouTubeTrack.class);
+                } catch (JsonProcessingException e) {
+                    return null;
                 }
-            }
+            }).filter(Objects::nonNull)
+                    .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
+                    .collect(Collectors.toList());
 
             int foundTracks = ytTracks.size();
-
-            Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, ctoken);
+            Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
             BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation);
             trackList.setQueryInformationValue(YouTubeClient.OFFSET_KEY, foundTracks);
             log.debug("Found {} YouTube Tracks", foundTracks);
@@ -131,62 +124,67 @@ class YouTubeUtility {
 
     public YouTubeTrackInfo getTrackInfo(String json) {
         try {
-            List<YouTubeTrackFormat> trackFormats = new ArrayList<>();
-
             JsonElement jsonElement = JsonElement.read(MAPPER, json);
-            JsonElement playerElement = jsonElement.firstElement("player");
+
+            JsonElement playerElement;
+            if (!jsonElement.isArray()) {
+                playerElement = jsonElement.firstElementFor("player");
+            } else {
+                playerElement = jsonElement.arrayElements().collect(Collectors.toList()).get(2).get("player");
+            }
 
             String scriptUrl = playerElement.get("assets").getAsString("js");
 
             JsonElement args = playerElement.get("args");
-            if (args.present()) {
-                JsonElement playerResponseTextNode = args.get("player_response").reRead(MAPPER);
 
-                JsonElement streamingData = playerResponseTextNode.get("streamingData");
-                List<JsonElement> formats = streamingData
-                        .get("adaptiveFormats")
-                        .orElseGet(() -> streamingData.get("formats"))
-                        .arrayElements();
+            if (args.isNull())
+                return new YouTubeTrackInfo(Collections.emptyList(), scriptUrl);
 
-                for (JsonElement format : formats) {
+            JsonElement playerResponseTextNode = args.get("player_response").reRead(MAPPER);
 
-                    String mimeType = format.getAsString("mimeType");
-                    FormatType formatType = FormatType.getFormatType(mimeType);
-                    String audioQuality = format.getAsString("audioQuality");
-                    String audioSampleRate = format.getAsString("audioSampleRate");
+            JsonElement streamingData = playerResponseTextNode.get("streamingData");
+            List<YouTubeTrackFormat> trackFormats = streamingData
+                    .get("adaptiveFormats")
+                    .orElseGet(() -> streamingData.get("formats"))
+                    .arrayElements()
+                    .map(format -> {
+                        String mimeType = format.getAsString("mimeType");
+                        FormatType formatType = FormatType.getFormatType(mimeType);
+                        String audioQuality = format.getAsString("audioQuality");
+                        String audioSampleRate = format.getAsString("audioSampleRate");
 
-                    String cipher = format.getAsString("cipher", "signatureCipher");
+                        String cipher = format.getAsString("cipher", "signatureCipher");
 
-                    YouTubeTrackFormat trackFormat;
-                    if (cipher == null) {
-                        String url = format.getAsString("url");
-                        trackFormat = YouTubeTrackFormat.builder()
-                                .mimeType(mimeType)
-                                .formatType(formatType)
-                                .audioQuality(audioQuality)
-                                .audioSampleRate(audioSampleRate)
-                                .streamReady(true)
-                                .url(url)
-                                .sigParam(null)
-                                .sigValue(null)
-                                .build();
-                    } else {
-                        Map<String, String> params = URLUtility.splitAndDecodeUrl(cipher);
-                        trackFormat = YouTubeTrackFormat.builder()
-                                .mimeType(mimeType)
-                                .formatType(formatType)
-                                .audioQuality(audioQuality)
-                                .audioSampleRate(audioSampleRate)
-                                .streamReady(false)
-                                .url(params.get("url"))
-                                .sigParam(params.getOrDefault("sp", "sig"))
-                                .sigValue(params.get("s"))
-                                .build();
-                    }
-                    trackFormats.add(trackFormat);
-                }
-            }
+                        YouTubeTrackFormat trackFormat;
+                        if (cipher == null) {
+                            String url = format.getAsString("url");
+                            return YouTubeTrackFormat.builder()
+                                    .mimeType(mimeType)
+                                    .formatType(formatType)
+                                    .audioQuality(audioQuality)
+                                    .audioSampleRate(audioSampleRate)
+                                    .streamReady(true)
+                                    .url(url)
+                                    .sigParam(null)
+                                    .sigValue(null)
+                                    .build();
+                        } else {
+                            Map<String, String> params = URLUtility.splitAndDecodeUrl(cipher);
+                            return YouTubeTrackFormat.builder()
+                                    .mimeType(mimeType)
+                                    .formatType(formatType)
+                                    .audioQuality(audioQuality)
+                                    .audioSampleRate(audioSampleRate)
+                                    .streamReady(false)
+                                    .url(params.get("url"))
+                                    .sigParam(params.getOrDefault("sp", "sig"))
+                                    .sigValue(params.get("s"))
+                                    .build();
+                        }
+                    }).collect(Collectors.toList());
+
             return new YouTubeTrackInfo(trackFormats, scriptUrl);
+
         } catch (JsonProcessingException e) {
             log.error("Error parsing Youtube track JSON: " + e.getMessage());
             return null;
