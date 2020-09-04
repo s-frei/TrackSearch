@@ -44,13 +44,15 @@ Maven dependency available on *Maven Central*:
 
 ```xml
 <dependency>
-    <groupId>com.github.s-frei.TrackSearch</groupId>
+    <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
     <version>0.6.0</version>
 </dependency>
 ```
 
 #### Example usage
+
+For more information check the interface docs.
 
 ```java
 //Client to search on all available sources asynchronous
@@ -87,6 +89,8 @@ mvnw clean install
 ```
 
 For detailed tests activate the `detailed-client-test` maven profile.
+
+---
 
 #### Stuff to be added
 
