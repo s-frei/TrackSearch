@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.6.0
+-----
+
+**Feature:**
+- Unit tests for all clients
+- Better code readability and enhanced JSON processing
+
+**Bugfix:**
+- Additional YouTube JSON path to avoid null values
+
 0.5.6
 -----
 

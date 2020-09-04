@@ -2,7 +2,6 @@ package io.sfrei.tracksearch.tracks.deserializer;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
@@ -25,24 +24,17 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
     @Override
     public YouTubeTrack deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
-        JsonNode rootNode = ctxt.readTree(p).get("videoRenderer");
-        JsonElement rootElement = new JsonElement(rootNode);
+        JsonElement rootElement = JsonElement.of(ctxt.readTree(p).get("videoRenderer"));
 
-        String ref = rootElement.getStringFor("videoId");
-
-        String title = rootElement.get("title", "runs").getFirst().getStringFor("text");
-
-        String timeString = rootElement.get("lengthText").getStringFor("simpleText");
+        String ref = rootElement.getAsString("videoId");
+        String title = rootElement.get("title", "runs").getFirstField().getAsString("text");
+        String timeString = rootElement.get("lengthText").getAsString("simpleText");
         Long length = TimeUtility.getSecondsForTimeString(timeString);
 
         if (title == null || length == null || ref == null)
             return null;
 
         String url = YouTubeClient.HOSTNAME + "/watch?v=" + ref;
-
-        if (title.contains(" & ")) {
-            String hi = "wth";
-        }
 
         return new YouTubeTrack(title, length, url);
     }
