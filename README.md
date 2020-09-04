@@ -40,15 +40,9 @@ There could be more added if there is interesting content offered to go for.
 
 #### Dependency
 
-For now using jitpack. GitHub packages does not allow to download without authentication through token.
-```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
+Maven dependency available on *Maven Central*:
 
+```xml
 <dependency>
     <groupId>com.github.s-frei.TrackSearch</groupId>
     <artifactId>tracksearch</artifactId>
