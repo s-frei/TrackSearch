@@ -15,7 +15,8 @@
 
     <developers>
         <developer>
-            <name>s-frei</name>
+            <id>s-frei</id>
+            <url>https://github.com/s-frei</url>
         </developer>
     </developers>
 
@@ -135,10 +136,9 @@
     </dependencyManagement>
 
     <scm>
-        <connection>scm:git:git://github.com/dexecutor/dependent-tasks-executor.git</connection>
-        <developerConnection>scm:git:git@github.com:dexecutor/dexecutor.git</developerConnection>
-        <url>https://github.com/dexecutor/dependent-tasks-executor</url>
-        <tag>HEAD</tag>
+        <url>https://github.com/s-frei/TrackSearch</url>
+        <connection>scm:git:git//github.com:s-frei/TrackSearch.git</connection>
+        <developerConnection>scm:git:git@github.com:s-frei/TrackSearch.git</developerConnection>
     </scm>
 
 </project>
