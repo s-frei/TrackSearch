@@ -1,11 +1,18 @@
+<!--suppress HtmlDeprecatedAttribute -->
 <div align="center">
   <b><h1>TrackSearch</h1></b><br>
   <p>
   <a href="CONTRIBUTING.md">
-  <img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen">
+    <img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen">
+  </a>
+  <a href="LICENSE">
+    <img alt="License" src="https://img.shields.io/github/license/s-frei/TrackSearch">
   </a>
   <a href="https://github.com/s-frei/TrackSearch/releases"> 
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/s-frei/tracksearch">
+    <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/s-frei/tracksearch">
+  </a>
+  <a href="https://mvnrepository.com/artifact/io.sfrei/tracksearch"> 
+    <img alt="Maven Central release" src="https://img.shields.io/maven-central/v/io.sfrei/tracksearch">
   </a>
   </p>
 </div>
