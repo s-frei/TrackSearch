@@ -32,7 +32,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     private static final String ADDITIONAL_PAGING_KEY = "continuation";
 
     private static final Map<String, String> VIDEO_SEARCH_PARAMS = Map.of("sp", "EgIQAQ%3D%3D");
-    private static final Map<String, String> TRACK_PARAMS = Map.of("pbj", "json", "hl", "en", "alt", "json");
+    private static final Map<String, String> TRACK_PARAMS = Map.of("pbj", "1", "hl", "en", "alt", "json");
 
     private static final Map<String, String> SEARCH_PARAMS;
 
@@ -68,19 +68,10 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     }
 
     @Override
-    public BaseTrackList<YouTubeTrack> getNext(TrackList<? extends Track> trackList) throws TrackSearchException {
-        throwIfPagingValueMissing(this, trackList);
-
-        if (trackList.getQueryType().equals(QueryType.SEARCH)) {
-            final HashMap<String, String> params = new HashMap<>();
-            params.putAll(getPagingParams(trackList.getQueryInformation()));
-            params.putAll(SEARCH_PARAMS);
-
-            Map<String, String> params = MapUtility.getMerged(VIDEO_SEARCH_PARAMS, TRACK_PARAMS, pagingParams);
-            BaseTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), params);
-            return TrackListHelper.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
-        }
-        throw new YouTubeException("Query type not supported");
+    public BaseTrackList<YouTubeTrack> getTracksForSearch(String search) throws TrackSearchException {
+        BaseTrackList<YouTubeTrack> trackList = getTracksForSearch(search, SEARCH_PARAMS);
+        trackList.addQueryInformationValue(POSITION_KEY, 0);
+        return trackList;
     }
 
     private String provideStreamUrl(YouTubeTrack track) {
@@ -93,6 +84,29 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     }
 
     @Override
+    public BaseTrackList<YouTubeTrack> getNext(TrackList<? extends Track> trackList) throws TrackSearchException {
+        throwIfPagingValueMissing(this, trackList);
+
+        if (trackList.getQueryType().equals(QueryType.SEARCH)) {
+            final HashMap<String, String> params = new HashMap<>();
+            params.putAll(getPagingParams(trackList.getQueryInformation()));
+            params.putAll(SEARCH_PARAMS);
+
+            BaseTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), params);
+            return TrackListHelper.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
+        }
+        throw new YouTubeException("Query type not supported");
+    }
+
+    private YouTubeTrackInfo loadTrackInfo(YouTubeTrack youtubeTrack) throws TrackSearchException {
+        Call<ResponseWrapper> trackRequest = requestService.getForUrlWithParams(youtubeTrack.getUrl(), TRACK_PARAMS);
+        ResponseWrapper trackResponse = Client.request(trackRequest);
+
+        String content = trackResponse.getContentOrThrow();
+        return youtubeTrack.setAndGetTrackInfo(youTubeUtility.getTrackInfo(content));
+    }
+
+    @Override
     public String getStreamUrl(YouTubeTrack youtubeTrack) throws TrackSearchException {
         YouTubeTrackInfo trackInfo;
         if (youtubeTrack.getTrackInfo() == null)
@@ -100,31 +114,21 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         else
             trackInfo = youtubeTrack.getTrackInfo();
 
-        String scriptUrl = trackInfo.getScriptUrl();
-        ResponseWrapper scriptResponse = Client.requestURL(HOSTNAME + scriptUrl);
-
         YouTubeTrackFormat youtubeTrackFormat = TrackFormatUtility.getBestTrackFormat(youtubeTrack, false);
 
         if (youtubeTrackFormat.isStreamReady())
             return youtubeTrackFormat.getUrl();
 
-        String content = scriptResponse.getContentOrThrow();
-        String signatureKey = youTubeUtility.getSignature(youtubeTrackFormat, content);
+        String scriptUrl = trackInfo.getScriptUrl();
+        if (scriptUrl == null)
+            throw new TrackSearchException("ScriptURL could not be resolved");
+
+        String scriptContent = Client.requestURL(HOSTNAME + scriptUrl).getContentOrThrow();
+
+        String signatureKey = youTubeUtility.getSignature(youtubeTrackFormat, scriptContent);
 
         String streamUrl = youtubeTrackFormat.getUrl();
         return URLUtility.appendParam(streamUrl, youtubeTrackFormat.getSigParam(), signatureKey);
-    }
-
-    private YouTubeTrackInfo loadTrackInfo(YouTubeTrack youtubeTrack) throws TrackSearchException {
-
-        if (youtubeTrack.getTrackInfo() != null && youtubeTrack.getTrackInfo().getFormats() != null)
-            return youtubeTrack.getTrackInfo();
-
-        Call<ResponseWrapper> trackRequest = requestService.getForUrlWithParams(youtubeTrack.getUrl(), TRACK_PARAMS);
-        ResponseWrapper trackResponse = Client.request(trackRequest);
-
-        String content = trackResponse.getContentOrThrow();
-        return youtubeTrack.setAndGetTrackInfo(youTubeUtility.getTrackInfo(content));
     }
 
     private Map<String, String> getPagingParams(Map<String, String> queryInformation) {

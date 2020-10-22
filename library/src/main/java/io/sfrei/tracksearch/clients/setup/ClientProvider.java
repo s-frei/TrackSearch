@@ -2,12 +2,11 @@ package io.sfrei.tracksearch.clients.setup;
 
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 
 import java.io.IOException;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 
 @Slf4j
 class ClientProvider {
@@ -15,9 +14,14 @@ class ClientProvider {
     protected static final OkHttpClient okHttpClient;
 
     static {
-        TrackSearchConfig.load();
+        TrackSearchConfig.setTime();
+
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+
         okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(new CustomInterceptor())
+                .cookieJar(new JavaNetCookieJar(cookieManager))
                 .build();
     }
 

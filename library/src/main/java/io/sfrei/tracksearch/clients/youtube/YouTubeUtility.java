@@ -16,12 +16,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 class YouTubeUtility {
@@ -59,67 +62,68 @@ class YouTubeUtility {
                                                            Function<YouTubeTrack, String> streamUrlProvider)
             throws YouTubeException {
 
+        final JsonElement responseElement;
         try {
-            JsonElement responseElement = JsonElement.read(MAPPER, json).getIndex(1).get("response");
-
-            JsonElement defaultElement = responseElement
-                    .get(defaultRoute);
-
-            JsonElement contentHolder = defaultElement
-                    .getFirstField()
-                    .get("itemSectionRenderer")
-                    .orElseGet(() -> responseElement
-                            .get("onResponseReceivedCommands")
-                            .getFirstField()
-                            .get("appendContinuationItemsAction", "continuationItems")
-                            .getFirstField()
-                            .get("itemSectionRenderer"))
-                    .orElseGet(() -> responseElement
-                            .get("continuationContents", "itemSectionContinuation", "itemSectionContinuation"))
-                    .orElseGet(() -> responseElement
-                            .get("continuationContents", "sectionListContinuation", "contents")
-                            .getFirstField()
-                            .get("itemSectionRenderer"));
-
-            String cToken;
-            if (contentHolder.get("continuations").present()) {
-                cToken = contentHolder
-                        .get("continuations")
-                        .getFirstField()
-                        .get("nextContinuationData")
-                        .getAsString("continuation");
-            } else {
-                cToken = responseElement
-                        .get("oneResponseReceivedCommands")
-                        .getFirstField()
-                        .get("appendContinuationItemsAction", "continuationItems")
-                        .getIndex(1)
-                        .orElseGet(() -> defaultElement
-                                .getIndex(1))
-                        .get(continuationItemRenderer)
-                        .getAsString("token");
-            }
-
-            JsonElement contents = contentHolder.get("contents");
-            List<YouTubeTrack> ytTracks = contents.elements().map(content -> {
-                try {
-                    return content.mapToObject(MAPPER, YouTubeTrack.class);
-                } catch (JsonProcessingException e) {
-                    return null;
-                }
-            }).filter(Objects::nonNull)
-                    .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
-                    .collect(Collectors.toList());
-
-            int foundTracks = ytTracks.size();
-            Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
-            BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation);
-            trackList.setQueryInformationValue(YouTubeClient.OFFSET_KEY, foundTracks);
-            log.debug("Found {} YouTube Tracks", foundTracks);
-            return trackList;
-        } catch (IOException e) {
+            responseElement = JsonElement.read(MAPPER, json).getIndex(1).get("response");
+        } catch (JsonProcessingException e) {
             throw new YouTubeException("GetYouTubeTubeTracks - " + e.getMessage());
         }
+
+        final JsonElement defaultElement = responseElement
+                .get(defaultRoute);
+
+        final JsonElement contentHolder = defaultElement
+                .getFirstField()
+                .get("itemSectionRenderer")
+                .orElseGet(() -> responseElement
+                        .get("onResponseReceivedCommands")
+                        .getFirstField()
+                        .get("appendContinuationItemsAction", "continuationItems")
+                        .getFirstField()
+                        .get("itemSectionRenderer"))
+                .orElseGet(() -> responseElement
+                        .get("continuationContents", "itemSectionContinuation", "itemSectionContinuation"))
+                .orElseGet(() -> responseElement
+                        .get("continuationContents", "sectionListContinuation", "contents")
+                        .getFirstField()
+                        .get("itemSectionRenderer"));
+
+        final String cToken;
+        if (contentHolder.get("continuations").present()) {
+            cToken = contentHolder
+                    .get("continuations")
+                    .getFirstField()
+                    .get("nextContinuationData")
+                    .getAsString("continuation");
+        } else {
+            cToken = responseElement
+                    .get("onResponseReceivedCommands")
+                    .getFirstField()
+                    .get("appendContinuationItemsAction", "continuationItems")
+                    .getIndex(1)
+                    .orElseGet(() -> defaultElement
+                            .getIndex(1))
+                    .get(continuationItemRenderer)
+                    .getAsString("token");
+        }
+
+        final JsonElement contents = contentHolder.get("contents");
+        final List<YouTubeTrack> ytTracks = contents.elements().map(content -> {
+            try {
+                return content.mapToObject(MAPPER, YouTubeTrack.class);
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+        }).filter(Objects::nonNull)
+                .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
+                .collect(Collectors.toList());
+
+        int foundTracks = ytTracks.size();
+        final Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
+        final BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation);
+        trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, foundTracks);
+        log.debug("Found {} YouTube Tracks", foundTracks);
+        return trackList;
     }
 
     public YouTubeTrackInfo getTrackInfo(String json) {
@@ -130,58 +134,33 @@ class YouTubeUtility {
             if (!jsonElement.isArray()) {
                 playerElement = jsonElement.firstElementFor("player");
             } else {
-                playerElement = jsonElement.arrayElements().collect(Collectors.toList()).get(2).get("player");
+                playerElement = jsonElement.getIndex(2).get("player");
             }
-
-            String scriptUrl = playerElement.get("assets").getAsString("js");
 
             JsonElement args = playerElement.get("args");
 
-            if (args.isNull())
-                return new YouTubeTrackInfo(Collections.emptyList(), scriptUrl);
+            String scriptUrl;
+            final JsonElement streamingData;
+            if (playerElement.present() && args.present()) {
+                scriptUrl = playerElement.get("assets").getAsString("js");
+                JsonElement playerResponseTextNode = args.get("player_response").reRead(MAPPER);
+                streamingData = playerResponseTextNode.get("streamingData");
+            } else {
+                scriptUrl = null;
+                streamingData = jsonElement.getIndex(2).get("playerResponse", "streamingData");
+            }
 
-            JsonElement playerResponseTextNode = args.get("player_response").reRead(MAPPER);
+            final Stream<JsonElement> formatsStream = streamingData.get("formats").arrayElements();
+            final Stream<JsonElement> adaptiveFormatsStream = streamingData.get("adaptiveFormats").arrayElements();
 
-            JsonElement streamingData = playerResponseTextNode.get("streamingData");
-            List<YouTubeTrackFormat> trackFormats = streamingData
-                    .get("adaptiveFormats")
-                    .orElseGet(() -> streamingData.get("formats"))
-                    .arrayElements()
-                    .map(format -> {
-                        String mimeType = format.getAsString("mimeType");
-                        FormatType formatType = FormatType.getFormatType(mimeType);
-                        String audioQuality = format.getAsString("audioQuality");
-                        String audioSampleRate = format.getAsString("audioSampleRate");
+            final Stream<YouTubeTrackFormat> formats = getFormatsFromStream(formatsStream);
+            final Stream<YouTubeTrackFormat> adaptiveFormats = getFormatsFromStream(adaptiveFormatsStream);
 
-                        String cipher = format.getAsString("cipher", "signatureCipher");
+            final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats)
+                    .collect(Collectors.toList());
 
-                        YouTubeTrackFormat trackFormat;
-                        if (cipher == null) {
-                            String url = format.getAsString("url");
-                            return YouTubeTrackFormat.builder()
-                                    .mimeType(mimeType)
-                                    .formatType(formatType)
-                                    .audioQuality(audioQuality)
-                                    .audioSampleRate(audioSampleRate)
-                                    .streamReady(true)
-                                    .url(url)
-                                    .sigParam(null)
-                                    .sigValue(null)
-                                    .build();
-                        } else {
-                            Map<String, String> params = URLUtility.splitAndDecodeUrl(cipher);
-                            return YouTubeTrackFormat.builder()
-                                    .mimeType(mimeType)
-                                    .formatType(formatType)
-                                    .audioQuality(audioQuality)
-                                    .audioSampleRate(audioSampleRate)
-                                    .streamReady(false)
-                                    .url(params.get("url"))
-                                    .sigParam(params.getOrDefault("sp", "sig"))
-                                    .sigValue(params.get("s"))
-                                    .build();
-                        }
-                    }).collect(Collectors.toList());
+            if (scriptUrl == null)
+                log.debug("");
 
             return new YouTubeTrackInfo(trackFormats, scriptUrl);
 
@@ -189,6 +168,43 @@ class YouTubeUtility {
             log.error("Error parsing Youtube track JSON: " + e.getMessage());
             return null;
         }
+    }
+
+    private Stream<YouTubeTrackFormat> getFormatsFromStream(Stream<JsonElement> formats) {
+        return formats.map(format -> {
+            String mimeType = format.getAsString("mimeType");
+            FormatType formatType = FormatType.getFormatType(mimeType);
+            String audioQuality = format.getAsString("audioQuality");
+            String audioSampleRate = format.getAsString("audioSampleRate");
+
+            String cipher = format.getAsString("cipher", "signatureCipher");
+
+            if (cipher == null) {
+                String url = format.getAsString("url");
+                return YouTubeTrackFormat.builder()
+                        .mimeType(mimeType)
+                        .formatType(formatType)
+                        .audioQuality(audioQuality)
+                        .audioSampleRate(audioSampleRate)
+                        .streamReady(true)
+                        .url(url)
+                        .sigParam(null)
+                        .sigValue(null)
+                        .build();
+            } else {
+                Map<String, String> params = URLUtility.splitAndDecodeUrl(cipher);
+                return YouTubeTrackFormat.builder()
+                        .mimeType(mimeType)
+                        .formatType(formatType)
+                        .audioQuality(audioQuality)
+                        .audioSampleRate(audioSampleRate)
+                        .streamReady(false)
+                        .url(params.get("url"))
+                        .sigParam(params.getOrDefault("sp", "sig"))
+                        .sigValue(params.get("s"))
+                        .build();
+            }
+        });
     }
 
     private List<SignaturePart> getObfuscateFunctionDefinitions(String scriptPart) {
