@@ -10,7 +10,6 @@ import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
-import io.sfrei.tracksearch.utils.MapUtility;
 import io.sfrei.tracksearch.utils.TrackFormatUtility;
 import io.sfrei.tracksearch.utils.TrackListHelper;
 import io.sfrei.tracksearch.utils.URLUtility;
@@ -18,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -31,8 +31,16 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     public static final String PAGING_KEY = "ctoken";
     private static final String ADDITIONAL_PAGING_KEY = "continuation";
 
-    private static final Map<String, String> VIDEO_SEARCH_PARAMS =  MapUtility.get("sp", "EgIQAQ%3D%3D");
-    private static final Map<String, String> TRACK_PARAMS = MapUtility.get("pbj", "1", "hl", "en");
+    private static final Map<String, String> VIDEO_SEARCH_PARAMS = Map.of("sp", "EgIQAQ%3D%3D");
+    private static final Map<String, String> TRACK_PARAMS = Map.of("pbj", "json", "hl", "en", "alt", "json");
+
+    private static final Map<String, String> SEARCH_PARAMS;
+
+    static {
+        SEARCH_PARAMS = new HashMap<>();
+        SEARCH_PARAMS.putAll(VIDEO_SEARCH_PARAMS);
+        SEARCH_PARAMS.putAll(TRACK_PARAMS);
+    }
 
     private final YouTubeService requestService;
     private final YouTubeUtility youTubeUtility;
@@ -48,12 +56,8 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         youTubeUtility = new YouTubeUtility();
     }
 
-    @Override
-    public BaseTrackList<YouTubeTrack> getTracksForSearch(String search) throws TrackSearchException {
-        Map<String, String> params = MapUtility.getMerged(VIDEO_SEARCH_PARAMS, TRACK_PARAMS);
-        BaseTrackList<YouTubeTrack> trackList = getTracksForSearch(search, params);
-        trackList.setQueryInformationValue(POSITION_KEY, 0);
-        return trackList;
+    public static Map<String, String> makeQueryInformation(String query, String pagingToken) {
+        return new HashMap<>(Map.of(TrackList.QUERY_PARAM, query, PAGING_INFORMATION, pagingToken));
     }
 
     private BaseTrackList<YouTubeTrack> getTracksForSearch(String search, Map<String, String> params) throws TrackSearchException {
@@ -68,7 +72,9 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         throwIfPagingValueMissing(this, trackList);
 
         if (trackList.getQueryType().equals(QueryType.SEARCH)) {
-            Map<String, String> pagingParams = getPagingParams(trackList.getQueryInformation());
+            final HashMap<String, String> params = new HashMap<>();
+            params.putAll(getPagingParams(trackList.getQueryInformation()));
+            params.putAll(SEARCH_PARAMS);
 
             Map<String, String> params = MapUtility.getMerged(VIDEO_SEARCH_PARAMS, TRACK_PARAMS, pagingParams);
             BaseTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), params);
@@ -123,11 +129,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
     private Map<String, String> getPagingParams(Map<String, String> queryInformation) {
         String pagingToken = queryInformation.get(PAGING_INFORMATION);
-        return MapUtility.get(PAGING_KEY, pagingToken, ADDITIONAL_PAGING_KEY, pagingToken);
-    }
-
-    public static Map<String, String> makeQueryInformation(String query, String pagingToken) {
-        return MapUtility.get(TrackList.QUERY_PARAM, query, PAGING_INFORMATION, pagingToken);
+        return Map.of(PAGING_KEY, pagingToken, ADDITIONAL_PAGING_KEY, pagingToken);
     }
 
     @Override

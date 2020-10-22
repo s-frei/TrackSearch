@@ -5,13 +5,16 @@ import io.sfrei.tracksearch.clients.setup.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
-import io.sfrei.tracksearch.tracks.*;
-import io.sfrei.tracksearch.utils.MapUtility;
+import io.sfrei.tracksearch.tracks.BaseTrackList;
+import io.sfrei.tracksearch.tracks.SoundCloudTrack;
+import io.sfrei.tracksearch.tracks.Track;
+import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.utils.TrackListHelper;
 import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,11 +46,8 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
         refreshClientID();
     }
 
-    @Override
-    public TrackList<SoundCloudTrack> getTracksForSearch(String search) throws TrackSearchException {
-        BaseTrackList<SoundCloudTrack> trackList = getTracksForSearch(search, 0, TrackSearchConfig.getDefaultPlaylistOffset());
-        trackList.setQueryInformationValue(POSITION_KEY, 0);
-        return trackList;
+    public static Map<String, String> makeQueryInformation(String query) {
+        return new HashMap<>(Map.of(TrackList.QUERY_PARAM, query));
     }
 
     private BaseTrackList<SoundCloudTrack> getTracksForSearch(String search, int position, int offset) throws TrackSearchException {
@@ -157,12 +157,15 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
         throw new SoundCloudException("ClientId can not be found");
     }
 
-    private Map<String, String> getPagingParams(int position, int offset) {
-        return MapUtility.get(PAGING_OFFSET, String.valueOf(offset), PAGING_POSITION, String.valueOf(position));
+    @Override
+    public TrackList<SoundCloudTrack> getTracksForSearch(String search) throws TrackSearchException {
+        BaseTrackList<SoundCloudTrack> trackList = getTracksForSearch(search, 0, TrackSearchConfig.getDefaultPlaylistOffset());
+        trackList.addQueryInformationValue(POSITION_KEY, 0);
+        return trackList;
     }
 
-    public static Map<String, String> makeQueryInformation(String query) {
-        return MapUtility.get(TrackList.QUERY_PARAM, query);
+    private Map<String, String> getPagingParams(int position, int offset) {
+        return Map.of(PAGING_OFFSET, String.valueOf(offset), PAGING_POSITION, String.valueOf(position));
     }
 
     @Override

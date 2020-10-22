@@ -1,7 +1,6 @@
 package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.setup.QueryType;
-import io.sfrei.tracksearch.utils.MapUtility;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class BaseTrackList<T extends Track> implements TrackList<T> {
     }
 
     public BaseTrackList<T> setPagingValues(String positionKey, int position, String offsetKey, int offset) {
-        MapUtility.set(queryInformation, positionKey, String.valueOf(position), offsetKey, String.valueOf(offset));
+        queryInformation.putAll(Map.of(positionKey, String.valueOf(position), offsetKey, String.valueOf(offset)));
         return this;
     }
 
