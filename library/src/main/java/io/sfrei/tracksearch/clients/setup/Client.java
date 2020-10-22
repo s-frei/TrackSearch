@@ -15,24 +15,25 @@ public class Client extends ClientProvider {
     public static final int UNAUTHORIZED = 401;
 
     public static ResponseWrapper request(Call<ResponseWrapper> call) {
-        log.trace("Requesting: " + call.request().url());
+        final String url = call.request().url().toString();
+        log.trace("Requesting: {}", url);
         try {
-            Response<ResponseWrapper> response = call.execute();
+            final Response<ResponseWrapper> response = call.execute();
             return getBody(response);
         } catch (IOException e) {
-            log.error(e.getMessage());
+            logRequestException(url, e);
             return ResponseWrapper.empty();
         }
     }
 
     public static ResponseWrapper requestURL(String url) {
-        Request request = new Request.Builder().url(url).build();
-
+        log.trace("Requesting: {}", url);
+        final Request request = new Request.Builder().url(url).build();
         try {
-            ResponseBody body = okHttpClient.newCall(request).execute().body();
+            final ResponseBody body = okHttpClient.newCall(request).execute().body();
             return ResponseProviderFactory.getWrapper(body);
         } catch (IOException e) {
-            log.error(e.getMessage());
+            logRequestException(url, e);
         }
         return ResponseWrapper.empty();
     }

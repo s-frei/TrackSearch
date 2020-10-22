@@ -21,15 +21,32 @@ class ClientProvider {
                 .build();
     }
 
+    private static void logResponseCode(String url, int code) {
+        log.error("Request not successful '{}' code: {}", url, code);
+    }
+
+    protected static void logRequestException(String url, IOException e) {
+        log.error("Failed to request '{}' cause: {}", url, e.getMessage());
+    }
+
     private static final class CustomInterceptor implements Interceptor {
         @Override
         public Response intercept(Interceptor.Chain chain) throws IOException {
-            Request request = chain.request();
-            Response response = chain.proceed(request);
 
-            int code = response.code();
-            if (code != Client.OK) {
-                log.error("ErrorOnRequest -> {} - Code: {}", request.url(), code);
+            final Request request = chain.request();
+            final String url = request.url().toString();
+
+            final Response response;
+            try {
+                response = chain.proceed(request);
+            } catch (IOException e) {
+                logRequestException(url, e);
+                throw e;
+            }
+
+            int statusCode = response.code();
+            if (statusCode != Client.OK) {
+                logResponseCode(url, statusCode);
             }
             return response;
         }
