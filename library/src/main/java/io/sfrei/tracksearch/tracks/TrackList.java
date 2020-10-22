@@ -13,7 +13,7 @@ public interface TrackList<T extends Track> {
 
     Map<String, String> getQueryInformation();
 
-    Integer getQueryInformationValue(String key);
+    Integer getQueryInformationIntValue(String key);
 
     void mergeIn(BaseTrackList<T> from);
 

@@ -65,7 +65,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
         throwIfPagingValueMissing(this, trackList);
 
         if (trackList.getQueryType().equals(QueryType.SEARCH)) {
-            int queryPosition = trackList.getQueryInformationValue(OFFSET_KEY);
+            int queryPosition = trackList.getQueryInformationIntValue(OFFSET_KEY);
             int queryOffset = TrackSearchConfig.getDefaultPlaylistOffset();
 
             BaseTrackList<SoundCloudTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), queryPosition, queryOffset);

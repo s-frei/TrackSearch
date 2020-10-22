@@ -77,7 +77,7 @@ class SoundCloudUtility {
             int foundTracks = scTracks.size();
             Map<String, String> queryInformation = SoundCloudClient.makeQueryInformation(query);
             BaseTrackList<SoundCloudTrack> trackList = new BaseTrackList<>(scTracks, queryType, queryInformation);
-            trackList.setQueryInformationValue(SoundCloudClient.OFFSET_KEY, foundTracks);
+            trackList.addQueryInformationValue(SoundCloudClient.OFFSET_KEY, foundTracks);
             log.debug("Found {} SoundCloud Tracks", foundTracks);
             return trackList;
         } catch (IOException e) {
