@@ -1,11 +1,18 @@
+<!--suppress HtmlDeprecatedAttribute -->
 <div align="center">
   <b><h1>TrackSearch</h1></b><br>
   <p>
   <a href="CONTRIBUTING.md">
-  <img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen">
+    <img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen">
+  </a>
+  <a href="LICENSE">
+    <img alt="License" src="https://img.shields.io/github/license/s-frei/TrackSearch">
   </a>
   <a href="https://github.com/s-frei/TrackSearch/releases"> 
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/s-frei/tracksearch">
+    <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/s-frei/tracksearch">
+  </a>
+  <a href="https://mvnrepository.com/artifact/io.sfrei/tracksearch"> 
+    <img alt="Maven Central release" src="https://img.shields.io/maven-central/v/io.sfrei/tracksearch">
   </a>
   </p>
 </div>
@@ -40,23 +47,19 @@ There could be more added if there is interesting content offered to go for.
 
 #### Dependency
 
-For now using jitpack. GitHub packages does not allow to download without authentication through token.
-```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
+Maven dependency available on *Maven Central*:
 
+```xml
 <dependency>
-    <groupId>com.github.s-frei.TrackSearch</groupId>
+    <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.6.0</version>
+    <version>0.6.1</version>
 </dependency>
 ```
 
 #### Example usage
+
+For more information check the interface docs.
 
 ```java
 //Client to search on all available sources asynchronous
@@ -93,6 +96,8 @@ mvnw clean install
 ```
 
 For detailed tests activate the `detailed-client-test` maven profile.
+
+---
 
 #### Stuff to be added
 

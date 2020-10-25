@@ -11,17 +11,15 @@ import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.URLUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 class YouTubeUtility {
@@ -55,214 +53,227 @@ class YouTubeUtility {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
 
-    protected BaseTrackList<YouTubeTrack> getYouTubeTracks(String json, QueryType queryType, String query,
-                                                           Function<YouTubeTrack, String> streamUrlProvider)
+    protected BaseTrackList<YouTubeTrack> getYouTubeTracks(final String json, final QueryType queryType, final String query,
+                                                           final Function<YouTubeTrack, String> streamUrlProvider)
             throws YouTubeException {
 
+        final JsonElement responseElement;
         try {
-            JsonElement responseElement = JsonElement.read(MAPPER, json).getIndex(1).get("response");
-
-            JsonElement defaultElement = responseElement
-                    .get(defaultRoute);
-
-            JsonElement contentHolder = defaultElement
-                    .getFirstField()
-                    .get("itemSectionRenderer")
-                    .orElseGet(() -> responseElement
-                            .get("onResponseReceivedCommands")
-                            .getFirstField()
-                            .get("appendContinuationItemsAction", "continuationItems")
-                            .getFirstField()
-                            .get("itemSectionRenderer"))
-                    .orElseGet(() -> responseElement
-                            .get("continuationContents", "itemSectionContinuation", "itemSectionContinuation"))
-                    .orElseGet(() -> responseElement
-                            .get("continuationContents", "sectionListContinuation", "contents")
-                            .getFirstField()
-                            .get("itemSectionRenderer"));
-
-            String cToken;
-            if (contentHolder.get("continuations").present()) {
-                cToken = contentHolder
-                        .get("continuations")
-                        .getFirstField()
-                        .get("nextContinuationData")
-                        .getAsString("continuation");
-            } else {
-                cToken = responseElement
-                        .get("oneResponseReceivedCommands")
-                        .getFirstField()
-                        .get("appendContinuationItemsAction", "continuationItems")
-                        .getIndex(1)
-                        .orElseGet(() -> defaultElement
-                                .getIndex(1))
-                        .get(continuationItemRenderer)
-                        .getAsString("token");
-            }
-
-            JsonElement contents = contentHolder.get("contents");
-            List<YouTubeTrack> ytTracks = contents.elements().map(content -> {
-                try {
-                    return content.mapToObject(MAPPER, YouTubeTrack.class);
-                } catch (JsonProcessingException e) {
-                    return null;
-                }
-            }).filter(Objects::nonNull)
-                    .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
-                    .collect(Collectors.toList());
-
-            int foundTracks = ytTracks.size();
-            Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
-            BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation);
-            trackList.setQueryInformationValue(YouTubeClient.OFFSET_KEY, foundTracks);
-            log.debug("Found {} YouTube Tracks", foundTracks);
-            return trackList;
-        } catch (IOException e) {
+            responseElement = JsonElement.read(MAPPER, json).getIndex(1).get("response");
+        } catch (JsonProcessingException e) {
             throw new YouTubeException("GetYouTubeTubeTracks - " + e.getMessage());
         }
+
+        final JsonElement defaultElement = responseElement
+                .get(defaultRoute);
+
+        final JsonElement contentHolder = defaultElement
+                .getFirstField()
+                .get("itemSectionRenderer")
+                .orElseGet(() -> responseElement
+                        .get("onResponseReceivedCommands")
+                        .getFirstField()
+                        .get("appendContinuationItemsAction", "continuationItems")
+                        .getFirstField()
+                        .get("itemSectionRenderer"))
+                .orElseGet(() -> responseElement
+                        .get("continuationContents", "itemSectionContinuation", "itemSectionContinuation"))
+                .orElseGet(() -> responseElement
+                        .get("continuationContents", "sectionListContinuation", "contents")
+                        .getFirstField()
+                        .get("itemSectionRenderer"));
+
+        final String cToken;
+        if (contentHolder.get("continuations").present()) {
+            cToken = contentHolder
+                    .get("continuations")
+                    .getFirstField()
+                    .get("nextContinuationData")
+                    .getAsString("continuation");
+        } else {
+            cToken = responseElement
+                    .get("onResponseReceivedCommands")
+                    .getFirstField()
+                    .get("appendContinuationItemsAction", "continuationItems")
+                    .getIndex(1)
+                    .orElseGet(() -> defaultElement
+                            .getIndex(1))
+                    .get(continuationItemRenderer)
+                    .getAsString("token");
+        }
+
+        final JsonElement contents = contentHolder.get("contents");
+        final List<YouTubeTrack> ytTracks = contents.elements().map(content -> {
+            try {
+                return content.mapToObject(MAPPER, YouTubeTrack.class);
+            } catch (JsonProcessingException e) {
+                log.error("Error parsing Youtube track JSON: {}", e.getMessage());
+                return null;
+            }
+        }).filter(Objects::nonNull)
+                .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
+                .collect(Collectors.toList());
+
+        int foundTracks = ytTracks.size();
+        final Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
+        final BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation);
+        trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, foundTracks);
+        log.debug("Found {} YouTube Tracks", foundTracks);
+        return trackList;
     }
 
-    public YouTubeTrackInfo getTrackInfo(String json) {
+    protected YouTubeTrackInfo getTrackInfo(final String json) {
         try {
-            JsonElement jsonElement = JsonElement.read(MAPPER, json);
+            final JsonElement jsonElement = JsonElement.read(MAPPER, json);
 
-            JsonElement playerElement;
+            final JsonElement playerElement;
             if (!jsonElement.isArray()) {
                 playerElement = jsonElement.firstElementFor("player");
             } else {
-                playerElement = jsonElement.arrayElements().collect(Collectors.toList()).get(2).get("player");
+                playerElement = jsonElement.getIndex(2).get("player");
             }
 
-            String scriptUrl = playerElement.get("assets").getAsString("js");
+            final JsonElement args = playerElement.get("args");
 
-            JsonElement args = playerElement.get("args");
+            final String scriptUrl;
+            final JsonElement streamingData;
+            if (playerElement.present() && args.present()) {
+                scriptUrl = playerElement.get("assets").getAsString("js");
+                final JsonElement playerResponseTextNode = args.get("player_response").reRead(MAPPER);
+                streamingData = playerResponseTextNode.get("streamingData");
+            } else {
+                scriptUrl = null;
+                streamingData = jsonElement.getIndex(2).get("playerResponse", "streamingData");
+            }
 
-            if (args.isNull())
-                return new YouTubeTrackInfo(Collections.emptyList(), scriptUrl);
 
-            JsonElement playerResponseTextNode = args.get("player_response").reRead(MAPPER);
+            final JsonElement formatsElement = streamingData.get("formats");
+            final Stream<YouTubeTrackFormat> formats;
+            if (formatsElement.present()) {
+                final Stream<JsonElement> formatsStream = formatsElement.arrayElements();
+                formats = getFormatsFromStream(formatsStream);
+            } else
+                formats = Stream.empty();
 
-            JsonElement streamingData = playerResponseTextNode.get("streamingData");
-            List<YouTubeTrackFormat> trackFormats = streamingData
-                    .get("adaptiveFormats")
-                    .orElseGet(() -> streamingData.get("formats"))
-                    .arrayElements()
-                    .map(format -> {
-                        String mimeType = format.getAsString("mimeType");
-                        FormatType formatType = FormatType.getFormatType(mimeType);
-                        String audioQuality = format.getAsString("audioQuality");
-                        String audioSampleRate = format.getAsString("audioSampleRate");
+            final Stream<JsonElement> adaptiveFormatsStream = streamingData.get("adaptiveFormats").arrayElements();
+            final Stream<YouTubeTrackFormat> adaptiveFormats = getFormatsFromStream(adaptiveFormatsStream);
 
-                        String cipher = format.getAsString("cipher", "signatureCipher");
-
-                        YouTubeTrackFormat trackFormat;
-                        if (cipher == null) {
-                            String url = format.getAsString("url");
-                            return YouTubeTrackFormat.builder()
-                                    .mimeType(mimeType)
-                                    .formatType(formatType)
-                                    .audioQuality(audioQuality)
-                                    .audioSampleRate(audioSampleRate)
-                                    .streamReady(true)
-                                    .url(url)
-                                    .sigParam(null)
-                                    .sigValue(null)
-                                    .build();
-                        } else {
-                            Map<String, String> params = URLUtility.splitAndDecodeUrl(cipher);
-                            return YouTubeTrackFormat.builder()
-                                    .mimeType(mimeType)
-                                    .formatType(formatType)
-                                    .audioQuality(audioQuality)
-                                    .audioSampleRate(audioSampleRate)
-                                    .streamReady(false)
-                                    .url(params.get("url"))
-                                    .sigParam(params.getOrDefault("sp", "sig"))
-                                    .sigValue(params.get("s"))
-                                    .build();
-                        }
-                    }).collect(Collectors.toList());
+            final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats)
+                    .collect(Collectors.toList());
 
             return new YouTubeTrackInfo(trackFormats, scriptUrl);
 
         } catch (JsonProcessingException e) {
-            log.error("Error parsing Youtube track JSON: " + e.getMessage());
+            log.error("Error parsing Youtube info JSON: {}", e.getMessage());
             return null;
         }
     }
 
-    private List<SignaturePart> getObfuscateFunctionDefinitions(String scriptPart) {
-        List<SignaturePart> obfuscateFunctionDefinitions = new ArrayList<>();
-        String[] functions = scriptPart.split("\n");
-        for (String function : functions) {
-            String functionName = getFunctionName(function);
+    private Stream<YouTubeTrackFormat> getFormatsFromStream(final Stream<JsonElement> formats) {
+        return formats.map(format -> {
+            final String mimeType = format.getAsString("mimeType");
+            final FormatType formatType = FormatType.getFormatType(mimeType);
+            final String audioQuality = format.getAsString("audioQuality");
+            final String audioSampleRate = format.getAsString("audioSampleRate");
+
+            final String cipher = format.getAsString("cipher", "signatureCipher");
+
+            if (cipher == null) {
+                final String url = format.getAsString("url");
+                return YouTubeTrackFormat.builder()
+                        .mimeType(mimeType)
+                        .formatType(formatType)
+                        .audioQuality(audioQuality)
+                        .audioSampleRate(audioSampleRate)
+                        .streamReady(true)
+                        .url(url)
+                        .sigParam(null)
+                        .sigValue(null)
+                        .build();
+            } else {
+                final Map<String, String> params = URLUtility.splitAndDecodeUrl(cipher);
+                return YouTubeTrackFormat.builder()
+                        .mimeType(mimeType)
+                        .formatType(formatType)
+                        .audioQuality(audioQuality)
+                        .audioSampleRate(audioSampleRate)
+                        .streamReady(false)
+                        .url(params.get("url"))
+                        .sigParam(params.getOrDefault("sp", "sig"))
+                        .sigValue(params.get("s"))
+                        .build();
+            }
+        });
+    }
+
+    private Map<String, SignaturePart.SignatureOccurrence> getObfuscateFunctionDefinitions(final String scriptPart) {
+        final HashMap<String, SignaturePart.SignatureOccurrence> obfuscateFunctionsDefinitios = new HashMap<>();
+        final String[] functions = scriptPart.split("\n");
+        for (final String function : functions) {
+            final String functionName = getFunctionName(function);
             if (functionName == null)
                 continue;
 
-            SignaturePart obfuscateFunctionDefinition = SignaturePart.builder().functionName(functionName).build();
+            final SignaturePart.SignatureOccurrence occurrence;
             if (function.contains(JS_SLICE))
-                obfuscateFunctionDefinition.setOccurrence(SignaturePart.SignatureOccurrence.SLICE);
+                occurrence = SignaturePart.SignatureOccurrence.SLICE;
             else if (function.contains(JS_SPLICE))
-                obfuscateFunctionDefinition.setOccurrence(SignaturePart.SignatureOccurrence.SPLICE);
+                occurrence = SignaturePart.SignatureOccurrence.SPLICE;
             else if (function.contains(JS_REVERSE))
-                obfuscateFunctionDefinition.setOccurrence(SignaturePart.SignatureOccurrence.REVERSE);
+                occurrence = SignaturePart.SignatureOccurrence.REVERSE;
             else
-                obfuscateFunctionDefinition.setOccurrence(SignaturePart.SignatureOccurrence.SWAP);
+                occurrence = SignaturePart.SignatureOccurrence.SWAP;
 
-            obfuscateFunctionDefinitions.add(obfuscateFunctionDefinition);
+            obfuscateFunctionsDefinitios.put(functionName, occurrence);
         }
-        return obfuscateFunctionDefinitions;
+        return obfuscateFunctionsDefinitios;
     }
 
-    private String getFunctionName(String wholeFunction) {
-        String[] split = wholeFunction.split(":function");
+    private String getFunctionName(final String wholeFunction) {
+        final String[] split = wholeFunction.split(":function");
         return split.length > 0 ? split[0] : null;
     }
 
-    private SignaturePart getSignaturePart(List<SignaturePart> parts, String functionName, Integer parameter) {
-        for (SignaturePart part : parts) {
-            if (part.getFunctionName().equals(functionName))
-                return new SignaturePart(part.getFunctionName(), part.getOccurrence(), parameter);
-        }
-        return null;
-    }
+    protected String getSignature(final YouTubeTrackFormat youtubeTrackFormat, final String scriptBody)
+            throws YouTubeException {
 
-    public String getSignature(YouTubeTrackFormat youtubeTrackFormat, String scriptBody) throws YouTubeException {
-
-        Matcher obfuscateFunctionsMatcher = OBFUSCATE_FUNCTIONS_PATTERN.matcher(scriptBody);
+        final Matcher obfuscateFunctionsMatcher = OBFUSCATE_FUNCTIONS_PATTERN.matcher(scriptBody);
         if (!obfuscateFunctionsMatcher.find())
             throw new YouTubeException("Was not able to find obfuscate functions");
 
-        String obfuscateFunctions = obfuscateFunctionsMatcher.group(1);
-        List<SignaturePart> obfuscateFunctionDefinitions = getObfuscateFunctionDefinitions(obfuscateFunctions);
+        final String obfuscateFunctions = obfuscateFunctionsMatcher.group(1);
+        final Map<String, SignaturePart.SignatureOccurrence> obfuscateFunctionDefinitions =
+                getObfuscateFunctionDefinitions(obfuscateFunctions);
 
-        Matcher obfuscateFunctionsCallsMatcher = OBFUSCATE_FUNCTIONS_CALLS_PATTERN.matcher(scriptBody);
+        final Matcher obfuscateFunctionsCallsMatcher = OBFUSCATE_FUNCTIONS_CALLS_PATTERN.matcher(scriptBody);
         if (!obfuscateFunctionsCallsMatcher.find())
             throw new YouTubeException("Was not able to find obfuscate functions calls");
 
-        Matcher obfuscateFunctionCallsMatcher = FUNCTION_CALL_PATTERN.matcher(obfuscateFunctionsCallsMatcher.group());
+        final Matcher obfuscateFunctionCallsMatcher = FUNCTION_CALL_PATTERN.matcher(obfuscateFunctionsCallsMatcher.group());
 
-        SignatureResolver signatureResolver = new SignatureResolver();
+        final SignatureResolver signatureResolver = new SignatureResolver();
         while (obfuscateFunctionCallsMatcher.find()) {
-            String obfuscateFunctionName = obfuscateFunctionCallsMatcher.group(2);
-            Integer obfuscateFunctionParameter = Integer.parseInt(obfuscateFunctionCallsMatcher.group(3));
+            final String obfuscateFunctionName = obfuscateFunctionCallsMatcher.group(2).trim();
+            final Integer obfuscateFunctionParameter = Integer.parseInt(obfuscateFunctionCallsMatcher.group(3));
 
-            SignaturePart signaturePart = getSignaturePart(obfuscateFunctionDefinitions, obfuscateFunctionName, obfuscateFunctionParameter);
-            if (signaturePart != null)
-                signatureResolver.addSignaturePart(signaturePart);
+            final SignaturePart.SignatureOccurrence signatureOccurrence = obfuscateFunctionDefinitions.get(obfuscateFunctionName);
+
+            if (signatureOccurrence == null)
+                continue;
+
+            final SignaturePart signaturePart = new SignaturePart(obfuscateFunctionName, signatureOccurrence, obfuscateFunctionParameter);
+            signatureResolver.addSignaturePart(signaturePart);
         }
 
         return signatureResolver.resolveSignature(youtubeTrackFormat.getSigValue());
     }
 
-    @Data
-    @Builder
-    @AllArgsConstructor
+    @Value
     private static class SignaturePart {
 
-        private final String functionName;
-        private SignatureOccurrence occurrence;
-        private Integer parameter;
+        String functionName;
+        SignatureOccurrence occurrence;
+        Integer parameter;
 
         public enum SignatureOccurrence {
             SLICE, SPLICE, REVERSE, SWAP
@@ -277,14 +288,14 @@ class YouTubeUtility {
             this.signatureParts = new ArrayList<>();
         }
 
-        private void addSignaturePart(SignaturePart signaturePart) {
+        private void addSignaturePart(final SignaturePart signaturePart) {
             signatureParts.add(signaturePart);
         }
 
-        private String resolveSignature(String signatureValue) {
-            StringBuilder signature = new StringBuilder(signatureValue);
-            for (SignaturePart signaturePart : signatureParts) {
-                Integer parameter = signaturePart.getParameter();
+        private String resolveSignature(final String signatureValue) {
+            final StringBuilder signature = new StringBuilder(signatureValue);
+            for (final SignaturePart signaturePart : signatureParts) {
+                final Integer parameter = signaturePart.getParameter();
                 switch (signaturePart.getOccurrence()) {
                     case SLICE:
                     case SPLICE:

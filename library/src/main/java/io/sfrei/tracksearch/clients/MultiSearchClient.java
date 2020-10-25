@@ -8,6 +8,7 @@ import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.*;
 import io.sfrei.tracksearch.utils.TrackListHelper;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -37,14 +38,14 @@ public class MultiSearchClient implements MultiTrackSearchClient {
     }
 
     @Override
-    public TrackList<Track> getTracksForSearch(String search) throws TrackSearchException {
+    public TrackList<Track> getTracksForSearch(@NonNull final String search) throws TrackSearchException {
         return getTracksForSearch(search, clients);
     }
 
     @Override
-    public TrackList<Track> getNext(TrackList<? extends Track> trackList) throws TrackSearchException {
+    public TrackList<Track> getNext(@NonNull final TrackList<? extends Track> trackList) throws TrackSearchException {
 
-        List<TrackSearchClient<? extends Track>> callClients = new ArrayList<>(clients);
+        final List<TrackSearchClient<? extends Track>> callClients = new ArrayList<>(clients);
 
         if (!youTubeClient.hasPagingValues(trackList)) {
             callClients.remove(youTubeClient);
@@ -56,23 +57,24 @@ public class MultiSearchClient implements MultiTrackSearchClient {
     }
 
     @Override
-    public String getStreamUrl(Track track) throws TrackSearchException {
+    public String getStreamUrl(@NonNull final Track track) throws TrackSearchException {
 
         if (track instanceof YouTubeTrack) {
             return youTubeClient.getStreamUrl((YouTubeTrack) track);
-        }
-        else if (track instanceof SoundCloudTrack) {
+        } else if (track instanceof SoundCloudTrack) {
             return soundCloudClient.getStreamUrl((SoundCloudTrack) track);
         }
         throw new TrackSearchException("Track type is unknown");
     }
 
     @Override
-    public TrackList<Track> getTracksForSearch(String search, Set<TrackSource> sources) throws TrackSearchException {
+    public TrackList<Track> getTracksForSearch(@NonNull final String search, @NonNull final Set<TrackSource> sources)
+            throws TrackSearchException {
+
         if (sources.isEmpty())
             throw new TrackSearchException("Provide at least one source");
 
-        List<TrackSearchClient<? extends Track>> callClients = new ArrayList<>(clients);
+        final List<TrackSearchClient<? extends Track>> callClients = new ArrayList<>(clients);
 
         if (!sources.contains(TrackSource.Youtube)) {
             callClients.remove(youTubeClient);
@@ -83,10 +85,11 @@ public class MultiSearchClient implements MultiTrackSearchClient {
         return getTracksForSearch(search, callClients);
     }
 
-    private BaseTrackList<Track> getTracksForSearch(String search, List<TrackSearchClient<? extends Track>> callClients) throws TrackSearchException {
-        List<Callable<BaseTrackList<Track>>> searchCalls = new ArrayList<>();
+    private BaseTrackList<Track> getTracksForSearch(final String search, final List<TrackSearchClient<? extends Track>> callClients)
+            throws TrackSearchException {
+        final List<Callable<BaseTrackList<Track>>> searchCalls = new ArrayList<>();
 
-        for (TrackSearchClient<? extends Track> client : callClients) {
+        for (final TrackSearchClient<? extends Track> client : callClients) {
             searchCalls.add(() -> (BaseTrackList<Track>) client.getTracksForSearch(search));
         }
 
@@ -94,30 +97,32 @@ public class MultiSearchClient implements MultiTrackSearchClient {
         return getMergedTrackListFromCalls(searchCalls, QueryType.SEARCH);
     }
 
-    private TrackList<Track> getNext(TrackList<? extends Track> trackList, List<TrackSearchClient<? extends Track>> callClients) throws TrackSearchException {
-        List<Callable<BaseTrackList<Track>>> nextCalls = new ArrayList<>();
+    private TrackList<Track> getNext(final TrackList<? extends Track> trackList, final List<TrackSearchClient<? extends Track>> callClients)
+            throws TrackSearchException {
 
-        for (TrackSearchClient<? extends Track> client : callClients) {
+        final List<Callable<BaseTrackList<Track>>> nextCalls = new ArrayList<>();
+
+        for (final TrackSearchClient<? extends Track> client : callClients) {
             nextCalls.add(() -> (BaseTrackList<Track>) client.getNext(trackList));
         }
         log.debug("Performing next call for {} clients", callClients.size());
         return getMergedTrackListFromCalls(nextCalls, trackList.getQueryType());
     }
 
-    private BaseTrackList<Track> getMergedTrackListFromCalls(List<Callable<BaseTrackList<Track>>> calls, QueryType queryType)
+    private BaseTrackList<Track> getMergedTrackListFromCalls(final List<Callable<BaseTrackList<Track>>> calls, final QueryType queryType)
             throws TrackSearchException {
 
-        ExecutorService executorService = Executors.newFixedThreadPool(calls.size());
-        BaseTrackList<Track> resultTrackList = new BaseTrackList<>();
+        final ExecutorService executorService = Executors.newFixedThreadPool(calls.size());
+        final BaseTrackList<Track> resultTrackList = new BaseTrackList<>();
 
-        List<Future<BaseTrackList<Track>>> trackLists;
+        final List<Future<BaseTrackList<Track>>> trackLists;
         try {
             trackLists = executorService.invokeAll(calls);
         } catch (InterruptedException e) {
             throw new TrackSearchException(e.getMessage());
         }
 
-        for (Future<BaseTrackList<Track>> trackList : trackLists) {
+        for (final Future<BaseTrackList<Track>> trackList : trackLists) {
             try {
                 resultTrackList.mergeIn(trackList.get());
             } catch (InterruptedException | ExecutionException e) {
@@ -131,7 +136,7 @@ public class MultiSearchClient implements MultiTrackSearchClient {
     }
 
     @Override
-    public boolean hasPagingValues(TrackList<? extends Track> trackList) {
+    public boolean hasPagingValues(final TrackList<? extends Track> trackList) {
         return TrackListHelper.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
     }
 

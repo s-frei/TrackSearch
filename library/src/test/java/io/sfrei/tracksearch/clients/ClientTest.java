@@ -2,6 +2,8 @@ package io.sfrei.tracksearch.clients;
 
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 
+import java.io.IOException;
+
 public interface ClientTest {
 
     void tracksFoSearch() throws TrackSearchException;
@@ -10,6 +12,6 @@ public interface ClientTest {
 
     void trackListGotPagingValues();
 
-    void getStreamUrl();
+    void getStreamUrl() throws IOException;
 
 }

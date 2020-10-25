@@ -1,6 +1,19 @@
 Changelog
 =========
 
+0.6.1
+-----
+
+**Major:**
+- Switch to Java 11
+
+**Feature:**
+- Added caching and cookie storing
+- Multiple code enhancements
+
+**Bugfix:**
+- Fix youtube stream resolving
+
 0.6.0
 -----
 

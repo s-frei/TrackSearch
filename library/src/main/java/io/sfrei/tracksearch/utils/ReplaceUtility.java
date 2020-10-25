@@ -2,7 +2,7 @@ package io.sfrei.tracksearch.utils;
 
 public class ReplaceUtility {
 
-    public static String replaceUnnecessary(String chars) {
+    public static String replaceUnnecessary(final String chars) {
         return chars
                 .replaceAll("@", " at ")
                 .replaceAll("_", " ")

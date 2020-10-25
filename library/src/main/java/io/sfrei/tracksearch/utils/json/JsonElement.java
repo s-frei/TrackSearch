@@ -20,7 +20,7 @@ public class JsonElement extends JsonUtility {
     @Getter
     private final JsonNode node;
 
-    public static JsonElement read(ObjectMapper mapper, String jsonString) throws JsonProcessingException {
+    public static JsonElement read(final ObjectMapper mapper, final String jsonString) throws JsonProcessingException {
         return new JsonElement(mapper.readTree(jsonString));
     }
 
@@ -29,7 +29,7 @@ public class JsonElement extends JsonUtility {
                 .map(JsonElement::new);
     }
 
-    public JsonElement firstElementFor(String path) {
+    public JsonElement firstElementFor(final String path) {
         return node.findValues(path).stream().map(JsonElement::new).collect(Collectors.toList()).get(0);
     }
 
@@ -39,18 +39,18 @@ public class JsonElement extends JsonUtility {
 
     public Stream<JsonElement> arrayElements() {
         if (isArray()) {
-            ArrayNode arrayNode = (ArrayNode) this.node;
+            final ArrayNode arrayNode = (ArrayNode) this.node;
             return StreamSupport.stream(arrayNode.spliterator(), false).map(JsonElement::new);
         }
         return Stream.empty();
     }
 
-    public String getAsString(String path) {
+    public String getAsString(final String path) {
         return getAsString(node, path);
     }
 
-    public String getAsString(String... paths) {
-        for (String value : paths) {
+    public String getAsString(final String... paths) {
+        for (final String value : paths) {
             String result = getAsString(node, value);
             if (result != null)
                 return result;
@@ -58,11 +58,11 @@ public class JsonElement extends JsonUtility {
         return null;
     }
 
-    public Long getLongFor(String path) {
+    public Long getLongFor(final String path) {
         return getAsLong(node, path);
     }
 
-    public JsonElement get(String... route) {
+    public JsonElement get(final String... route) {
         return new JsonElement(get(node, route));
     }
 
@@ -70,19 +70,19 @@ public class JsonElement extends JsonUtility {
         return new JsonElement(getFirstField(node));
     }
 
-    public JsonElement getIndex(int index) {
+    public JsonElement getIndex(final int index) {
         return new JsonElement(get(node, index));
     }
 
-    public JsonElement orElseGet(Supplier<JsonElement> supplier) {
+    public JsonElement orElseGet(final Supplier<JsonElement> supplier) {
         return node != null ? new JsonElement(node) : supplier.get();
     }
 
-    public JsonElement reRead(ObjectMapper mapper) throws JsonProcessingException {
+    public JsonElement reRead(final ObjectMapper mapper) throws JsonProcessingException {
         return new JsonElement(mapper.readTree(getAsText(node)));
     }
 
-    public <T> T mapToObject(ObjectMapper mapper, Class<T> clazz) throws JsonProcessingException {
+    public <T> T mapToObject(final ObjectMapper mapper, final Class<T> clazz) throws JsonProcessingException {
         return mapper.treeToValue(node, clazz);
     }
 

@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.sfrei</groupId>
         <artifactId>tracksearch-parent</artifactId>
-        <version>0.6.0</version>
+        <version>0.6.1</version>
     </parent>
 
     <artifactId>tracksearch</artifactId>
@@ -17,11 +17,13 @@
     <description>Library to gain track metadata from different sources</description>
 
     <properties>
+        <java-version>11</java-version>
         <retrofit.version>2.9.0</retrofit.version>
-        <jackson-databind.version>2.11.2</jackson-databind.version>
+        <okhttp.version>4.9.0</okhttp.version>
+        <jackson-databind.version>2.11.3</jackson-databind.version>
         <jsoup.version>1.13.1</jsoup.version>
         <logback-classic.version>1.2.3</logback-classic.version>
-        <junit-jupiter.version>5.6.2</junit-jupiter.version>
+        <junit-jupiter.version>5.7.0</junit-jupiter.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     </properties>
 
@@ -50,8 +52,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java-version}</source>
+                    <target>${java-version}</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -72,7 +74,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>${maven-javadoc-plugin.version}</version>
                 <configuration>
-                    <source>1.8</source>
+                    <source>${java-version}</source>
                 </configuration>
                 <executions>
                     <execution>
@@ -100,6 +102,16 @@
             <version>${retrofit.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp-urlconnection</artifactId>
+            <version>${okhttp.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-databind.version}</version>
@@ -110,14 +122,14 @@
             <version>${jsoup.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback-classic.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

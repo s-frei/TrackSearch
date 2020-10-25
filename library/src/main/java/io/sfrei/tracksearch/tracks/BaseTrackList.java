@@ -1,7 +1,7 @@
 package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.setup.QueryType;
-import io.sfrei.tracksearch.utils.MapUtility;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -10,22 +10,17 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
+@AllArgsConstructor
 public class BaseTrackList<T extends Track> implements TrackList<T> {
+
+    private final List<T> tracks;
 
     private QueryType queryType = QueryType.UNKNOWN;
     private final Map<String, String> queryInformation;
 
-    private final List<T> tracks;
-
     public BaseTrackList() {
         this.tracks = new ArrayList<>();
         this.queryInformation = new HashMap<>();
-    }
-
-    public BaseTrackList(List<T> tracks, QueryType queryType, Map<String, String> queryInformation) {
-        this.tracks = tracks;
-        this.queryType = queryType;
-        this.queryInformation = queryInformation;
     }
 
     @Override
@@ -39,19 +34,20 @@ public class BaseTrackList<T extends Track> implements TrackList<T> {
     }
 
     public BaseTrackList<T> setPagingValues(String positionKey, int position, String offsetKey, int offset) {
-        MapUtility.set(queryInformation, positionKey, String.valueOf(position), offsetKey, String.valueOf(offset));
+        queryInformation.putAll(Map.of(positionKey, String.valueOf(position), offsetKey, String.valueOf(offset)));
         return this;
     }
 
-    public void setQueryInformationValue(String key, int value) {
+    public void addQueryInformationValue(String key, int value) {
         queryInformation.put(key, String.valueOf(value));
     }
 
     @Override
-    public Integer getQueryInformationValue(String key) {
+    public Integer getQueryInformationIntValue(String key) {
         return Integer.parseInt(queryInformation.get(key));
     }
 
+    @Override
     public String getQueryParam() {
         return queryInformation.get(QUERY_PARAM);
     }

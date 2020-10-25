@@ -10,8 +10,8 @@ public class TimeUtility {
     private static final Date DATE_REFERENCE = new Date(0);
     private static final List<String> TIME_FORMATS = Arrays.asList("HH:mm:ss", "mm:ss", "ss");
 
-    public static Long getSecondsForTimeString(String time) {
-        for (String format : TIME_FORMATS) {
+    public static Long getSecondsForTimeString(final String time) {
+        for (final String format : TIME_FORMATS) {
             try {
                 return (new SimpleDateFormat(format).parse(time).getTime() - DATE_REFERENCE.getTime()) / 1000L;
             } catch (Exception ignored) {
@@ -20,7 +20,7 @@ public class TimeUtility {
         return null;
     }
 
-    public static Long getSecondsForMilliseconds(Long milliseconds) {
+    public static Long getSecondsForMilliseconds(final Long milliseconds) {
         if (milliseconds == null)
             return null;
 

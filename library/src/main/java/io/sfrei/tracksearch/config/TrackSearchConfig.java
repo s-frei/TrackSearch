@@ -13,9 +13,9 @@ public class TrackSearchConfig {
     private static final Integer DEFAULT_PLAYLIST_OFFSET = 20;
     public static final String HEADER_LANGUAGE_ENGLISH = "Accept-Language: en";
     public static final String HEADER_YOUTUBE_CLIENT_NAME = "x-youtube-client-name: 1";
-    public static final String HEADER_YOUTUBE_CLIENT_VERSION = "x-youtube-client-version: 2.20200406.06.02";
+    public static final String HEADER_YOUTUBE_CLIENT_VERSION = "x-youtube-client-version: 2.20201020.05.00";
 
-    public static void load() {
+    public static void setTime() {
         TimeZone.setDefault(TimeZone.getTimeZone(TIMEZONE));
     }
 
