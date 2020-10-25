@@ -150,10 +150,16 @@ class YouTubeUtility {
                 streamingData = jsonElement.getIndex(2).get("playerResponse", "streamingData");
             }
 
-            final Stream<JsonElement> formatsStream = streamingData.get("formats").arrayElements();
-            final Stream<JsonElement> adaptiveFormatsStream = streamingData.get("adaptiveFormats").arrayElements();
 
-            final Stream<YouTubeTrackFormat> formats = getFormatsFromStream(formatsStream);
+            final JsonElement formatsElement = streamingData.get("formats");
+            final Stream<YouTubeTrackFormat> formats;
+            if (formatsElement.present()) {
+                final Stream<JsonElement> formatsStream = formatsElement.arrayElements();
+                formats = getFormatsFromStream(formatsStream);
+            } else
+                formats = Stream.empty();
+
+            final Stream<JsonElement> adaptiveFormatsStream = streamingData.get("adaptiveFormats").arrayElements();
             final Stream<YouTubeTrackFormat> adaptiveFormats = getFormatsFromStream(adaptiveFormatsStream);
 
             final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats)
