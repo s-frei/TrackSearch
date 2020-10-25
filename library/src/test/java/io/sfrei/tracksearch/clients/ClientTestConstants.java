@@ -6,7 +6,7 @@ import java.util.List;
 public class ClientTestConstants {
 
     //Amazing german artist ;)
-    public static final String SEARCH_KEY = "Ben Böhmer | Live at Anjunadeep x Printworks London 2019 (Official HD Set)";
+    public static final String SEARCH_KEY = "Ben Böhmer";
 
     public static final List<String> SEARCH_KEYS;
 

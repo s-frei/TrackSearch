@@ -9,6 +9,7 @@ import org.junit.jupiter.api.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,6 +26,7 @@ public abstract class ClientTestImpl<T extends Track> implements ClientTest {
 
     public ClientTestImpl(TrackSearchClient<T> trackSearchClient, List<String> searchKeys) {
         searchClient = trackSearchClient;
+        log.debug("Initialized {}", searchClient.getClass().getSimpleName());
         this.searchKeys = searchKeys;
         tracksForSearch = new ArrayList<>();
     }
@@ -35,6 +37,7 @@ public abstract class ClientTestImpl<T extends Track> implements ClientTest {
     public void tracksFoSearch() throws TrackSearchException {
         log.debug("Search for {}", Arrays.toString(searchKeys.toArray()));
         for (String key : searchKeys) {
+            log.debug("Search for: {}", key);
             TrackList<T> tracksForSearch = searchClient.getTracksForSearch(key);
             log.debug("Found tracks: {}", tracksForSearch.getTracks().size());
             assertFalse(tracksForSearch.isEmpty());
@@ -54,6 +57,7 @@ public abstract class ClientTestImpl<T extends Track> implements ClientTest {
     @Test
     public void getNextTracks() throws TrackSearchException {
         for (TrackList<T> trackList : tracksForSearch) {
+            log.debug("Next for: {}", trackList.getQueryParam());
             TrackList<T> nextTracksForSearch = searchClient.getNext(trackList);
             log.debug("Found tracks: {}", nextTracksForSearch.getTracks().size());
             assertFalse(nextTracksForSearch.isEmpty());
@@ -64,8 +68,9 @@ public abstract class ClientTestImpl<T extends Track> implements ClientTest {
     @Order(4)
     @Test
     public void getStreamUrl() {
+        AtomicInteger pos = new AtomicInteger(0);
         tracksForSearch.forEach(trackList -> trackList.getTracks().forEach(track -> {
-            log.info("Trying to get stream url for: {}", track.toString());
+            log.info("{} - Trying to get stream url for: {}", pos.getAndIncrement(), track.toString());
             String streamUrl = track.getStreamUrl();
             assertNotNull(streamUrl);
             log.info("URL found: {}", streamUrl);
