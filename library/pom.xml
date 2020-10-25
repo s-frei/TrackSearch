@@ -19,6 +19,7 @@
     <properties>
         <java-version>11</java-version>
         <retrofit.version>2.9.0</retrofit.version>
+        <okhttp.version>4.9.0</okhttp.version>
         <jackson-databind.version>2.11.3</jackson-databind.version>
         <jsoup.version>1.13.1</jsoup.version>
         <logback-classic.version>1.2.3</logback-classic.version>
@@ -102,9 +103,13 @@
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp-urlconnection</artifactId>
-            <version>3.14.9</version>
-            <scope>compile</scope>
+            <version>${okhttp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
