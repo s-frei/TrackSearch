@@ -1,11 +1,13 @@
 package io.sfrei.tracksearch.clients;
 
+import io.sfrei.tracksearch.clients.setup.Client;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public abstract class ClientTestImpl<T extends Track> implements ClientTest {
+public abstract class ClientTestImpl<T extends Track> extends Client implements ClientTest {
 
     protected final TrackSearchClient<T> searchClient;
 
@@ -35,11 +37,11 @@ public abstract class ClientTestImpl<T extends Track> implements ClientTest {
     @Order(1)
     @Test
     public void tracksFoSearch() throws TrackSearchException {
-        log.debug("Search for {}", Arrays.toString(searchKeys.toArray()));
+        log.info("Search for {}", Arrays.toString(searchKeys.toArray()));
         for (String key : searchKeys) {
-            log.debug("Search for: {}", key);
+            log.info("Search for: {}", key);
             TrackList<T> tracksForSearch = searchClient.getTracksForSearch(key);
-            log.debug("Found tracks: {}", tracksForSearch.getTracks().size());
+            log.info("Found tracks: {}", tracksForSearch.getTracks().size());
             assertFalse(tracksForSearch.isEmpty());
             this.tracksForSearch.add(tracksForSearch);
         }
@@ -57,9 +59,9 @@ public abstract class ClientTestImpl<T extends Track> implements ClientTest {
     @Test
     public void getNextTracks() throws TrackSearchException {
         for (TrackList<T> trackList : tracksForSearch) {
-            log.debug("Next for: {}", trackList.getQueryParam());
+            log.info("Next for: {}", trackList.getQueryParam());
             TrackList<T> nextTracksForSearch = searchClient.getNext(trackList);
-            log.debug("Found tracks: {}", nextTracksForSearch.getTracks().size());
+            log.info("Found tracks: {}", nextTracksForSearch.getTracks().size());
             assertFalse(nextTracksForSearch.isEmpty());
         }
     }
@@ -67,13 +69,18 @@ public abstract class ClientTestImpl<T extends Track> implements ClientTest {
     @Override
     @Order(4)
     @Test
-    public void getStreamUrl() {
+    public void getStreamUrl() throws IOException {
         AtomicInteger pos = new AtomicInteger(0);
-        tracksForSearch.forEach(trackList -> trackList.getTracks().forEach(track -> {
-            log.info("{} - Trying to get stream url for: {}", pos.getAndIncrement(), track.toString());
-            String streamUrl = track.getStreamUrl();
-            assertNotNull(streamUrl);
-            log.info("URL found: {}", streamUrl);
-        }));
+        for (TrackList<T> trackList : tracksForSearch) {
+            for (T track : trackList.getTracks()) {
+                log.info("{} - Trying to get stream url for: {}", pos.getAndIncrement(), track.toString());
+                String streamUrl = track.getStreamUrl();
+                assertNotNull(streamUrl);
+                log.info("URL found: {}", streamUrl);
+                final int code = requestAndGetCode(streamUrl);
+                log.debug("Response received - code: {}", code);
+                assertEquals(OK, code);
+            }
+        }
     }
 }
