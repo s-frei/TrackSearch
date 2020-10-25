@@ -26,28 +26,28 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
     }
 
     @Override
-    public SoundCloudTrack deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public SoundCloudTrack deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
 
-        JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
-        String title = rootElement.getAsString("title");
-        Long length = TimeUtility.getSecondsForMilliseconds(rootElement.getLongFor("duration"));
-        String url = rootElement.getAsString("permalink_url");
+        final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
+        final String title = rootElement.getAsString("title");
+        final Long length = TimeUtility.getSecondsForMilliseconds(rootElement.getLongFor("duration"));
+        final String url = rootElement.getAsString("permalink_url");
 
         if (title == null || length == null || url == null)
             return null;
 
-        SoundCloudTrack soundcloudTrack = new SoundCloudTrack(title, length, url);
+        final SoundCloudTrack soundcloudTrack = new SoundCloudTrack(title, length, url);
 
-        List<SoundCloudTrackFormat> trackFormats = rootElement.get("media", "transcodings")
+        final List<SoundCloudTrackFormat> trackFormats = rootElement.get("media", "transcodings")
                 .arrayElements()
                 .map(transcoding -> {
 
-                    String formatUrl = transcoding.getAsString("url");
-                    String audioQuality = transcoding.getAsString("quality");
+                    final String formatUrl = transcoding.getAsString("url");
+                    final String audioQuality = transcoding.getAsString("quality");
 
-                    JsonElement formatElement = transcoding.get("format");
-                    String mimeType = formatElement.getAsString("mime_type");
-                    String protocol = formatElement.getAsString("protocol");
+                    final JsonElement formatElement = transcoding.get("format");
+                    final String mimeType = formatElement.getAsString("mime_type");
+                    final String protocol = formatElement.getAsString("protocol");
 
                     return SoundCloudTrackFormat.builder()
                             .mimeType(mimeType)
@@ -60,7 +60,7 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
 
                 }).collect(Collectors.toList());
 
-        SoundCloudTrackInfo trackInfo = new SoundCloudTrackInfo(trackFormats);
+        final SoundCloudTrackInfo trackInfo = new SoundCloudTrackInfo(trackFormats);
         soundcloudTrack.setTrackInfo(trackInfo);
 
         return soundcloudTrack;

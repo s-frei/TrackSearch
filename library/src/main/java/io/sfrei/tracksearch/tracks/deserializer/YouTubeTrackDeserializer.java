@@ -22,19 +22,19 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
     }
 
     @Override
-    public YouTubeTrack deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public YouTubeTrack deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
 
-        JsonElement rootElement = JsonElement.of(ctxt.readTree(p).get("videoRenderer"));
+        final JsonElement rootElement = JsonElement.of(ctxt.readTree(p).get("videoRenderer"));
 
-        String ref = rootElement.getAsString("videoId");
-        String title = rootElement.get("title", "runs").getFirstField().getAsString("text");
-        String timeString = rootElement.get("lengthText").getAsString("simpleText");
-        Long length = TimeUtility.getSecondsForTimeString(timeString);
+        final String ref = rootElement.getAsString("videoId");
+        final String title = rootElement.get("title", "runs").getFirstField().getAsString("text");
+        final String timeString = rootElement.get("lengthText").getAsString("simpleText");
+        final Long length = TimeUtility.getSecondsForTimeString(timeString);
 
         if (title == null || length == null || ref == null)
             return null;
 
-        String url = YouTubeClient.HOSTNAME + "/watch?v=" + ref;
+        final String url = YouTubeClient.HOSTNAME + "/watch?v=" + ref;
 
         return new YouTubeTrack(title, length, url);
     }

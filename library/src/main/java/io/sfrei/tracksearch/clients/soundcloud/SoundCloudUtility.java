@@ -12,7 +12,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,9 +34,9 @@ class SoundCloudUtility {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    List<String> getCrossOriginScripts(String html) {
-        Document doc = Jsoup.parse(html);
-        Elements scriptsDom = doc.getElementsByTag("script");
+    protected List<String> getCrossOriginScripts(final String html) {
+        final Document doc = Jsoup.parse(html);
+        final Elements scriptsDom = doc.getElementsByTag("script");
         return scriptsDom.stream()
                 .filter(element -> element.hasAttr("crossorigin"))
                 .map(element -> element.attr("src"))
@@ -45,10 +44,10 @@ class SoundCloudUtility {
                 .collect(Collectors.toList());
     }
 
-    Optional<String> getClientID(String script) {
-        Matcher clientIdMatcher = SOUNDCLOUD_CLIENT_ID_PATTERN.matcher(script);
+    protected Optional<String> getClientID(final String script) {
+        final Matcher clientIdMatcher = SOUNDCLOUD_CLIENT_ID_PATTERN.matcher(script);
         if (clientIdMatcher.find()) {
-            String clientID = clientIdMatcher.group()
+            final String clientID = clientIdMatcher.group()
                     .replace(SOUNDCLOUD_CLIENT_ID_PREFIX, "")
                     .replaceAll("[^a-zA-Z0-9]+", "");
             log.debug("ClientID was found: {} ", clientID);
@@ -57,38 +56,41 @@ class SoundCloudUtility {
         return Optional.empty();
     }
 
-    BaseTrackList<SoundCloudTrack> getSoundCloudTracks(String json, QueryType queryType, String query,
-                                                       Function<SoundCloudTrack, String> streamUrlProvider)
+    protected BaseTrackList<SoundCloudTrack> getSoundCloudTracks(final String json, final QueryType queryType, final String query,
+                                                                 final Function<SoundCloudTrack, String> streamUrlProvider)
             throws SoundCloudException {
 
+        final JsonElement responseElement;
         try {
-
-            List<SoundCloudTrack> scTracks = JsonElement.read(MAPPER, json).get("collection").elements()
-                    .map(content -> {
-                        try {
-                            return content.mapToObject(MAPPER, SoundCloudTrack.class);
-                        } catch (JsonProcessingException e) {
-                            return null;
-                        }
-                    }).filter(Objects::nonNull)
-                    .peek(soundCloudTrack -> soundCloudTrack.setStreamUrlProvider(streamUrlProvider))
-                    .collect(Collectors.toList());
-
-            int foundTracks = scTracks.size();
-            Map<String, String> queryInformation = SoundCloudClient.makeQueryInformation(query);
-            BaseTrackList<SoundCloudTrack> trackList = new BaseTrackList<>(scTracks, queryType, queryInformation);
-            trackList.addQueryInformationValue(SoundCloudClient.OFFSET_KEY, foundTracks);
-            log.debug("Found {} SoundCloud Tracks", foundTracks);
-            return trackList;
-        } catch (IOException e) {
+            responseElement = JsonElement.read(MAPPER, json).get("collection");
+        } catch (JsonProcessingException e) {
             throw new SoundCloudException("GetSoundCloudTracks - " + e.getMessage());
         }
+
+        final List<SoundCloudTrack> scTracks = responseElement.elements()
+                .map(content -> {
+                    try {
+                        return content.mapToObject(MAPPER, SoundCloudTrack.class);
+                    } catch (JsonProcessingException e) {
+                        log.error("Error parsing SoundCloud track JSON: {}", e.getMessage());
+                        return null;
+                    }
+                }).filter(Objects::nonNull)
+                .peek(soundCloudTrack -> soundCloudTrack.setStreamUrlProvider(streamUrlProvider))
+                .collect(Collectors.toList());
+
+        final int foundTracks = scTracks.size();
+        final Map<String, String> queryInformation = SoundCloudClient.makeQueryInformation(query);
+        final BaseTrackList<SoundCloudTrack> trackList = new BaseTrackList<>(scTracks, queryType, queryInformation);
+        trackList.addQueryInformationValue(SoundCloudClient.OFFSET_KEY, foundTracks);
+        log.debug("Found {} SoundCloud Tracks", foundTracks);
+        return trackList;
     }
 
-    Optional<String> getProgressiveStreamUrl(String html) {
-        Matcher streamUrlMatcher = SOUNDCLOUD_STREAM_URL_PATTERN.matcher(html);
+    protected Optional<String> getProgressiveStreamUrl(final String html) {
+        final Matcher streamUrlMatcher = SOUNDCLOUD_STREAM_URL_PATTERN.matcher(html);
         if (streamUrlMatcher.find()) {
-            String progressiveStreamUrl = streamUrlMatcher.group()
+            final String progressiveStreamUrl = streamUrlMatcher.group()
                     .replace(SOUNDCLOUD_STREAM_PREFIX, "")
                     .replaceAll("\"", "");
             log.trace("ProgressiveStreamURL was found: {}", progressiveStreamUrl);
@@ -97,7 +99,7 @@ class SoundCloudUtility {
         return Optional.empty();
     }
 
-    String getStreamUrl(String body) {
+    protected String getStreamUrl(final String body) {
         return body
                 .replace(SOUNDCLOUD_STREAM_PREFIX, "")
                 .replace("{\"", "")

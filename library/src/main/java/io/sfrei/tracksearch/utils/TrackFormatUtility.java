@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 public class TrackFormatUtility {
 
-    public static YouTubeTrackFormat getBestTrackFormat(YouTubeTrack youtubeTrack, boolean includeVideo)
+    public static YouTubeTrackFormat getBestTrackFormat(final YouTubeTrack youtubeTrack, final boolean includeVideo)
             throws TrackSearchException {
 
         final AtomicReference<YouTubeTrackFormat> bestFormat = new AtomicReference<>(null);
@@ -86,21 +86,21 @@ public class TrackFormatUtility {
             return qualityId;
         }
 
-        private static int getOrdinalForQuality(String qualityId) {
-            for (YoutubeAudioQualities quality : YoutubeAudioQualities.values()) {
+        private static int getOrdinalForQuality(final String qualityId) {
+            for (final YoutubeAudioQualities quality : YoutubeAudioQualities.values()) {
                 if (quality.getQualityId().equals(qualityId))
                     return quality.ordinal();
             }
             return -1;
         }
 
-        public static boolean audioQualitySame(String current, String other) {
+        public static boolean audioQualitySame(final String current, final String other) {
             final int currentQuality = YoutubeAudioQualities.getOrdinalForQuality(current);
             final int otherQuality = YoutubeAudioQualities.getOrdinalForQuality(other);
             return otherQuality == currentQuality;
         }
 
-        public static boolean audioQualityBetter(String current, String other) {
+        public static boolean audioQualityBetter(final String current, final String other) {
             final int currentQuality = YoutubeAudioQualities.getOrdinalForQuality(current);
             final int otherQuality = YoutubeAudioQualities.getOrdinalForQuality(other);
             return otherQuality > currentQuality;
