@@ -161,9 +161,6 @@ class YouTubeUtility {
             final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats)
                     .collect(Collectors.toList());
 
-            if (scriptUrl == null)
-                log.debug("");
-
             return new YouTubeTrackInfo(trackFormats, scriptUrl);
 
         } catch (JsonProcessingException e) {
