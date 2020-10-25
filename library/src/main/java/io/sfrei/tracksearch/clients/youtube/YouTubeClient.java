@@ -115,11 +115,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
     @Override
     public String getStreamUrl(@NonNull final YouTubeTrack youtubeTrack) throws TrackSearchException {
-        final YouTubeTrackInfo trackInfo;
-        if (youtubeTrack.getTrackInfo() == null)
-            trackInfo = loadTrackInfo(youtubeTrack);
-        else
-            trackInfo = youtubeTrack.getTrackInfo();
+        final YouTubeTrackInfo trackInfo = loadTrackInfo(youtubeTrack);
 
         final YouTubeTrackFormat youtubeTrackFormat = TrackFormatUtility.getBestTrackFormat(youtubeTrack, false);
 
