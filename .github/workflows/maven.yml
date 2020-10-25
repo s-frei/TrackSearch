@@ -19,4 +19,4 @@ jobs:
         java-version: 11
         architecture: x64
     - name: Test with Maven
-      run: mvn test -P detailed-client-test --file pom.xml
+      run: mvn test --file pom.xml
