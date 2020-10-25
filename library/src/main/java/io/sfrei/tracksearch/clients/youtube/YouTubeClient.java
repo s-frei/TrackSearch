@@ -10,6 +10,7 @@ import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
+import io.sfrei.tracksearch.utils.ScriptCache;
 import io.sfrei.tracksearch.utils.TrackFormatUtility;
 import io.sfrei.tracksearch.utils.TrackListHelper;
 import io.sfrei.tracksearch.utils.URLUtility;
@@ -45,6 +46,8 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     private final YouTubeService requestService;
     private final YouTubeUtility youTubeUtility;
 
+    private final ScriptCache<String, String> scriptCache;
+
     public YouTubeClient() {
         Retrofit base = new Retrofit.Builder()
                 .baseUrl(HOSTNAME)
@@ -54,6 +57,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
         requestService = base.create(YouTubeService.class);
         youTubeUtility = new YouTubeUtility();
+        scriptCache = new ScriptCache<>();
     }
 
     public static Map<String, String> makeQueryInformation(String query, String pagingToken) {
@@ -123,7 +127,13 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         if (scriptUrl == null)
             throw new TrackSearchException("ScriptURL could not be resolved");
 
-        String scriptContent = Client.requestURL(HOSTNAME + scriptUrl).getContentOrThrow();
+        final String scriptContent;
+        if (scriptCache.containsKey(scriptUrl))
+            scriptContent = scriptCache.get(scriptUrl);
+        else {
+            scriptContent = Client.requestURL(HOSTNAME + scriptUrl).getContentOrThrow();
+            scriptCache.put(scriptUrl, scriptContent);
+        }
 
         String signatureKey = youTubeUtility.getSignature(youtubeTrackFormat, scriptContent);
 
