@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.6.2 - unreleased
-------------------
+0.6.2
+-----
 
 **Feature:**
 - Fallback for youtube player script
