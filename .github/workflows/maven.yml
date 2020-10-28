@@ -1,4 +1,4 @@
-name: Test functionality
+name: functionality-test
 
 on:
   push:
@@ -19,4 +19,4 @@ jobs:
         java-version: 11
         architecture: x64
     - name: Test with Maven
-      run: mvn test --file pom.xml
+      run: mvn test
