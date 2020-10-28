@@ -4,7 +4,8 @@ Changelog
 0.6.2 - unreleased
 ------------------
 
-Nothing for now ...
+**Feature:**
+- Fallback for youtube player script
 
 0.6.1
 -----
