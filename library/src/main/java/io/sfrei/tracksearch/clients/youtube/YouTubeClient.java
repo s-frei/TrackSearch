@@ -106,11 +106,13 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     }
 
     private YouTubeTrackInfo loadTrackInfo(final YouTubeTrack youtubeTrack) throws TrackSearchException {
-        final Call<ResponseWrapper> trackRequest = requestService.getForUrlWithParams(youtubeTrack.getUrl(), TRACK_PARAMS);
+        final String trackUrl = youtubeTrack.getUrl();
+        final Call<ResponseWrapper> trackRequest = requestService.getForUrlWithParams(trackUrl, TRACK_PARAMS);
         final ResponseWrapper trackResponse = Client.request(trackRequest);
 
-        final String content = trackResponse.getContentOrThrow();
-        return youtubeTrack.setAndGetTrackInfo(youTubeUtility.getTrackInfo(content));
+        final String trackContent = trackResponse.getContentOrThrow();
+        final YouTubeTrackInfo trackInfo = youTubeUtility.getTrackInfo(trackContent, trackUrl);
+        return youtubeTrack.setAndGetTrackInfo(trackInfo);
     }
 
     @Override

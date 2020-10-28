@@ -14,6 +14,9 @@
   <a href="https://mvnrepository.com/artifact/io.sfrei/tracksearch"> 
     <img alt="Maven Central release" src="https://img.shields.io/maven-central/v/io.sfrei/tracksearch">
   </a>
+  <a href="https://github.com/s-frei/TrackSearch/actions"> 
+    <img alt="Functionality Test State" src="https://github.com/s-frei/TrackSearch/workflows/functionality-test/badge.svg">
+  </a>
   </p>
 </div>
 
@@ -39,7 +42,7 @@ There could be more added if there is interesting content offered to go for.
 #### Current features:
 
 - Search for keywords
-- Paging of results
+- Paging of track lists
 - Expose audio stream url
 - Interact with multiple clients asynchronous
 
@@ -53,13 +56,13 @@ Maven dependency available on *Maven Central*:
 <dependency>
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.6.1</version>
+    <version>0.6.2</version>
 </dependency>
 ```
 
 #### Example usage
 
-For more information check the interface docs.
+For more information check the related interface documentation.
 
 ```java
 //Client to search on all available sources asynchronous
@@ -73,9 +76,9 @@ TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keyword
 
 //Get the audio stream
 List<Track> tracks = tracksForSearch.getTracks();
-String streamUrl = tracks.get(any).getStreamUrl();
+String streamUrl = tracks.get(anyPos).getStreamUrl();
 
-//Get next tracks
+//Get next tracks page
 TrackList<Track> nextTracks = searchClient.getNext(tracksForSearch);
 ```
 
@@ -87,7 +90,7 @@ be abused for this, or it wasn't written in Java.
 
 ## Develop
 
-Run following command in the root directory.
+Fire up following in your shell. JDK 11 is required.
 
 #### Build
 
@@ -95,7 +98,19 @@ Run following command in the root directory.
 mvnw clean install
 ```
 
-For detailed tests activate the `detailed-client-test` maven profile.
+#### Test
+
+The *simple* test runs daily to get notified when something is not working.
+Test it on your own:
+
+```shell script
+mvnw test
+```
+
+For detailed test (about 120 tracks for each client):
+```shell script
+mvnw test -P detailed-client-test
+```
 
 ---
 

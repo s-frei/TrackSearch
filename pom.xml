@@ -6,7 +6,7 @@
 
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch-parent</artifactId>
-    <version>0.6.1</version>
+    <version>0.6.2</version>
     <packaging>pom</packaging>
 
     <name>TrackSearch Parent</name>

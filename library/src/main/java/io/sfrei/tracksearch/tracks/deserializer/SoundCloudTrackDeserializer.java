@@ -53,7 +53,7 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
                             .mimeType(mimeType)
                             .formatType(FormatType.Audio)
                             .audioQuality(audioQuality)
-                            .streamReady(false)
+                            .streamReady(true)
                             .protocol(protocol)
                             .url(formatUrl)
                             .build();

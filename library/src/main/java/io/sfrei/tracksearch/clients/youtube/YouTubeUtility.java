@@ -2,6 +2,7 @@ package io.sfrei.tracksearch.clients.youtube;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.sfrei.tracksearch.clients.setup.Client;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
@@ -15,6 +16,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,6 +47,9 @@ class YouTubeUtility {
                     + SLICE + "|" + SPLICE + "|" + REVERSE + "|" + SWAP +
                     ")+)"
     );
+    private static final Pattern EMBEDDED_PLAYER_SCRIPT_PATTERN = Pattern.compile("src=\"(/[a-zA-Z0-9/-_.]+base.js)\"");
+
+    // JSON Routes
     private static final String[] defaultRoute = {"contents", "twoColumnSearchResultsRenderer", "primaryContents",
             "sectionListRenderer", "contents"};
     private static final String[] continuationItemRenderer = {"continuationItemRenderer", "continuationEndpoint", "continuationCommand"};
@@ -122,7 +127,7 @@ class YouTubeUtility {
         return trackList;
     }
 
-    protected YouTubeTrackInfo getTrackInfo(final String json) {
+    protected YouTubeTrackInfo getTrackInfo(final String json, final String trackUrl) {
         try {
             final JsonElement jsonElement = JsonElement.read(MAPPER, json);
 
@@ -135,17 +140,15 @@ class YouTubeUtility {
 
             final JsonElement args = playerElement.get("args");
 
-            final String scriptUrl;
+            AtomicReference<String> scriptUrl = new AtomicReference<>(null);
             final JsonElement streamingData;
             if (playerElement.present() && args.present()) {
-                scriptUrl = playerElement.get("assets").getAsString("js");
+                scriptUrl.set(playerElement.get("assets").getAsString("js"));
                 final JsonElement playerResponseTextNode = args.get("player_response").reRead(MAPPER);
                 streamingData = playerResponseTextNode.get("streamingData");
             } else {
-                scriptUrl = null;
                 streamingData = jsonElement.getIndex(2).get("playerResponse", "streamingData");
             }
-
 
             final JsonElement formatsElement = streamingData.get("formats");
             final Stream<YouTubeTrackFormat> formats;
@@ -158,10 +161,22 @@ class YouTubeUtility {
             final Stream<JsonElement> adaptiveFormatsStream = streamingData.get("adaptiveFormats").arrayElements();
             final Stream<YouTubeTrackFormat> adaptiveFormats = getFormatsFromStream(adaptiveFormatsStream);
 
-            final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats)
-                    .collect(Collectors.toList());
+            final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats).collect(Collectors.toList());
 
-            return new YouTubeTrackInfo(trackFormats, scriptUrl);
+            if (trackFormats.stream().anyMatch(YouTubeTrackFormat::streamNotReady) && scriptUrl.get() == null) {
+                log.trace("Try to get player script trough embedded URL");
+                final String embeddedUrl = trackUrl.replace("youtube.com/", "youtube.com/embed/");
+                final String embeddedPageContent = Client.requestURL(embeddedUrl).getContent();
+                if (embeddedPageContent != null) {
+                    final Matcher matcher = EMBEDDED_PLAYER_SCRIPT_PATTERN.matcher(embeddedPageContent);
+                    if (matcher.find()) {
+                        log.debug("Found player script in embedded URL");
+                        scriptUrl.set(matcher.group(1));
+                    }
+                }
+            }
+
+            return new YouTubeTrackInfo(trackFormats, scriptUrl.get());
 
         } catch (JsonProcessingException e) {
             log.error("Error parsing Youtube info JSON: {}", e.getMessage());

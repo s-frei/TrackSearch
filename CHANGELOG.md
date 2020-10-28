@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.6.2
+-----
+
+**Feature:**
+- Fallback for youtube player script
+- Daily test runner to verify functionality
+
 0.6.1
 -----
 
