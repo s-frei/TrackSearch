@@ -89,7 +89,8 @@ public abstract class ClientTestImpl<T extends Track> extends Client implements 
                 log.info("MetaData for: {}", track.toString());
                 if (trackMetadata.getChannelName() == null ||
                         trackMetadata.getChannelUrl() == null ||
-                        trackMetadata.getStreamAmount() == null)
+                        trackMetadata.getStreamAmount() == null ||
+                        trackMetadata.getThumbNailUrl() == null)
                     log.warn("Any MetaData unresolved: {}", metaDataString);
 
                 log.debug("MetaData: {}", metaDataString);

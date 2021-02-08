@@ -11,6 +11,8 @@ import io.sfrei.tracksearch.utils.TimeUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
 
@@ -51,9 +53,17 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
         final String channelUrl = YouTubeClient.HOSTNAME.concat(channelUrlSuffix);
 
         final String streamAmountText = rootElement.get("viewCountText").getAsString("simpleText");
-        final Long streamAmount = streamAmountText != null ? Long.valueOf(ReplaceUtility.replaceNonDigits(streamAmountText)) : null;
+        final String streamAmountDigits = streamAmountText != null && !streamAmountText.isEmpty() ?
+                ReplaceUtility.replaceNonDigits(streamAmountText) : null;
+        final Long streamAmount = streamAmountDigits != null && !streamAmountDigits.isEmpty() ?
+                Long.parseLong(streamAmountDigits) : 0L;
 
-        final YouTubeTrackMetadata trackMetadata = new YouTubeTrackMetadata(channelName, channelUrl, streamAmount);
+        final Stream<JsonElement> thumbNailStream = rootElement.get("thumbnail", "thumbnails").elements();
+        final Optional<JsonElement> lastThumbnail = thumbNailStream.findFirst();
+        final String thumbNailUrl = lastThumbnail.map(thumbNail -> thumbNail.getAsString("url")).orElse(null);
+
+        final YouTubeTrackMetadata trackMetadata = new YouTubeTrackMetadata(channelName, channelUrl,
+                streamAmount, thumbNailUrl);
 
         return new YouTubeTrack(title, length, url, trackMetadata);
     }

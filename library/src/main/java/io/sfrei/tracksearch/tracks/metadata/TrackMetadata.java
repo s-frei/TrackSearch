@@ -23,4 +23,11 @@ public interface TrackMetadata {
      */
     Long getStreamAmount();
 
+    /**
+     * Get the URL of the media thumbnail (small).
+     *
+     * @return the thumbnail URL.
+     */
+    String getThumbNailUrl();
+
 }

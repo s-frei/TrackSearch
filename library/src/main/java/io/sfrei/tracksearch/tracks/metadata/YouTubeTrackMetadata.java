@@ -13,4 +13,6 @@ public class YouTubeTrackMetadata implements TrackMetadata {
 
     Long streamAmount;
 
+    String thumbNailUrl;
+
 }

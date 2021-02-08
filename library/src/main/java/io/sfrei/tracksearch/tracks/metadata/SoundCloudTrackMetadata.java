@@ -13,4 +13,6 @@ public class SoundCloudTrackMetadata implements TrackMetadata {
 
     Long streamAmount;
 
+    String thumbNailUrl;
+
 }
