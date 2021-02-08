@@ -95,7 +95,7 @@ Fire up following in your shell. JDK 11 is required.
 #### Build
 
 ```shell script
-mvnw clean install
+./mvnw clean install
 ```
 
 #### Test
@@ -104,12 +104,12 @@ The *simple* test runs daily to get notified when something is not working.
 Test it on your own:
 
 ```shell script
-mvnw test
+./mvnw test
 ```
 
 For detailed test (about 120 tracks for each client):
 ```shell script
-mvnw test -P detailed-client-test
+./mvnw test -P detailed-client-test
 ```
 
 ---
