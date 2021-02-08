@@ -39,14 +39,15 @@ music) I decided to add following providers first for now:
 
 There could be more added if there is interesting content offered to go for.
 
-#### Current features:
+#### Current features :mag_right:
 
 - Search for keywords
 - Paging of track lists
 - Expose audio stream url
 - Interact with multiple clients asynchronous
+- Get track metadata like: length, channel, views, thumbnail, ...
 
-## How to use it ?
+## How to use it ? :books:
 
 #### Dependency
 
@@ -87,8 +88,7 @@ TrackList<Track> nextTracks = searchClient.getNext(tracksForSearch);
 I haven't found anything which is capable of doing this kind of stuff, except it offered something similar and could
 be abused for this, or it wasn't written in Java.
 
-
-## Develop
+## Develop :hammer:
 
 Fire up following in your shell. JDK 11 is required.
 
