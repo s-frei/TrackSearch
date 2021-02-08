@@ -1,6 +1,7 @@
 package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.setup.TrackSource;
+import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
 
 public interface Track {
 
@@ -36,12 +37,21 @@ public interface Track {
 
     /**
      * Get the audio stream URL in the highest possible quality.
-     * @return the audio stream URL, null when exception occured.
+     *
+     * @return the audio stream URL, null when exception occurred.
      */
     String getStreamUrl();
 
     /**
+     * Get metadata like, channel, views and so on.
+     *
+     * @return the object containing the track metadata.
+     */
+    TrackMetadata getTrackMetadata();
+
+    /**
      * Check if this track equals another using the URL.
+     *
      * @param o the other track object.
      * @return if this track equals another.
      */
