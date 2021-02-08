@@ -4,6 +4,8 @@ import io.sfrei.tracksearch.clients.setup.Client;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 
@@ -38,7 +40,10 @@ public abstract class ClientTestImpl<T extends Track> extends Client implements 
     @Test
     public void tracksFoSearch() throws TrackSearchException {
         log.info("Search for {}", Arrays.toString(searchKeys.toArray()));
+        final TestLogger testLogger = new TestLogger();
         for (String key : searchKeys) {
+            testLogger.logBefore();
+
             log.info("Search for: {}", key);
             TrackList<T> tracksForSearch = searchClient.getTracksForSearch(key);
             log.info("Found tracks: {}", tracksForSearch.getTracks().size());
@@ -58,7 +63,10 @@ public abstract class ClientTestImpl<T extends Track> extends Client implements 
     @Order(3)
     @Test
     public void getNextTracks() throws TrackSearchException {
+        final TestLogger testLogger = new TestLogger();
         for (TrackList<T> trackList : tracksForSearch) {
+            testLogger.logBefore();
+
             log.info("Next for: {}", trackList.getQueryParam());
             TrackList<T> nextTracksForSearch = searchClient.getNext(trackList);
             log.info("Found tracks: {}", nextTracksForSearch.getTracks().size());
@@ -67,13 +75,39 @@ public abstract class ClientTestImpl<T extends Track> extends Client implements 
     }
 
     @Override
+    @Order(3)
+    @Test
+    public void checkMetadata() {
+        final TestLogger testLogger = new TestLogger();
+        for (TrackList<T> trackList : tracksForSearch) {
+            for (T track : trackList.getTracks()) {
+                testLogger.logBefore();
+
+                final TrackMetadata trackMetadata = track.getTrackMetadata();
+                final String metaDataString = trackMetadata.toString();
+
+                log.info("MetaData for: {}", track.toString());
+                if (trackMetadata.getChannelName() == null ||
+                        trackMetadata.getChannelUrl() == null ||
+                        trackMetadata.getStreamAmount() == null ||
+                        trackMetadata.getThumbNailUrl() == null)
+                    log.warn("Any MetaData unresolved: {}", metaDataString);
+
+                log.debug("MetaData: {}", metaDataString);
+            }
+        }
+    }
+
+    @Override
     @Order(4)
     @Test
     public void getStreamUrl() throws IOException {
-        AtomicInteger pos = new AtomicInteger(0);
+        final TestLogger testLogger = new TestLogger();
         for (TrackList<T> trackList : tracksForSearch) {
             for (T track : trackList.getTracks()) {
-                log.info("{} - Trying to get stream url for: {}", pos.getAndIncrement(), track.toString());
+                testLogger.logBefore();
+
+                log.info("Trying to get stream url for: {}", track.toString());
                 String streamUrl = track.getStreamUrl();
                 assertNotNull(streamUrl);
                 log.info("URL found: {}", streamUrl);
@@ -83,4 +117,19 @@ public abstract class ClientTestImpl<T extends Track> extends Client implements 
             }
         }
     }
+
+    /**
+     * Improve readability, especially in GitHub actions
+     */
+    @NoArgsConstructor
+    private static class TestLogger {
+
+        AtomicInteger pos = new AtomicInteger(0);
+
+        protected void logBefore() {
+            log.info(" - {} -", pos.getAndIncrement());
+        }
+
+    }
+
 }

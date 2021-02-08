@@ -6,7 +6,7 @@
 
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch-parent</artifactId>
-    <version>0.6.2</version>
+    <version>0.6.3</version>
     <packaging>pom</packaging>
 
     <name>TrackSearch Parent</name>
@@ -46,7 +46,7 @@
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
 
         <!-- shared -->
-        <lombok.version>1.18.16</lombok.version>
+        <lombok.version>1.18.18</lombok.version>
     </properties>
 
     <profiles>

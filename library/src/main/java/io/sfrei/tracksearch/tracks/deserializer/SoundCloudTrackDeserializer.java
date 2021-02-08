@@ -7,6 +7,7 @@ import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
+import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
 import io.sfrei.tracksearch.utils.TimeUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 
@@ -28,6 +29,8 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
     @Override
     public SoundCloudTrack deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
 
+        // Track
+
         final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
         final String title = rootElement.getAsString("title");
         final Long length = TimeUtility.getSecondsForMilliseconds(rootElement.getLongFor("duration"));
@@ -36,7 +39,24 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
         if (title == null || length == null || url == null)
             return null;
 
-        final SoundCloudTrack soundcloudTrack = new SoundCloudTrack(title, length, url);
+        // Metadata
+
+        final JsonElement owner = rootElement.get("user");
+
+        final String channelName = owner.getAsString("username");
+
+        final String channelUrl = owner.getAsString("permalink_url");
+
+        final Long streamAmount = rootElement.getLongFor("playback_count");
+
+        final String thumbNailUrl = rootElement.getAsString("artwork_url");
+
+        final SoundCloudTrackMetadata trackMetadata = new SoundCloudTrackMetadata(channelName, channelUrl,
+                streamAmount, thumbNailUrl);
+
+        final SoundCloudTrack soundcloudTrack = new SoundCloudTrack(title, length, url, trackMetadata);
+
+        // Formats
 
         final List<SoundCloudTrackFormat> trackFormats = rootElement.get("media", "transcodings")
                 .arrayElements()

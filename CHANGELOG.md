@@ -1,10 +1,19 @@
 Changelog
 =========
 
+0.6.3
+-----
+
+**Feature:**
+
+- Additional metadata resolving trough new object on the track layer
+- Maven caching to test runner
+
 0.6.2
 -----
 
 **Feature:**
+
 - Fallback for youtube player script
 - Daily test runner to verify functionality
 

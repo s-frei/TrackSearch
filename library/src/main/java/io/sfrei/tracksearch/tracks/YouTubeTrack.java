@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.tracks.deserializer.YouTubeTrackDeserializer;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
+import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,11 +18,15 @@ public class YouTubeTrack extends BaseTrack implements Track {
     @Setter
     private YouTubeTrackInfo trackInfo;
 
+    @Getter
+    private final YouTubeTrackMetadata trackMetadata;
+
     @Setter
     private Function<YouTubeTrack, String> streamUrlProvider;
 
-    public YouTubeTrack(String title, Long length, String url) {
+    public YouTubeTrack(String title, Long length, String url, YouTubeTrackMetadata trackMetadata) {
         super(TrackSource.Youtube, title, length, url);
+        this.trackMetadata = trackMetadata;
     }
 
     public YouTubeTrackInfo setAndGetTrackInfo(YouTubeTrackInfo trackInfo) {
@@ -33,4 +38,5 @@ public class YouTubeTrack extends BaseTrack implements Track {
     public String getStreamUrl() {
         return streamUrlProvider.apply(this);
     }
+
 }

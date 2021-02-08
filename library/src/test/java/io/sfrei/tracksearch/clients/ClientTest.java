@@ -12,6 +12,8 @@ public interface ClientTest {
 
     void trackListGotPagingValues();
 
+    void checkMetadata();
+
     void getStreamUrl() throws IOException;
 
 }
