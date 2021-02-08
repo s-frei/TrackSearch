@@ -16,4 +16,8 @@ public class ReplaceUtility {
                 .trim();
     }
 
+    public static String replaceNonDigits(final String chars) {
+        return chars.replaceAll("[^\\d.]", "");
+    }
+
 }
