@@ -88,12 +88,13 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
     public String getStreamUrl(@NonNull final SoundCloudTrack track) throws TrackSearchException {
         checkClientIDAvailableOrThrow();
 
-        final Optional<String> progressiveStreamUrl = getProgressiveStreamUrl(track.getUrl());
-        if (progressiveStreamUrl.isEmpty())
+        final ResponseWrapper trackResponse = getForUrlWitClientId(track.getUrl(), true);
+        final Optional<String> streamUrl = soundCloudUtility.getUrlForStream(trackResponse.getContentOrThrow());
+        if (streamUrl.isEmpty())
             throw new TrackSearchException("Progressive stream URL not found");
 
-        final ResponseWrapper response = getForUrlWitClientId(progressiveStreamUrl.get(), true);
-        return soundCloudUtility.getStreamUrl(response.getContentOrThrow());
+        final ResponseWrapper streamUrlResponse = getForUrlWitClientId(streamUrl.get(), true);
+        return soundCloudUtility.extractStreamUrl(streamUrlResponse.getContentOrThrow());
     }
 
     private ResponseWrapper getSearch(final String search, final boolean firstRequest, final Map<String, String> pagingParams) {
@@ -105,13 +106,6 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
         }
 
         return getSearch(search, false, pagingParams);
-    }
-
-    private Optional<String> getProgressiveStreamUrl(final String url) throws TrackSearchException {
-        final ResponseWrapper response = getForUrlWitClientId(url, true);
-        if (!response.hasContent())
-            return Optional.empty();
-        return soundCloudUtility.getProgressiveStreamUrl(response.getContentOrThrow());
     }
 
     private ResponseWrapper getForUrlWitClientId(final String url, final boolean firstRequest) {

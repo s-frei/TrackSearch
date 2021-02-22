@@ -28,9 +28,13 @@ class SoundCloudUtility {
     private static final String SOUNDCLOUD_CLIENT_ID_REGEX = SOUNDCLOUD_CLIENT_ID_PREFIX + "\"[a-zA-Z0-9]+\"";
     private static final Pattern SOUNDCLOUD_CLIENT_ID_PATTERN = Pattern.compile(SOUNDCLOUD_CLIENT_ID_REGEX);
 
-    private static final String SOUNDCLOUD_STREAM_PREFIX = "\"url\":";
-    private static final String SOUNDCLOUD_STREAM_REGEX = SOUNDCLOUD_STREAM_PREFIX + "\"https://api-v2.soundcloud.com/media/[a-zA-Z0-9:/-]+/stream/progressive\"";
-    private static final Pattern SOUNDCLOUD_STREAM_URL_PATTERN = Pattern.compile(SOUNDCLOUD_STREAM_REGEX);
+    private static final String STREAM_URL_MAIM_PART = "https://api-v2.soundcloud.com/media/[a-zA-Z0-9:/-]+";
+    private static final String PROGRESSIVE_SOUNDCLOUD_STREAM_REGEX = STREAM_URL_MAIM_PART + "/stream/progressive"; // the stream to go for
+    private static final String ALTERNATIVE_PROGRESSIVE_SOUNDCLOUD_STREAM_REGEX = STREAM_URL_MAIM_PART + "/preview/progressive"; // non SC Go(+) membership
+    private static final String ALTERNATIVE_SOUNDCLOUD_STREAM_REGEX = STREAM_URL_MAIM_PART + "/stream/hls"; // .m3u8 - hls stream
+    private static final Pattern PROGRESSIVE_SOUNDCLOUD_STREAM_URL_PATTERN = Pattern.compile(PROGRESSIVE_SOUNDCLOUD_STREAM_REGEX);
+    private static final Pattern ALTERNATIVE_PROGRESSIVE_SOUNDCLOUD_STREAM_URL_PATTERN = Pattern.compile(ALTERNATIVE_PROGRESSIVE_SOUNDCLOUD_STREAM_REGEX);
+    private static final Pattern ALTERNATIVE_SOUNDCLOUD_STREAM_URL_PATTERN = Pattern.compile(ALTERNATIVE_SOUNDCLOUD_STREAM_REGEX);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -87,23 +91,30 @@ class SoundCloudUtility {
         return trackList;
     }
 
-    protected Optional<String> getProgressiveStreamUrl(final String html) {
-        final Matcher streamUrlMatcher = SOUNDCLOUD_STREAM_URL_PATTERN.matcher(html);
-        if (streamUrlMatcher.find()) {
-            final String progressiveStreamUrl = streamUrlMatcher.group()
-                    .replace(SOUNDCLOUD_STREAM_PREFIX, "")
-                    .replaceAll("\"", "");
+    protected Optional<String> getUrlForStream(final String html) {
+        final Matcher progressiveStreamUrlMatcher = PROGRESSIVE_SOUNDCLOUD_STREAM_URL_PATTERN.matcher(html);
+        if (progressiveStreamUrlMatcher.find()) {
+            final String progressiveStreamUrl = progressiveStreamUrlMatcher.group();
             log.trace("ProgressiveStreamURL was found: {}", progressiveStreamUrl);
             return Optional.of(progressiveStreamUrl);
+        }
+        final Matcher alternativeProgressiveStreamUrlMatcher = ALTERNATIVE_PROGRESSIVE_SOUNDCLOUD_STREAM_URL_PATTERN.matcher(html);
+        if (alternativeProgressiveStreamUrlMatcher.find()) {
+            final String alternativeProgressiveStreamUrl = alternativeProgressiveStreamUrlMatcher.group();
+            log.trace("Alternative ProgressiveStreamURL was found: {}", alternativeProgressiveStreamUrl);
+            return Optional.of(alternativeProgressiveStreamUrl);
+        }
+        final Matcher alternativeStreamUrlMatcher = ALTERNATIVE_SOUNDCLOUD_STREAM_URL_PATTERN.matcher(html);
+        if (alternativeStreamUrlMatcher.find()) {
+            final String alternativeStreamUrl = alternativeStreamUrlMatcher.group();
+            log.trace("Alternative StreamURL was found: {}", alternativeStreamUrl);
+            return Optional.of(alternativeStreamUrl);
         }
         return Optional.empty();
     }
 
-    protected String getStreamUrl(final String body) {
-        return body
-                .replace(SOUNDCLOUD_STREAM_PREFIX, "")
-                .replace("{\"", "")
-                .replace("\"}", "");
+    protected String extractStreamUrl(final String body) {
+        return body.replace("\"url\":", "").replaceAll("[{}\"]", "");
     }
 
 }
