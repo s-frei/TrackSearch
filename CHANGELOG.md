@@ -4,7 +4,9 @@ Changelog
 0.6.4 - unreleased
 ------------------
 
-Nothing changed yet
+**Bugfix:**
+
+- Fix soundcloud stream resolving (.m3u8 fallback)
 
 0.6.3
 -----
