@@ -96,8 +96,8 @@ Fire up following in your shell:
 
 #### Build
 
-```shell script
-./mvnw clean install
+```sh
+$ ./mvnw clean install
 ```
 
 #### Test
@@ -105,13 +105,14 @@ Fire up following in your shell:
 The *simple* [test runs daily](https://github.com/s-frei/TrackSearch/actions) to get notified when something is not
 working. Test it on your own:
 
-```shell script
-./mvnw test
+```sh
+$ ./mvnw test
 ```
 
 For detailed test (about 120 tracks for each client):
-```shell script
-./mvnw test -P detailed-client-test
+
+```sh
+$ ./mvnw test -P detailed-client-test
 ```
 
 ---
