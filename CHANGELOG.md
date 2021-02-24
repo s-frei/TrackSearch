@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.6.4
+-----
+
+**Bugfix:**
+
+- Fix soundcloud stream resolving (.m3u8 fallback)
+- Fix YouTube signature decryption
+
 0.6.3
 -----
 

@@ -30,10 +30,10 @@ class YouTubeUtility {
     private static final String JS_SPLICE = ".splice";
     private static final String JS_SLICE = ".slice";
     private static final String JS_REVERSE = ".reverse";
-    private static final String FUNCTION_CALL = "([a-zA-Z]+.([a-zA-Z0-9]+)\\(a,([0-9]+)\\);)";
+    private static final String FUNCTION_CALL = "([a-zA-Z]+.([a-zA-Z0-9]+)\\(a,([0-9]+)\\))";
     private static final Pattern FUNCTION_CALL_PATTERN = Pattern.compile(FUNCTION_CALL);
     private static final Pattern OBFUSCATE_FUNCTIONS_CALLS_PATTERN = Pattern.compile(
-            "function\\(a\\)\\{a=a\\.split\\(\"\"\\);" + FUNCTION_CALL + "+"
+            "function\\(a\\)\\{a=a.split\\(\"\"\\);([a-zA-Z1-9 =,-\\[\\]\"()]+);"
     );
     private static final String VAR_NAME = "[a-zA-Z0-9]+";
     private static final String FUNCTION_END = "}*,?\\n?";
@@ -264,20 +264,19 @@ class YouTubeUtility {
         if (!obfuscateFunctionsCallsMatcher.find())
             throw new YouTubeException("Was not able to find obfuscate functions calls");
 
-        final Matcher obfuscateFunctionCallsMatcher = FUNCTION_CALL_PATTERN.matcher(obfuscateFunctionsCallsMatcher.group());
+        final Matcher obfuscateFunctionCallMatcher = FUNCTION_CALL_PATTERN.matcher(obfuscateFunctionsCallsMatcher.group(1));
 
         final SignatureResolver signatureResolver = new SignatureResolver();
-        while (obfuscateFunctionCallsMatcher.find()) {
-            final String obfuscateFunctionName = obfuscateFunctionCallsMatcher.group(2).trim();
-            final Integer obfuscateFunctionParameter = Integer.parseInt(obfuscateFunctionCallsMatcher.group(3));
 
+        while (obfuscateFunctionCallMatcher.find()) {
+            final String obfuscateFunctionName = obfuscateFunctionCallMatcher.group(2).trim();
             final SignaturePart.SignatureOccurrence signatureOccurrence = obfuscateFunctionDefinitions.get(obfuscateFunctionName);
 
             if (signatureOccurrence == null)
                 continue;
 
-            final SignaturePart signaturePart = new SignaturePart(obfuscateFunctionName, signatureOccurrence, obfuscateFunctionParameter);
-            signatureResolver.addSignaturePart(signaturePart);
+            final Integer obfuscateFunctionParameter = Integer.parseInt(obfuscateFunctionCallMatcher.group(3));
+            signatureResolver.addSignaturePart(obfuscateFunctionName, signatureOccurrence, obfuscateFunctionParameter);
         }
 
         return signatureResolver.resolveSignature(youtubeTrackFormat.getSigValue());
@@ -303,8 +302,8 @@ class YouTubeUtility {
             this.signatureParts = new ArrayList<>();
         }
 
-        private void addSignaturePart(final SignaturePart signaturePart) {
-            signatureParts.add(signaturePart);
+        private void addSignaturePart(String functionName, SignaturePart.SignatureOccurrence occurrence, Integer parameter) {
+            this.signatureParts.add(new SignaturePart(functionName, occurrence, parameter));
         }
 
         private String resolveSignature(final String signatureValue) {

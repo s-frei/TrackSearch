@@ -24,10 +24,10 @@
 
 TrackSearch is for searching track metadata on different sources, like Youtube and SoundCloud for now and to expose the
 URL of the underlying audio stream in the highest resolution. That offers the possibility to hand them over to other
-programs which are able to process them, like [VLC](https://www.videolan.org/vlc/), or Firefox which can display the 
+programs which are able to process them, like [VLC](https://www.videolan.org/vlc/), or Firefox which can display the
 audio directly for example.
 
-**Note:** TrackSearch isn't using any API-Key, it uses the public Rest-API.
+**Note:** TrackSearch isn't using any API-Key, it uses the public API (like your browser).
 
 ## Supported sources
 
@@ -49,19 +49,19 @@ There could be more added if there is interesting content offered to go for.
 
 ## How to use it ? :books:
 
-#### Dependency
+### Dependency
 
-Maven dependency available on *Maven Central*:
+Maven dependency available on [Maven Central](https://search.maven.org/artifact/io.sfrei/tracksearch):
 
 ```xml
 <dependency>
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.6.3</version>
+    <version>0.6.4</version>
 </dependency>
 ```
 
-#### Example usage
+### Getting started
 
 For more information check the related interface documentation.
 
@@ -80,36 +80,39 @@ List<Track> tracks = tracksForSearch.getTracks();
 String streamUrl = tracks.get(anyPos).getStreamUrl();
 
 //Get next tracks page
-TrackList<Track> nextTracks = searchClient.getNext(tracksForSearch);
+TrackList<Track> nextTracks=searchClient.getNext(tracksForSearch);
 ```
 
 ## Why is this done ?
 
-I haven't found anything which is capable of doing this kind of stuff, except it offered something similar and could
-be abused for this, or it wasn't written in Java.
+I haven't found anything which is capable of doing this kind of stuff, except it offered something similar and could be
+abused for this, or it wasn't written in Java.
 
 ## Develop :hammer:
 
-Fire up following in your shell. JDK 11 is required.
+**Note:** **JDK 11** is required!
+
+Fire up following in your shell:
 
 #### Build
 
-```shell script
-./mvnw clean install
+```sh
+$ ./mvnw clean install
 ```
 
 #### Test
 
-The *simple* test runs daily to get notified when something is not working.
-Test it on your own:
+The *simple* [test runs daily](https://github.com/s-frei/TrackSearch/actions) to get notified when something is not
+working. Test it on your own:
 
-```shell script
-./mvnw test
+```sh
+$ ./mvnw test
 ```
 
 For detailed test (about 120 tracks for each client):
-```shell script
-./mvnw test -P detailed-client-test
+
+```sh
+$ ./mvnw test -P detailed-client-test
 ```
 
 ---
