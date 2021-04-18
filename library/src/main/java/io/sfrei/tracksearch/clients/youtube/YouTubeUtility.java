@@ -66,7 +66,7 @@ class YouTubeUtility {
         try {
             responseElement = JsonElement.read(MAPPER, json).getIndex(1).get("response");
         } catch (JsonProcessingException e) {
-            throw new YouTubeException("GetYouTubeTubeTracks - " + e.getMessage());
+            throw new YouTubeException("Error parsing SoundCloudTracks JSON", e);
         }
 
         final JsonElement defaultElement = responseElement
@@ -132,10 +132,10 @@ class YouTubeUtility {
             final JsonElement jsonElement = JsonElement.read(MAPPER, json);
 
             final JsonElement playerElement;
-            if (!jsonElement.isArray()) {
-                playerElement = jsonElement.firstElementFor("player");
-            } else {
+            if (jsonElement.isArray()) {
                 playerElement = jsonElement.getIndex(2).get("player");
+            } else {
+                playerElement = jsonElement.firstElementFor("player");
             }
 
             final JsonElement args = playerElement.get("args");
@@ -323,6 +323,8 @@ class YouTubeUtility {
                         char swapChar = signature.charAt(0);
                         signature.setCharAt(0, signature.charAt(charPos));
                         signature.setCharAt(charPos, swapChar);
+                        break;
+                    default:
                         break;
                 }
             }

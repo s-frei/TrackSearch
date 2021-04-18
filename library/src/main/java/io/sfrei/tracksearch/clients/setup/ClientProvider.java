@@ -3,13 +3,14 @@ package io.sfrei.tracksearch.clients.setup;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 
 @Slf4j
-class ClientProvider {
+abstract class ClientProvider {
 
     protected static final OkHttpClient okHttpClient;
 
@@ -34,6 +35,7 @@ class ClientProvider {
     }
 
     private static final class CustomInterceptor implements Interceptor {
+        @NotNull
         @Override
         public Response intercept(Interceptor.Chain chain) throws IOException {
 

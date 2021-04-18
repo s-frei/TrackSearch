@@ -119,14 +119,14 @@ public class MultiSearchClient implements MultiTrackSearchClient {
         try {
             trackLists = executorService.invokeAll(calls);
         } catch (InterruptedException e) {
-            throw new TrackSearchException(e.getMessage());
+            throw new TrackSearchException(e);
         }
 
         for (final Future<BaseTrackList<Track>> trackList : trackLists) {
             try {
                 resultTrackList.mergeIn(trackList.get());
             } catch (InterruptedException | ExecutionException e) {
-                throw new TrackSearchException("An error occurred acquiring a tracklist");
+                throw new TrackSearchException("An error occurred acquiring a tracklist", e);
             }
         }
 

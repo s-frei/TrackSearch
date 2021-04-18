@@ -4,15 +4,17 @@ import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
+@UtilityClass
 public class TrackFormatUtility {
 
-    public static YouTubeTrackFormat getBestTrackFormat(final YouTubeTrack youtubeTrack, final boolean includeVideo)
+    public YouTubeTrackFormat getBestTrackFormat(final YouTubeTrack youtubeTrack, final boolean includeVideo)
             throws TrackSearchException {
 
         final AtomicReference<YouTubeTrackFormat> bestFormat = new AtomicReference<>(null);
@@ -41,11 +43,9 @@ public class TrackFormatUtility {
 
             final boolean sameQuality = YoutubeAudioQualities.audioQualitySame(currentAudioQuality, anotherAudioQuality);
 
-            if (!sameQuality) {
-                if (YoutubeAudioQualities.audioQualityBetter(currentAudioQuality, anotherAudioQuality)) {
-                    bestFormat.set(trackFormat);
-                    continue;
-                }
+            if (!sameQuality && YoutubeAudioQualities.audioQualityBetter(currentAudioQuality, anotherAudioQuality)) {
+                bestFormat.set(trackFormat);
+                continue;
             }
 
             if (trackFormat.getAudioSampleRate() == null)

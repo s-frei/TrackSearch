@@ -2,6 +2,8 @@ package io.sfrei.tracksearch.tracks.metadata;
 
 import lombok.Getter;
 
+import java.util.Locale;
+
 @Getter
 public enum FormatType {
     Unknown("unknown"),
@@ -15,7 +17,7 @@ public enum FormatType {
     }
 
     public static FormatType getFormatType(String mimeTypeDef) {
-        String typeDef = mimeTypeDef.toLowerCase();
+        String typeDef = mimeTypeDef.toLowerCase(Locale.ROOT);
         if (typeDef.contains(Audio.getTypeDef())) {
             return Audio;
         } else if (typeDef.contains(Video.getTypeDef())) {

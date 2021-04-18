@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class JsonUtility {
+public abstract class JsonUtility {
 
     public static String getAsString(final JsonNode node, final String value) {
-        return node != null ? getAsText(node.get(value)) : null;
+        return node == null ? null : getAsText(node.get(value));
     }
 
     public static String getAsText(final JsonNode node) {
@@ -15,11 +15,11 @@ public class JsonUtility {
     }
 
     public static Long getAsLong(final JsonNode node, final String value) {
-        return node != null ? getAsLong(node.get(value)) : null;
+        return node == null ? null : getAsLong(node.get(value));
     }
 
     public static Long getAsLong(final JsonNode node) {
-        return node != null ? node.asLong() : null;
+        return node == null ? null : node.asLong();
     }
 
     public static JsonNode get(final JsonNode node, final String... route) {
@@ -38,7 +38,7 @@ public class JsonUtility {
     }
 
     public static JsonNode get(final JsonNode node, final int index) {
-        return node != null ? node.get(index) : null;
+        return node == null ? null : node.get(index);
     }
 
 }

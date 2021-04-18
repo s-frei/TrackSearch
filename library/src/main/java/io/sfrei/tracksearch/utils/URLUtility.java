@@ -1,16 +1,19 @@
 package io.sfrei.tracksearch.utils;
 
+import lombok.experimental.UtilityClass;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+@UtilityClass
 public class URLUtility {
 
-    private static final String URL_SPLIT_DELIMITER = "&";
+    private final String URL_SPLIT_DELIMITER = "&";
 
-    public static Map<String, String> splitAndDecodeUrl(final String url) {
+    public Map<String, String> splitAndDecodeUrl(final String url) {
         final Map<String, String> params = new HashMap<>();
         try {
             final String[] splitUrl = url.split(URL_SPLIT_DELIMITER);
@@ -24,12 +27,13 @@ public class URLUtility {
         return params;
     }
 
-    public static String appendParam(final String url, final String param, final String value) {
+    public String appendParam(final String url, final String param, final String value) {
         final char delimiter;
-        if (!url.contains("?"))
-            delimiter = '?';
-        else
+        if (url.contains("?"))
             delimiter = '&';
+        else
+            delimiter = '?';
+
         return url.concat(delimiter + param + "=" + value);
     }
 

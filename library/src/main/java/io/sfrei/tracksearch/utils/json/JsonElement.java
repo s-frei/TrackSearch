@@ -75,7 +75,7 @@ public class JsonElement extends JsonUtility {
     }
 
     public JsonElement orElseGet(final Supplier<JsonElement> supplier) {
-        return node != null ? new JsonElement(node) : supplier.get();
+        return node == null ? supplier.get() : new JsonElement(node);
     }
 
     public JsonElement reRead(final ObjectMapper mapper) throws JsonProcessingException {
