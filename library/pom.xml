@@ -23,7 +23,7 @@
         <jackson-databind.version>2.12.3</jackson-databind.version>
         <jsoup.version>1.13.1</jsoup.version>
         <logback-classic.version>1.2.3</logback-classic.version>
-        <junit-jupiter.version>5.7.1</junit-jupiter.version>
+        <junit-jupiter.version>5.7.2</junit-jupiter.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     </properties>
 
