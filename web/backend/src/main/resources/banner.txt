@@ -1,0 +1,15 @@
+${AnsiColor.BRIGHT_YELLOW}d888888b d8888b.  .d8b.   .o88b. db   dD .d8888. d88888b  .d8b.  d8888b.  .o88b. db   db
+${AnsiColor.BRIGHT_YELLOW}`~~88~~' 88  `8D d8' `8b d8P  Y8 88 ,8P' 88'  YP 88'     d8' `8b 88  `8D d8P  Y8 88   88
+${AnsiColor.BRIGHT_YELLOW}   88    88oobY' 88ooo88 8P      88,8P   `8bo.   88ooooo 88ooo88 88oobY' 8P      88ooo88
+${AnsiColor.BRIGHT_YELLOW}   88    88`8b   88~~~88 8b      88`8b     `Y8b. 88~~~~~ 88~~~88 88`8b   8b      88~~~88
+${AnsiColor.BRIGHT_YELLOW}   88    88 `88. 88   88 Y8b  d8 88 `88. db   8D 88.     88   88 88 `88. Y8b  d8 88   88
+${AnsiColor.BRIGHT_YELLOW}   YP    88   YD YP   YP  `Y88P' YP   YD `8888Y' Y88888P YP   YP 88   YD  `Y88P' YP   YP
+${AnsiStyle.NORMAL}
+${AnsiColor.BRIGHT_CYAN}SpringBoot version: ${AnsiStyle.FAINT}${AnsiColor.BRIGHT_GREEN}${spring-boot.version}${AnsiStyle.NORMAL}
+${AnsiColor.RED}----------------------------------------------------------------------------------------
+${AnsiColor.BRIGHT_CYAN}Build by: ${AnsiStyle.BOLD}${AnsiColor.BRIGHT_YELLOW}${info.git_build_user}${AnsiStyle.NORMAL}
+${AnsiColor.BRIGHT_CYAN}Version: ${AnsiStyle.BOLD}${AnsiColor.BRIGHT_YELLOW}${info.git_version}${AnsiStyle.NORMAL}
+${AnsiColor.BRIGHT_CYAN}Commit: ${AnsiStyle.BOLD}${AnsiColor.BRIGHT_YELLOW}${info.git_commit}${AnsiStyle.NORMAL}
+${AnsiColor.CYAN}Repo: https://github.com/s-frei/TrackSearch${AnsiStyle.NORMAL}
+${AnsiColor.RED}----------------------------------------------------------------------------------------
+${AnsiColor.WHITE}

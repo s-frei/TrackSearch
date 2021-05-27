@@ -1,0 +1,19 @@
+server:
+  port: 8040
+
+info:
+  git_build_user: '@git.build.user.name@'
+  git_version: '@git.build.version@'
+  git_commit: '@git.commit.id@'
+  git_commit_short: '@git.commit.id.abbrev@'
+
+springdoc:
+  swagger-ui:
+    path: /swagger
+  cache:
+    disabled: true
+
+logging:
+  level:
+    io.sfrei: INFO
+    org.springframework.boot.availability: WARN
