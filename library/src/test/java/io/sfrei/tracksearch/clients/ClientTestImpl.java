@@ -30,7 +30,7 @@ public abstract class ClientTestImpl<T extends Track> extends Client implements 
 
     public ClientTestImpl(TrackSearchClient<T> trackSearchClient, List<String> searchKeys) {
         searchClient = trackSearchClient;
-        log.debug("Initialized {}", searchClient.getClass().getSimpleName());
+        log.debug("Initialized test suite for: {}", searchClient.getClass().getSimpleName());
         this.searchKeys = searchKeys;
         tracksForSearch = new ArrayList<>();
     }
@@ -86,7 +86,7 @@ public abstract class ClientTestImpl<T extends Track> extends Client implements 
                 final TrackMetadata trackMetadata = track.getTrackMetadata();
                 final String metaDataString = trackMetadata.toString();
 
-                log.info("MetaData for: {}", track.toString());
+                log.info("MetaData for: {}", track);
                 if (trackMetadata.getChannelName() == null ||
                         trackMetadata.getChannelUrl() == null ||
                         trackMetadata.getStreamAmount() == null ||
@@ -124,10 +124,10 @@ public abstract class ClientTestImpl<T extends Track> extends Client implements 
     @NoArgsConstructor
     private static class TestLogger {
 
-        AtomicInteger pos = new AtomicInteger(0);
+        private final AtomicInteger pos = new AtomicInteger(1);
 
         protected void logBefore() {
-            log.info(" - {} -", pos.getAndIncrement());
+            log.info("======= {} =======", String.format("%03d", pos.getAndIncrement()));
         }
 
     }

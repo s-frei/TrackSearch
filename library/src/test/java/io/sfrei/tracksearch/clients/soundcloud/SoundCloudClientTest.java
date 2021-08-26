@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Tag;
 
 import java.util.Collections;
 
-import static io.sfrei.tracksearch.clients.ClientTestConstants.SEARCH_KEY;
+import static io.sfrei.tracksearch.clients.ClientTestConstants.DEFAULT_SEARCH_KEY;
 
 @Tag("ClientTest")
 public class SoundCloudClientTest extends ClientTestImpl<SoundCloudTrack> {
 
     public SoundCloudClientTest() {
-        super(new SoundCloudClient(), Collections.singletonList(SEARCH_KEY));
+        super(new SoundCloudClient(), Collections.singletonList(DEFAULT_SEARCH_KEY));
     }
 
 }
