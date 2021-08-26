@@ -10,7 +10,7 @@ import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
-import io.sfrei.tracksearch.utils.ScriptCache;
+import io.sfrei.tracksearch.utils.CacheMap;
 import io.sfrei.tracksearch.utils.TrackFormatUtility;
 import io.sfrei.tracksearch.utils.TrackListHelper;
 import io.sfrei.tracksearch.utils.URLUtility;
@@ -138,10 +138,10 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
             scriptCache.put(scriptUrl, scriptContent);
         }
 
-        final String signatureKey = youTubeUtility.getSignature(youtubeTrackFormat, scriptContent);
+        final String signatureKey = youTubeUtility.getSignature(youtubeTrackFormat, scriptUrl, scriptContent);
+        final String unauthorizedStreamUrl = youtubeTrackFormat.getUrl();
 
-        final String streamUrl = youtubeTrackFormat.getUrl();
-        return URLUtility.appendParam(streamUrl, youtubeTrackFormat.getSigParam(), signatureKey);
+        return URLUtility.setParam(unauthorizedStreamUrl, youtubeTrackFormat.getSigParam(), signatureKey);
     }
 
     private Map<String, String> getPagingParams(final Map<String, String> queryInformation) {

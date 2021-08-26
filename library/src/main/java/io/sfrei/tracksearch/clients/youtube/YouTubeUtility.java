@@ -213,7 +213,7 @@ class YouTubeUtility {
                         .sigValue(null)
                         .build();
             } else {
-                final Map<String, String> params = URLUtility.splitAndDecodeUrl(cipher);
+                final Map<String, String> params = URLUtility.decodeAndSplitParams(cipher);
                 return YouTubeTrackFormat.builder()
                         .mimeType(mimeType)
                         .formatType(formatType)
