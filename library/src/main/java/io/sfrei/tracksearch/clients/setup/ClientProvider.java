@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.util.TimeZone;
 
 @Slf4j
 abstract class ClientProvider {
@@ -15,7 +16,7 @@ abstract class ClientProvider {
     protected static final OkHttpClient okHttpClient;
 
     static {
-        TrackSearchConfig.setTime();
+        TimeZone.setDefault(TimeZone.getTimeZone(TrackSearchConfig.TIMEZONE));
 
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
