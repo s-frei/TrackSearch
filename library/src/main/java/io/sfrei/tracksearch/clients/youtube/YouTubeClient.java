@@ -47,7 +47,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     private final YouTubeService requestService;
     private final YouTubeUtility youTubeUtility;
 
-    private final ScriptCache<String, String> scriptCache;
+    private final CacheMap<String, String> scriptCache;
 
     public YouTubeClient() {
         final Retrofit base = new Retrofit.Builder()
@@ -58,7 +58,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
         requestService = base.create(YouTubeService.class);
         youTubeUtility = new YouTubeUtility();
-        scriptCache = new ScriptCache<>();
+        scriptCache = new CacheMap<>();
     }
 
     public static Map<String, String> makeQueryInformation(final String query, final String pagingToken) {
@@ -129,8 +129,10 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
             throw new TrackSearchException("ScriptURL could not be resolved");
 
         final String scriptContent;
-        if (scriptCache.containsKey(scriptUrl))
+        if (scriptCache.containsKey(scriptUrl)) {
+            log.trace("Use cached script for: {}", scriptUrl);
             scriptContent = scriptCache.get(scriptUrl);
+        }
         else {
             scriptContent = Client.requestURL(HOSTNAME + scriptUrl).getContentOrThrow();
             scriptCache.put(scriptUrl, scriptContent);

@@ -10,6 +10,7 @@ import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
+import io.sfrei.tracksearch.utils.CacheMap;
 import io.sfrei.tracksearch.utils.URLUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.Value;
@@ -53,6 +54,12 @@ class YouTubeUtility {
     private static final String[] defaultRoute = {"contents", "twoColumnSearchResultsRenderer", "primaryContents",
             "sectionListRenderer", "contents"};
     private static final String[] continuationItemRenderer = {"continuationItemRenderer", "continuationEndpoint", "continuationCommand"};
+
+    private final CacheMap<String, SignatureResolver> sigResolverCache;
+
+    public YouTubeUtility() {
+        sigResolverCache = new CacheMap<>();
+    }
 
     private static String wrap(String functionContent) {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
@@ -252,6 +259,13 @@ class YouTubeUtility {
     protected String getSignature(final YouTubeTrackFormat youtubeTrackFormat, final String scriptBody)
             throws YouTubeException {
 
+        final String sigValue = youtubeTrackFormat.getSigValue();
+
+        if (sigResolverCache.containsKey(scriptUrl)) {
+            log.trace("Use cached signature resolver for: {}", scriptUrl);
+            return sigResolverCache.get(scriptUrl).resolveSignature(sigValue);
+        }
+
         final Matcher obfuscateFunctionsMatcher = OBFUSCATE_FUNCTIONS_PATTERN.matcher(scriptBody);
         if (!obfuscateFunctionsMatcher.find())
             throw new YouTubeException("Was not able to find obfuscate functions");
@@ -279,7 +293,10 @@ class YouTubeUtility {
             signatureResolver.addSignaturePart(obfuscateFunctionName, signatureOccurrence, obfuscateFunctionParameter);
         }
 
-        return signatureResolver.resolveSignature(youtubeTrackFormat.getSigValue());
+        if (!sigResolverCache.containsKey(scriptUrl))
+            sigResolverCache.put(scriptUrl, signatureResolver);
+
+        return signatureResolver.resolveSignature(sigValue);
     }
 
     @Value
