@@ -256,7 +256,7 @@ class YouTubeUtility {
         return split.length > 0 ? split[0] : null;
     }
 
-    protected String getSignature(final YouTubeTrackFormat youtubeTrackFormat, final String scriptBody)
+    protected String getSignature(final YouTubeTrackFormat youtubeTrackFormat, String scriptUrl, final String scriptBody)
             throws YouTubeException {
 
         final String sigValue = youtubeTrackFormat.getSigValue();
