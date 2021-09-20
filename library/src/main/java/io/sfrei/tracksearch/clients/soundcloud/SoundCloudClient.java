@@ -141,7 +141,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
         final String content = response.getContentOrThrow();
         final List<String> crossOriginScripts = soundCloudUtility.getCrossOriginScripts(content);
         for (final String scriptUrl : crossOriginScripts) {
-            final ResponseWrapper scriptResponse = Client.requestURL(scriptUrl);
+            final ResponseWrapper scriptResponse = requestURL(scriptUrl);
             if (scriptResponse.hasContent()) {
                 final Optional<String> clientID = soundCloudUtility.getClientID(scriptResponse.getContent());
                 if (clientID.isPresent()) {

@@ -12,6 +12,7 @@ public class Client extends ClientProvider {
 
     public static final int OK = 200;
     public static final int UNAUTHORIZED = 401;
+    public static final int SERVICE_UNAVAILABLE = 503;
 
     public static ResponseWrapper request(Call<ResponseWrapper> call) {
         final String url = call.request().url().toString();
@@ -25,7 +26,7 @@ public class Client extends ClientProvider {
         }
     }
 
-    public static ResponseWrapper requestURL(String url) {
+    public ResponseWrapper requestURL(String url) {
         log.trace("Requesting: {}", url);
         final Request request = new Request.Builder().url(url).build();
         try (final okhttp3.Response response = okHttpClient.newCall(request).execute()) {
@@ -36,7 +37,7 @@ public class Client extends ClientProvider {
         return ResponseWrapper.empty();
     }
 
-    protected static int requestAndGetCode(String url) throws IOException {
+    protected int requestAndGetCode(String url) throws IOException {
         log.trace("Requesting: {}", url);
         final Request request = new Request.Builder().url(url).build();
         try (final okhttp3.Response response = okHttpClient.newCall(request).execute()) {

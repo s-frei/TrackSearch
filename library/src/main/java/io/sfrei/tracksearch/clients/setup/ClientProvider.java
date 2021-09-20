@@ -1,6 +1,5 @@
 package io.sfrei.tracksearch.clients.setup;
 
-import io.sfrei.tracksearch.config.TrackSearchConfig;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
@@ -8,16 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.util.TimeZone;
 
 @Slf4j
 abstract class ClientProvider {
 
-    protected static final OkHttpClient okHttpClient;
+    protected final OkHttpClient okHttpClient;
 
-    static {
-        TimeZone.setDefault(TimeZone.getTimeZone(TrackSearchConfig.TIMEZONE));
-
+    public ClientProvider() {
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 

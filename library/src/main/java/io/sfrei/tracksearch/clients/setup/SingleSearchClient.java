@@ -5,7 +5,7 @@ import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 
-public abstract class SingleSearchClient<T extends Track> extends ClientProvider implements TrackSearchClient<T> {
+public abstract class SingleSearchClient<T extends Track> extends Client implements TrackSearchClient<T> {
 
     protected void throwIfPagingValueMissing(ClientProvider source, TrackList<? extends Track> trackList)
             throws TrackSearchException {

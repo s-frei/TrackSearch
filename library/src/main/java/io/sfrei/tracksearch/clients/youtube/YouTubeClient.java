@@ -111,7 +111,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         final ResponseWrapper trackResponse = Client.request(trackRequest);
 
         final String trackContent = trackResponse.getContentOrThrow();
-        final YouTubeTrackInfo trackInfo = youTubeUtility.getTrackInfo(trackContent, trackUrl);
+        final YouTubeTrackInfo trackInfo = youTubeUtility.getTrackInfo(trackContent, trackUrl, this::requestURL);
         return youtubeTrack.setAndGetTrackInfo(trackInfo);
     }
 
@@ -134,7 +134,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
             scriptContent = scriptCache.get(scriptUrl);
         }
         else {
-            scriptContent = Client.requestURL(HOSTNAME + scriptUrl).getContentOrThrow();
+            scriptContent = requestURL(HOSTNAME + scriptUrl).getContentOrThrow();
             scriptCache.put(scriptUrl, scriptContent);
         }
 
