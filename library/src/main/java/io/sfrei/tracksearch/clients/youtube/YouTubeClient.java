@@ -25,7 +25,7 @@ import java.util.Map;
 @Slf4j
 public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
-    public static final String HOSTNAME = "https://youtube.com";
+    public static final String HOSTNAME = "https://www.youtube.com";
     private static final String INFORMATION_PREFIX = "yt";
     public static final String POSITION_KEY = INFORMATION_PREFIX + TrackSearchConfig.POSITION_KEY_SUFFIX;
     public static final String OFFSET_KEY = INFORMATION_PREFIX + TrackSearchConfig.OFFSET_KEY_SUFFIX;
