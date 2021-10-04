@@ -1,5 +1,6 @@
 package io.sfrei.tracksearch.clients.setup;
 
+import io.sfrei.tracksearch.utils.UserAgentUtility;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,7 @@ abstract class ClientProvider {
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 
         okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(new CustomInterceptor())
+                .addInterceptor(new LoggingAndUserAgentInterceptor())
                 .cookieJar(new JavaNetCookieJar(cookieManager))
                 .build();
     }
@@ -31,17 +32,20 @@ abstract class ClientProvider {
         log.error("Failed to request '{}' cause: {}", url, e.getMessage());
     }
 
-    private static final class CustomInterceptor implements Interceptor {
+    private static final class LoggingAndUserAgentInterceptor implements Interceptor {
         @NotNull
         @Override
         public Response intercept(Interceptor.Chain chain) throws IOException {
 
-            final Request request = chain.request();
-            final String url = request.url().toString();
+            final Request modifiedRequest = chain.request().newBuilder()
+                    .header("user-agent", UserAgentUtility.getRandomUserAgent())
+                    .build();
+
+            final String url = modifiedRequest.url().toString();
 
             final Response response;
             try {
-                response = chain.proceed(request);
+                response = chain.proceed(modifiedRequest);
             } catch (IOException e) {
                 logRequestException(url, e);
                 throw e;
