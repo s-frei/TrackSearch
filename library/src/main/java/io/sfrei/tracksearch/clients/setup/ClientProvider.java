@@ -25,11 +25,11 @@ abstract class ClientProvider {
     }
 
     private static void logResponseCode(String url, int code) {
-        log.error("Request not successful '{}' code: {}", url, code);
+        log.error("Code: {} for request not successful '{}' ", code, url);
     }
 
     protected static void logRequestException(String url, IOException e) {
-        log.error("Failed to request '{}' cause: {}", url, e.getMessage());
+        log.error("Failed to request '{}' cause: {}", url, e);
     }
 
     private static final class LoggingAndUserAgentInterceptor implements Interceptor {
