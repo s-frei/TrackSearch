@@ -1,10 +1,21 @@
 Changelog
 =========
 
-0.6.5 - unreleased
+0.7.0 - unreleased
 ------------------
 
-No changes
+**Feature:**
+
+- Improve request and function caching for better performance
+- Improve log output
+- Avoid resolving of not ready youtube streams
+- Updated dependencies
+
+**Bugfix:**
+
+- Fix stream URL resolving through retry 'once' on failure. This is not
+  improving performance but fixes the issue when resolving fails for unknown
+  circumstances.
 
 0.6.4
 -----

@@ -2,8 +2,8 @@ package io.sfrei.tracksearch.clients.youtube;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.sfrei.tracksearch.clients.setup.Client;
 import io.sfrei.tracksearch.clients.setup.QueryType;
+import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
@@ -73,7 +73,7 @@ class YouTubeUtility {
         try {
             responseElement = JsonElement.read(MAPPER, json).getIndex(1).get("response");
         } catch (JsonProcessingException e) {
-            throw new YouTubeException("Error parsing SoundCloudTracks JSON", e);
+            throw new YouTubeException("Error parsing YouTubeTracks JSON", e);
         }
 
         final JsonElement defaultElement = responseElement
@@ -115,7 +115,9 @@ class YouTubeUtility {
         }
 
         final JsonElement contents = contentHolder.get("contents");
-        final List<YouTubeTrack> ytTracks = contents.elements().map(content -> {
+        final List<YouTubeTrack> ytTracks = contents.elements()
+                .filter(content -> Objects.isNull(content.get("videoRenderer", "upcomingEventData").getNode())) // Avoid premieres
+                .map(content -> {
             try {
                 return content.mapToObject(MAPPER, YouTubeTrack.class);
             } catch (JsonProcessingException e) {
@@ -134,7 +136,7 @@ class YouTubeUtility {
         return trackList;
     }
 
-    protected YouTubeTrackInfo getTrackInfo(final String json, final String trackUrl) {
+    protected YouTubeTrackInfo getTrackInfo(final String json, final String trackUrl, Function<String, ResponseWrapper> requester) {
         try {
             final JsonElement jsonElement = JsonElement.read(MAPPER, json);
 
@@ -173,11 +175,11 @@ class YouTubeUtility {
             if (trackFormats.stream().anyMatch(YouTubeTrackFormat::streamNotReady) && scriptUrl.get() == null) {
                 log.trace("Try to get player script trough embedded URL");
                 final String embeddedUrl = trackUrl.replace("youtube.com/", "youtube.com/embed/");
-                final String embeddedPageContent = Client.requestURL(embeddedUrl).getContent();
+                final String embeddedPageContent = requester.apply(embeddedUrl).getContent();
                 if (embeddedPageContent != null) {
                     final Matcher matcher = EMBEDDED_PLAYER_SCRIPT_PATTERN.matcher(embeddedPageContent);
                     if (matcher.find()) {
-                        log.debug("Found player script in embedded URL");
+                        log.trace("Found player script in embedded URL");
                         scriptUrl.set(matcher.group(1));
                     }
                 }
@@ -213,7 +215,7 @@ class YouTubeUtility {
                         .sigValue(null)
                         .build();
             } else {
-                final Map<String, String> params = URLUtility.decodeAndSplitParams(cipher);
+                final Map<String, String> params = URLUtility.splitParamsAndDecode(cipher);
                 return YouTubeTrackFormat.builder()
                         .mimeType(mimeType)
                         .formatType(formatType)

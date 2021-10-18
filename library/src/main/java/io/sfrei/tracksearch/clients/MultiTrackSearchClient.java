@@ -4,6 +4,7 @@ import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
@@ -19,7 +20,7 @@ public interface MultiTrackSearchClient extends TrackSearchClient<Track>  {
      * @return a tracklist containing all found tracks on all available clients.
      * @throws TrackSearchException when any client encountered a problem while searching.
      */
-    TrackList<Track> getTracksForSearch(String search) throws TrackSearchException;
+    TrackList<Track> getTracksForSearch(@NotNull String search) throws TrackSearchException;
 
     /**
      * Search for the next tracks for last result.
@@ -27,7 +28,7 @@ public interface MultiTrackSearchClient extends TrackSearchClient<Track>  {
      * @return a tracklist containing all next tracks available for all previously searched clients.
      * @throws TrackSearchException when any client encountered a problem while getting next.
      */
-    TrackList<Track> getNext(TrackList<? extends Track> trackList) throws TrackSearchException;
+    TrackList<Track> getNext(@NotNull TrackList<? extends Track> trackList) throws TrackSearchException;
 
     /**
      * Get the audio stream URL in the highest possible audio resolution.
@@ -35,7 +36,7 @@ public interface MultiTrackSearchClient extends TrackSearchClient<Track>  {
      * @return the audio stream URL.
      * @throws TrackSearchException when the URL could not be exposed.
      */
-    String getStreamUrl(Track track) throws TrackSearchException;
+    String getStreamUrl(@NotNull Track track) throws TrackSearchException;
 
     /**
      * Search for tracks using a string containing keywords on pre selected track sources.
@@ -44,6 +45,6 @@ public interface MultiTrackSearchClient extends TrackSearchClient<Track>  {
      * @return a tracklist containing all found tracks for selected clients.
      * @throws TrackSearchException when any client encountered a problem while searching.
      */
-    TrackList<Track> getTracksForSearch(String search, Set<TrackSource> sources) throws TrackSearchException;
+    TrackList<Track> getTracksForSearch(@NotNull String search, Set<TrackSource> sources) throws TrackSearchException;
 
 }
