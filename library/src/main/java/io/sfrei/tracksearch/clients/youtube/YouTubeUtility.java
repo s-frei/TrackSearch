@@ -73,7 +73,7 @@ class YouTubeUtility {
         try {
             responseElement = JsonElement.read(MAPPER, json).getIndex(1).get("response");
         } catch (JsonProcessingException e) {
-            throw new YouTubeException("Error parsing SoundCloudTracks JSON", e);
+            throw new YouTubeException("Error parsing YouTubeTracks JSON", e);
         }
 
         final JsonElement defaultElement = responseElement
@@ -215,7 +215,7 @@ class YouTubeUtility {
                         .sigValue(null)
                         .build();
             } else {
-                final Map<String, String> params = URLUtility.decodeAndSplitParams(cipher);
+                final Map<String, String> params = URLUtility.splitParamsAndDecode(cipher);
                 return YouTubeTrackFormat.builder()
                         .mimeType(mimeType)
                         .formatType(formatType)

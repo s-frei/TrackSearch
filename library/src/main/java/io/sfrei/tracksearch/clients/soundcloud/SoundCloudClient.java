@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
+import java.net.CookiePolicy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,9 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
     private String clientID;
 
     public SoundCloudClient() {
+
+        super(CookiePolicy.ACCEPT_ALL, null);
+
         final Retrofit base = new Retrofit.Builder()
                 .baseUrl(HOSTNAME)
                 .client(okHttpClient)

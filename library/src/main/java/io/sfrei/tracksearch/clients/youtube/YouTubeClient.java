@@ -26,11 +26,11 @@ import java.util.Map;
 public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
     public static final String HOSTNAME = "https://www.youtube.com";
+    public static final String PAGING_KEY = "ctoken";
     private static final String INFORMATION_PREFIX = "yt";
     public static final String POSITION_KEY = INFORMATION_PREFIX + TrackSearchConfig.POSITION_KEY_SUFFIX;
     public static final String OFFSET_KEY = INFORMATION_PREFIX + TrackSearchConfig.OFFSET_KEY_SUFFIX;
     private static final String PAGING_INFORMATION = INFORMATION_PREFIX + "PagingToken";
-    public static final String PAGING_KEY = "ctoken";
     private static final String ADDITIONAL_PAGING_KEY = "continuation";
 
     private static final Map<String, String> VIDEO_SEARCH_PARAMS = Map.of("sp", "EgIQAQ%3D%3D");
@@ -50,6 +50,12 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     private final CacheMap<String, String> scriptCache;
 
     public YouTubeClient() {
+
+        super(
+                (uri, cookie) -> cookie.getName().equals("YSC") || cookie.getName().equals("VISITOR_INFO1_LIVE") || cookie.getName().equals("GPS"),
+                Map.of("Cookie", "CONSENT=YES+cb.20210328-17-p0.en+FX+478")
+        );
+
         final Retrofit base = new Retrofit.Builder()
                 .baseUrl(HOSTNAME)
                 .client(okHttpClient)
@@ -105,7 +111,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         throw new YouTubeException("Query type not supported");
     }
 
-    private YouTubeTrackInfo loadTrackInfo(final YouTubeTrack youtubeTrack) throws TrackSearchException {
+    public YouTubeTrackInfo loadTrackInfo(final YouTubeTrack youtubeTrack) throws TrackSearchException {
         final String trackUrl = youtubeTrack.getUrl();
         final Call<ResponseWrapper> trackRequest = requestService.getForUrlWithParams(trackUrl, TRACK_PARAMS);
         final ResponseWrapper trackResponse = Client.request(trackRequest);
@@ -117,12 +123,13 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
     @Override
     public String getStreamUrl(@NonNull final YouTubeTrack youtubeTrack) throws TrackSearchException {
+
         final YouTubeTrackInfo trackInfo = loadTrackInfo(youtubeTrack);
 
         final YouTubeTrackFormat youtubeTrackFormat = TrackFormatUtility.getBestTrackFormat(youtubeTrack, false);
 
         if (youtubeTrackFormat.isStreamReady())
-            return youtubeTrackFormat.getUrl();
+            return URLUtility.decode(youtubeTrackFormat.getUrl());
 
         final String scriptUrl = trackInfo.getScriptUrl();
         if (scriptUrl == null)
@@ -132,16 +139,15 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         if (scriptCache.containsKey(scriptUrl)) {
             log.trace("Use cached script for: {}", scriptUrl);
             scriptContent = scriptCache.get(scriptUrl);
-        }
-        else {
+        } else {
             scriptContent = requestURL(HOSTNAME + scriptUrl).getContentOrThrow();
             scriptCache.put(scriptUrl, scriptContent);
         }
 
-        final String signatureKey = youTubeUtility.getSignature(youtubeTrackFormat, scriptUrl, scriptContent);
+        final String signature = youTubeUtility.getSignature(youtubeTrackFormat, scriptUrl, scriptContent);
         final String unauthorizedStreamUrl = youtubeTrackFormat.getUrl();
 
-        return URLUtility.setParam(unauthorizedStreamUrl, youtubeTrackFormat.getSigParam(), signatureKey);
+        return URLUtility.addRequestParam(unauthorizedStreamUrl, youtubeTrackFormat.getSigParam(), signature);
     }
 
     private Map<String, String> getPagingParams(final Map<String, String> queryInformation) {

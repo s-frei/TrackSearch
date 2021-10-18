@@ -21,7 +21,7 @@ public class MultiTrackSearchClientTest extends ClientTestImpl<Track> {
 
 
     public MultiTrackSearchClientTest() {
-        super(new MultiSearchClient(), Collections.singletonList(DEFAULT_SEARCH_KEY));
+        super(new MultiSearchClient(), Collections.singletonList(DEFAULT_SEARCH_KEY), log);
     }
 
     @Test
