@@ -93,7 +93,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         try {
             return getStreamUrl(track, TrackSearchConstants.RETRY_RESOLVING_ONCE);
         } catch (TrackSearchException e) {
-            log.error(e.getMessage());
+            log.error("Error occurred acquiring stream URL", e);
         }
         return null;
     }
