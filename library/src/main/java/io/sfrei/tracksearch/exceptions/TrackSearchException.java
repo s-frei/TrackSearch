@@ -6,4 +6,12 @@ public class TrackSearchException extends Exception {
         super(message);
     }
 
+    public TrackSearchException(Throwable cause) {
+        super(cause);
+    }
+
+    public TrackSearchException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

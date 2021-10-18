@@ -4,15 +4,17 @@ import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
+@UtilityClass
 public class TrackListHelper {
 
-    public static <T extends Track> BaseTrackList<T> updatePagingValues(final BaseTrackList<T> newTrackList, final TrackList<?> oldTrackList,
+    public <T extends Track> BaseTrackList<T> updatePagingValues(final BaseTrackList<T> newTrackList, final TrackList<?> oldTrackList,
                                                                         final String positionKey, String offsetKey) {
 
         final String oldOffsetValue = oldTrackList.getQueryInformation().get(offsetKey);
@@ -27,7 +29,7 @@ public class TrackListHelper {
         return newTrackList.setPagingValues(positionKey, newPosition, offsetKey, newOffset);
     }
 
-    public static void mergePositionValues(final BaseTrackList<? extends Track> trackList, final String positionKey, final String offsetKey) {
+    public void mergePositionValues(final BaseTrackList<? extends Track> trackList, final String positionKey, final String offsetKey) {
         final AtomicInteger position = new AtomicInteger(0);
         final AtomicInteger offset = new AtomicInteger(0);
 
@@ -41,7 +43,7 @@ public class TrackListHelper {
         trackList.setPagingValues(positionKey, position.get(), offsetKey, offset.get());
     }
 
-    public static boolean hasQueryInformation(final TrackList<? extends Track> trackList, final String... keys) {
+    public boolean hasQueryInformation(final TrackList<? extends Track> trackList, final String... keys) {
         final Map<String, String> queryInformation = trackList.getQueryInformation();
         for (final String key : keys) {
             if (queryInformation.get(key) == null)

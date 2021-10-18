@@ -2,14 +2,15 @@ package io.sfrei.tracksearch.clients.youtube;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.sfrei.tracksearch.clients.setup.Client;
 import io.sfrei.tracksearch.clients.setup.QueryType;
+import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
+import io.sfrei.tracksearch.utils.CacheMap;
 import io.sfrei.tracksearch.utils.URLUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.Value;
@@ -54,6 +55,12 @@ class YouTubeUtility {
             "sectionListRenderer", "contents"};
     private static final String[] continuationItemRenderer = {"continuationItemRenderer", "continuationEndpoint", "continuationCommand"};
 
+    private final CacheMap<String, SignatureResolver> sigResolverCache;
+
+    public YouTubeUtility() {
+        sigResolverCache = new CacheMap<>();
+    }
+
     private static String wrap(String functionContent) {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
@@ -66,7 +73,7 @@ class YouTubeUtility {
         try {
             responseElement = JsonElement.read(MAPPER, json).getIndex(1).get("response");
         } catch (JsonProcessingException e) {
-            throw new YouTubeException("GetYouTubeTubeTracks - " + e.getMessage());
+            throw new YouTubeException("Error parsing YouTubeTracks JSON", e);
         }
 
         final JsonElement defaultElement = responseElement
@@ -108,7 +115,9 @@ class YouTubeUtility {
         }
 
         final JsonElement contents = contentHolder.get("contents");
-        final List<YouTubeTrack> ytTracks = contents.elements().map(content -> {
+        final List<YouTubeTrack> ytTracks = contents.elements()
+                .filter(content -> Objects.isNull(content.get("videoRenderer", "upcomingEventData").getNode())) // Avoid premieres
+                .map(content -> {
             try {
                 return content.mapToObject(MAPPER, YouTubeTrack.class);
             } catch (JsonProcessingException e) {
@@ -127,15 +136,15 @@ class YouTubeUtility {
         return trackList;
     }
 
-    protected YouTubeTrackInfo getTrackInfo(final String json, final String trackUrl) {
+    protected YouTubeTrackInfo getTrackInfo(final String json, final String trackUrl, Function<String, ResponseWrapper> requester) {
         try {
             final JsonElement jsonElement = JsonElement.read(MAPPER, json);
 
             final JsonElement playerElement;
-            if (!jsonElement.isArray()) {
-                playerElement = jsonElement.firstElementFor("player");
-            } else {
+            if (jsonElement.isArray()) {
                 playerElement = jsonElement.getIndex(2).get("player");
+            } else {
+                playerElement = jsonElement.firstElementFor("player");
             }
 
             final JsonElement args = playerElement.get("args");
@@ -166,11 +175,11 @@ class YouTubeUtility {
             if (trackFormats.stream().anyMatch(YouTubeTrackFormat::streamNotReady) && scriptUrl.get() == null) {
                 log.trace("Try to get player script trough embedded URL");
                 final String embeddedUrl = trackUrl.replace("youtube.com/", "youtube.com/embed/");
-                final String embeddedPageContent = Client.requestURL(embeddedUrl).getContent();
+                final String embeddedPageContent = requester.apply(embeddedUrl).getContent();
                 if (embeddedPageContent != null) {
                     final Matcher matcher = EMBEDDED_PLAYER_SCRIPT_PATTERN.matcher(embeddedPageContent);
                     if (matcher.find()) {
-                        log.debug("Found player script in embedded URL");
+                        log.trace("Found player script in embedded URL");
                         scriptUrl.set(matcher.group(1));
                     }
                 }
@@ -206,7 +215,7 @@ class YouTubeUtility {
                         .sigValue(null)
                         .build();
             } else {
-                final Map<String, String> params = URLUtility.splitAndDecodeUrl(cipher);
+                final Map<String, String> params = URLUtility.splitParamsAndDecode(cipher);
                 return YouTubeTrackFormat.builder()
                         .mimeType(mimeType)
                         .formatType(formatType)
@@ -249,8 +258,15 @@ class YouTubeUtility {
         return split.length > 0 ? split[0] : null;
     }
 
-    protected String getSignature(final YouTubeTrackFormat youtubeTrackFormat, final String scriptBody)
+    protected String getSignature(final YouTubeTrackFormat youtubeTrackFormat, String scriptUrl, final String scriptBody)
             throws YouTubeException {
+
+        final String sigValue = youtubeTrackFormat.getSigValue();
+
+        if (sigResolverCache.containsKey(scriptUrl)) {
+            log.trace("Use cached signature resolver for: {}", scriptUrl);
+            return sigResolverCache.get(scriptUrl).resolveSignature(sigValue);
+        }
 
         final Matcher obfuscateFunctionsMatcher = OBFUSCATE_FUNCTIONS_PATTERN.matcher(scriptBody);
         if (!obfuscateFunctionsMatcher.find())
@@ -279,7 +295,10 @@ class YouTubeUtility {
             signatureResolver.addSignaturePart(obfuscateFunctionName, signatureOccurrence, obfuscateFunctionParameter);
         }
 
-        return signatureResolver.resolveSignature(youtubeTrackFormat.getSigValue());
+        if (!sigResolverCache.containsKey(scriptUrl))
+            sigResolverCache.put(scriptUrl, signatureResolver);
+
+        return signatureResolver.resolveSignature(sigValue);
     }
 
     @Value
@@ -323,6 +342,8 @@ class YouTubeUtility {
                         char swapChar = signature.charAt(0);
                         signature.setCharAt(0, signature.charAt(charPos));
                         signature.setCharAt(charPos, swapChar);
+                        break;
+                    default:
                         break;
                 }
             }

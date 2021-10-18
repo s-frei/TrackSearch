@@ -1,8 +1,11 @@
 package io.sfrei.tracksearch.utils;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class ReplaceUtility {
 
-    public static String replaceUnnecessary(final String chars) {
+    public String replaceUnnecessary(final String chars) {
         return chars
                 .replaceAll("@", " at ")
                 .replaceAll("_", " ")
@@ -16,7 +19,7 @@ public class ReplaceUtility {
                 .trim();
     }
 
-    public static String replaceNonDigits(final String chars) {
+    public String replaceNonDigits(final String chars) {
         return chars.replaceAll("[^\\d.]", "");
     }
 

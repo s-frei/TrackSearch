@@ -68,7 +68,7 @@ class SoundCloudUtility {
         try {
             responseElement = JsonElement.read(MAPPER, json).get("collection");
         } catch (JsonProcessingException e) {
-            throw new SoundCloudException("GetSoundCloudTracks - " + e.getMessage());
+            throw new SoundCloudException("Error parsing SoundCloudTracks JSON", e);
         }
 
         final List<SoundCloudTrack> scTracks = responseElement.elements()

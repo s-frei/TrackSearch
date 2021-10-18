@@ -10,6 +10,7 @@ import io.sfrei.tracksearch.tracks.*;
 import io.sfrei.tracksearch.utils.TrackListHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,16 @@ public class MultiSearchClient implements MultiTrackSearchClient {
     }
 
     @Override
+    public String getStreamUrl(@NonNull Track track, int retries) throws TrackSearchException {
+        if (track instanceof YouTubeTrack) {
+            return youTubeClient.getStreamUrl((YouTubeTrack) track, retries);
+        } else if (track instanceof SoundCloudTrack) {
+            return soundCloudClient.getStreamUrl((SoundCloudTrack) track, retries);
+        }
+        throw new TrackSearchException("Track type is unknown");
+    }
+
+    @Override
     public TrackList<Track> getTracksForSearch(@NonNull final String search, @NonNull final Set<TrackSource> sources)
             throws TrackSearchException {
 
@@ -119,14 +130,14 @@ public class MultiSearchClient implements MultiTrackSearchClient {
         try {
             trackLists = executorService.invokeAll(calls);
         } catch (InterruptedException e) {
-            throw new TrackSearchException(e.getMessage());
+            throw new TrackSearchException(e);
         }
 
         for (final Future<BaseTrackList<Track>> trackList : trackLists) {
             try {
                 resultTrackList.mergeIn(trackList.get());
             } catch (InterruptedException | ExecutionException e) {
-                throw new TrackSearchException("An error occurred acquiring a tracklist");
+                throw new TrackSearchException("An error occurred acquiring a tracklist", e);
             }
         }
 
@@ -136,7 +147,7 @@ public class MultiSearchClient implements MultiTrackSearchClient {
     }
 
     @Override
-    public boolean hasPagingValues(final TrackList<? extends Track> trackList) {
+    public boolean hasPagingValues(@NotNull final TrackList<? extends Track> trackList) {
         return TrackListHelper.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
     }
 

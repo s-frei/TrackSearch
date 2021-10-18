@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static io.sfrei.tracksearch.clients.ClientTestConstants.SEARCH_KEY;
+import static io.sfrei.tracksearch.clients.ClientTestConstants.DEFAULT_SEARCH_KEY;
 
 /**
  * Even tho the clients are already tested separately
@@ -21,7 +21,7 @@ public class MultiTrackSearchClientTest extends ClientTestImpl<Track> {
 
 
     public MultiTrackSearchClientTest() {
-        super(new MultiSearchClient(), Collections.singletonList(SEARCH_KEY));
+        super(new MultiSearchClient(), Collections.singletonList(DEFAULT_SEARCH_KEY), log);
     }
 
     @Test
@@ -29,7 +29,7 @@ public class MultiTrackSearchClientTest extends ClientTestImpl<Track> {
         MultiTrackSearchClient searchClient = (MultiTrackSearchClient) this.searchClient;
         TrackSource trackSource = TrackSource.Youtube;
         log.debug("MultiTrackSearchClient with explicit source ->  {}", trackSource);
-        searchClient.getTracksForSearch(SEARCH_KEY, TrackSource.setOf(trackSource));
+        searchClient.getTracksForSearch(DEFAULT_SEARCH_KEY, TrackSource.setOf(trackSource));
     }
 
     @Test
@@ -37,7 +37,7 @@ public class MultiTrackSearchClientTest extends ClientTestImpl<Track> {
         MultiTrackSearchClient searchClient = (MultiTrackSearchClient) this.searchClient;
         TrackSource trackSource = TrackSource.Soundcloud;
         log.debug("MultiTrackSearchClient with explicit source ->  {}", trackSource);
-        searchClient.getTracksForSearch(SEARCH_KEY, TrackSource.setOf(trackSource));
+        searchClient.getTracksForSearch(DEFAULT_SEARCH_KEY, TrackSource.setOf(trackSource));
     }
 
 }

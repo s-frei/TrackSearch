@@ -5,14 +5,13 @@ import java.util.List;
 
 public class ClientTestConstants {
 
-    //Amazing german artist ;)
-    public static final String SEARCH_KEY = "Ben Böhmer";
+    public static final String DEFAULT_SEARCH_KEY = "Ben Böhmer";
 
     public static final List<String> SEARCH_KEYS;
 
     static {
         SEARCH_KEYS = new ArrayList<>();
-        SEARCH_KEYS.add(SEARCH_KEY);
+        SEARCH_KEYS.add(DEFAULT_SEARCH_KEY);
         SEARCH_KEYS.add("Paul Kalkbrenner");
         SEARCH_KEYS.add("Einmusik");
         SEARCH_KEYS.add("Mind Against");

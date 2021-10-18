@@ -53,10 +53,10 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
         final String channelUrl = YouTubeClient.HOSTNAME.concat(channelUrlSuffix);
 
         final String streamAmountText = rootElement.get("viewCountText").getAsString("simpleText");
-        final String streamAmountDigits = streamAmountText != null && !streamAmountText.isEmpty() ?
-                ReplaceUtility.replaceNonDigits(streamAmountText) : null;
-        final Long streamAmount = streamAmountDigits != null && !streamAmountDigits.isEmpty() ?
-                Long.parseLong(streamAmountDigits) : 0L;
+        final String streamAmountDigits = streamAmountText == null || streamAmountText.isEmpty() ?
+                 null : ReplaceUtility.replaceNonDigits(streamAmountText);
+        final Long streamAmount = streamAmountDigits == null || streamAmountDigits.isEmpty() ?
+                 0L : Long.parseLong(streamAmountDigits);
 
         final Stream<JsonElement> thumbNailStream = rootElement.get("thumbnail", "thumbnails").elements();
         final Optional<JsonElement> lastThumbnail = thumbNailStream.findFirst();

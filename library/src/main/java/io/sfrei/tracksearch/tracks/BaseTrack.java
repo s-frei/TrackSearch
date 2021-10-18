@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 @RequiredArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public abstract class BaseTrack {
+public class BaseTrack {
 
     private final TrackSource source;
 

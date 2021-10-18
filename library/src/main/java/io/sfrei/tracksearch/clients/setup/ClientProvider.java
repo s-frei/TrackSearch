@@ -1,57 +1,77 @@
 package io.sfrei.tracksearch.clients.setup;
 
-import io.sfrei.tracksearch.config.TrackSearchConfig;
+import io.sfrei.tracksearch.utils.UserAgentUtility;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
-class ClientProvider {
+abstract class ClientProvider {
 
-    protected static final OkHttpClient okHttpClient;
+    protected final CookieManager COOKIE_MANAGER;
+    protected final OkHttpClient okHttpClient;
 
-    static {
-        TrackSearchConfig.setTime();
+    public ClientProvider(@Nullable final CookiePolicy cookiePolicy, @Nullable final Map<String, String> headers) {
 
-        CookieManager cookieManager = new CookieManager();
-        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+        COOKIE_MANAGER = new CookieManager();
+        if (cookiePolicy != null)
+            COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 
         okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(new CustomInterceptor())
-                .cookieJar(new JavaNetCookieJar(cookieManager))
+                .connectionSpecs(List.of(ConnectionSpec.RESTRICTED_TLS))
+                .addInterceptor(new LoggingAndHeaderInterceptor(headers))
+                .cookieJar(new JavaNetCookieJar(COOKIE_MANAGER))
                 .build();
     }
 
     private static void logResponseCode(String url, int code) {
-        log.error("Request not successful '{}' code: {}", url, code);
+        log.error("Code: {} for request not successful '{}' ", code, url);
     }
 
     protected static void logRequestException(String url, IOException e) {
-        log.error("Failed to request '{}' cause: {}", url, e.getMessage());
+        log.error("Failed to request '{}' cause: {}", url, e);
     }
 
-    private static final class CustomInterceptor implements Interceptor {
+    @RequiredArgsConstructor
+    private static final class LoggingAndHeaderInterceptor implements Interceptor {
+
+        private final Map<String, String> headers;
+
+        @NotNull
         @Override
         public Response intercept(Interceptor.Chain chain) throws IOException {
 
-            final Request request = chain.request();
-            final String url = request.url().toString();
+            final Request.Builder modifiedRequestBuilder = chain.request()
+                    .newBuilder()
+                    .header("user-agent", UserAgentUtility.getRandomUserAgent());
+
+            if (headers != null) {
+                headers.forEach(modifiedRequestBuilder::header);
+            }
+
+            final Request modifiedRequest = modifiedRequestBuilder.build();
+
+            final String url = modifiedRequest.url().toString();
 
             final Response response;
             try {
-                response = chain.proceed(request);
+                response = chain.proceed(modifiedRequest);
             } catch (IOException e) {
                 logRequestException(url, e);
                 throw e;
             }
 
-            int statusCode = response.code();
-            if (statusCode != Client.OK) {
-                logResponseCode(url, statusCode);
-            }
+            if (!response.isSuccessful())
+                logResponseCode(url, response.code());
+
             return response;
         }
     }
