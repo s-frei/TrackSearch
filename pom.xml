@@ -46,7 +46,7 @@
         <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
 
         <!-- shared -->
-        <lombok.version>1.18.20</lombok.version>
+        <lombok.version>1.18.22</lombok.version>
     </properties>
 
     <profiles>
