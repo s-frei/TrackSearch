@@ -40,13 +40,13 @@
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.3.0</maven-javadoc-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-        <maven-scm-provider-gitexe.version>1.11.2</maven-scm-provider-gitexe.version>
+        <maven-scm-provider-gitexe.version>1.12.0</maven-scm-provider-gitexe.version>
         <maven-scm-api.version>1.11.2</maven-scm-api.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
 
         <!-- shared -->
-        <lombok.version>1.18.20</lombok.version>
+        <lombok.version>1.18.22</lombok.version>
     </properties>
 
     <profiles>
