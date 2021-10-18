@@ -115,7 +115,9 @@ class YouTubeUtility {
         }
 
         final JsonElement contents = contentHolder.get("contents");
-        final List<YouTubeTrack> ytTracks = contents.elements().map(content -> {
+        final List<YouTubeTrack> ytTracks = contents.elements()
+                .filter(content -> Objects.isNull(content.get("videoRenderer", "upcomingEventData").getNode())) // Avoid premieres
+                .map(content -> {
             try {
                 return content.mapToObject(MAPPER, YouTubeTrack.class);
             } catch (JsonProcessingException e) {
