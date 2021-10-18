@@ -36,7 +36,9 @@ public interface Track {
     String getUrl();
 
     /**
-     * Get the audio stream URL in the highest possible quality.
+     * Get the audio stream URL in the highest possible quality. The resulting URL will be
+     * checked if it can be successfully accessed, if under some circumstances this fails,
+     * the resolver will start another attempt - once.
      *
      * @return the audio stream URL, null when exception occurred.
      */
