@@ -1,8 +1,10 @@
 package io.sfrei.tracksearch.clients.soundcloud;
 
 
+import io.sfrei.tracksearch.clients.helper.ClientHelper;
 import io.sfrei.tracksearch.clients.setup.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
+import io.sfrei.tracksearch.config.TrackSearchConstants;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
@@ -81,7 +83,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
 
     private String provideStreamUrl(final SoundCloudTrack track) {
         try {
-            return getStreamUrl(track);
+            return getStreamUrl(track, TrackSearchConstants.RETRY_RESOLVING_ONCE);
         } catch (TrackSearchException e) {
             log.error(e.getMessage());
         }
@@ -89,16 +91,22 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
     }
 
     @Override
-    public String getStreamUrl(@NonNull final SoundCloudTrack track) throws TrackSearchException {
+    public String getStreamUrl(@NonNull final SoundCloudTrack soundCloudTrack) throws TrackSearchException {
         checkClientIDAvailableOrThrow();
 
-        final ResponseWrapper trackResponse = getForUrlWitClientId(track.getUrl(), true);
+        final ResponseWrapper trackResponse = getForUrlWitClientId(soundCloudTrack.getUrl(), true);
         final Optional<String> streamUrl = soundCloudUtility.getUrlForStream(trackResponse.getContentOrThrow());
         if (streamUrl.isEmpty())
             throw new TrackSearchException("Progressive stream URL not found");
 
         final ResponseWrapper streamUrlResponse = getForUrlWitClientId(streamUrl.get(), true);
         return soundCloudUtility.extractStreamUrl(streamUrlResponse.getContentOrThrow());
+    }
+
+    @Override
+    public String getStreamUrl(@NonNull SoundCloudTrack soundCloudTrack, final int retries) throws TrackSearchException {
+        return ClientHelper.getStreamUrl(this, soundCloudTrack, this::requestAndGetCode, retries)
+                .orElseThrow(() -> new SoundCloudException(String.format("Not able to get stream URL after %s retries", retries)));
     }
 
     private ResponseWrapper getSearch(final String search, final boolean firstRequest, final Map<String, String> pagingParams) {
@@ -128,7 +136,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
     }
 
     public final boolean refreshClientID() {
-        log.debug("SoundCloudClient -> Trying to get ClientID");
+        log.debug("Trying to get ClientID");
         final String clientID;
         try {
             clientID = getClientID();

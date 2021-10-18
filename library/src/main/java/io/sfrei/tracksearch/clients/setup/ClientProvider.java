@@ -10,8 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +28,6 @@ abstract class ClientProvider {
         okHttpClient = new OkHttpClient.Builder()
                 .connectionSpecs(List.of(ConnectionSpec.RESTRICTED_TLS))
                 .addInterceptor(new LoggingAndHeaderInterceptor(headers))
-                .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(8000)))
                 .cookieJar(new JavaNetCookieJar(COOKIE_MANAGER))
                 .build();
     }

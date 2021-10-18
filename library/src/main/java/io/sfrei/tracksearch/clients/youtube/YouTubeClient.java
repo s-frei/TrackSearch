@@ -1,7 +1,9 @@
 package io.sfrei.tracksearch.clients.youtube;
 
+import io.sfrei.tracksearch.clients.helper.ClientHelper;
 import io.sfrei.tracksearch.clients.setup.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
+import io.sfrei.tracksearch.config.TrackSearchConstants;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
@@ -89,7 +91,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
     private String provideStreamUrl(final YouTubeTrack track) {
         try {
-            return getStreamUrl(track);
+            return getStreamUrl(track, TrackSearchConstants.RETRY_RESOLVING_ONCE);
         } catch (TrackSearchException e) {
             log.error(e.getMessage());
         }
@@ -148,6 +150,12 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
         final String unauthorizedStreamUrl = youtubeTrackFormat.getUrl();
 
         return URLUtility.addRequestParam(unauthorizedStreamUrl, youtubeTrackFormat.getSigParam(), signature);
+    }
+
+    @Override
+    public String getStreamUrl(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
+        return ClientHelper.getStreamUrl(this, youtubeTrack, this::requestAndGetCode, retries)
+                .orElseThrow(() -> new YouTubeException(String.format("Not able to get stream URL after %s retries", retries)));
     }
 
     private Map<String, String> getPagingParams(final Map<String, String> queryInformation) {

@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 
-import java.io.IOException;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,7 +104,7 @@ public abstract class ClientTestImpl<T extends Track> extends Client implements 
     @Override
     @Order(4)
     @Test
-    public void getStreamUrl() throws IOException {
+    public void getStreamUrl() {
         final TestLogger testLogger = TestLogger.withLogger(logger);
         for (TrackList<T> trackList : tracksForSearch) {
             for (T track : trackList.getTracks()) {

@@ -45,7 +45,11 @@ public class Client extends ClientProvider {
         return ResponseWrapper.empty();
     }
 
-    protected int requestAndGetCode(String url) throws IOException {
+    public static boolean successResponseCode(int code) {
+        return code == OK || code == PARTIAL_CONTENT;
+    }
+
+    protected int requestAndGetCode(String url) {
         final Request request = new Request.Builder().url(url)
                 .header("connection", "close")
                 .header("range", "bytes=0-1")
@@ -54,7 +58,7 @@ public class Client extends ClientProvider {
             return response.code();
         } catch (IOException e) {
             logRequestException(url, e);
-            throw e;
+            return 418;
         }
     }
 
