@@ -2,25 +2,24 @@ package io.sfrei.tracksearch.utils;
 
 import lombok.experimental.UtilityClass;
 
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalTime;
 
 @UtilityClass
 public class TimeUtility {
 
-    private final Date DATE_REFERENCE = new Date(0);
-    private final List<String> TIME_FORMATS = Arrays.asList("HH:mm:ss", "mm:ss", "ss");
+    private static final String TIME_STRING_DEFAULT = "00:00:00";
 
+    // Input like '1:22:45', '3:45', ...
     public Long getSecondsForTimeString(final String time) {
-        for (final String format : TIME_FORMATS) {
-            try {
-                return (new SimpleDateFormat(format).parse(time).getTime() - DATE_REFERENCE.getTime()) / 1000L;
-            } catch (Exception ignored) {
-            }
+
+        final char[] defaultTimeStringArray = TIME_STRING_DEFAULT.toCharArray();
+        final char[] reverseTimeStringArray = new StringBuffer(time).reverse().toString().toCharArray();
+
+        for (int i = 0; i < reverseTimeStringArray.length; i++) {
+            defaultTimeStringArray[defaultTimeStringArray.length - 1 - i] = reverseTimeStringArray[i];
         }
-        return null;
+
+        return Integer.toUnsignedLong(LocalTime.parse(String.valueOf(defaultTimeStringArray)).toSecondOfDay());
     }
 
     public Long getSecondsForMilliseconds(final Long milliseconds) {
