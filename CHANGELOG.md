@@ -4,7 +4,9 @@ Changelog
 0.7.1 - unreleased
 ------------------
 
-Nothing changed for now
+**Bugfix:**
+  
+- Fix youtube track length resolving
 
 0.7.0
 -----
