@@ -28,7 +28,7 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
     @Override
     public YouTubeTrack deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
 
-        final JsonElement rootElement = JsonElement.of(ctxt.readTree(p).get("videoRenderer"));
+        final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
 
         // Track
 

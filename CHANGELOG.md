@@ -4,6 +4,10 @@ Changelog
 0.7.1 - unreleased
 ------------------
 
+**Feature:**
+
+- Additional youtube video metadata path
+
 **Bugfix:**
   
 - Fix youtube track length resolving

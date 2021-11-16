@@ -119,7 +119,12 @@ class YouTubeUtility {
                 .filter(content -> Objects.isNull(content.get("videoRenderer", "upcomingEventData").getNode())) // Avoid premieres
                 .map(content -> {
             try {
-                return content.mapToObject(MAPPER, YouTubeTrack.class);
+                final JsonElement videoMetadata = content.get("videoRenderer")
+                        .orElseGet(() -> content
+                                .get("searchPyvRenderer", "ads")
+                                .getFirstField()
+                                .get("promotedVideoRenderer"));
+                return videoMetadata.mapToObject(MAPPER, YouTubeTrack.class);
             } catch (JsonProcessingException e) {
                 log.error("Error parsing Youtube track JSON: {}", e.getMessage());
                 return null;
