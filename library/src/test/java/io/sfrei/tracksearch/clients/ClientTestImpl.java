@@ -86,17 +86,19 @@ public abstract class ClientTestImpl<T extends Track> extends Client implements 
             for (T track : trackList.getTracks()) {
                 testLogger.logBefore();
 
+                logger.debug("Check track MetaData for: {}", track);
+                assertNotNull(track.getTitle());
+                assertNotNull(track.getLength());
+                assertNotNull(track.getUrl());
+
                 final TrackMetadata trackMetadata = track.getTrackMetadata();
-                final String metaDataString = trackMetadata.toString();
+                assertNotNull(trackMetadata);
 
-                logger.info("MetaData for: {}", track);
-                if (trackMetadata.getChannelName() == null ||
-                        trackMetadata.getChannelUrl() == null ||
-                        trackMetadata.getStreamAmount() == null ||
-                        trackMetadata.getThumbNailUrl() == null)
-                    logger.warn("Any MetaData unresolved: {}", metaDataString);
-
-                logger.debug("MetaData: {}", metaDataString);
+                logger.debug("MetaData: {}", trackMetadata);
+                assertNotNull(trackMetadata.getChannelName());
+                assertNotNull(trackMetadata.getChannelUrl());
+                assertNotNull(trackMetadata.getStreamAmount());
+                assertNotNull(trackMetadata.getThumbNailUrl());
             }
         }
     }
