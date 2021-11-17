@@ -11,6 +11,7 @@ import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.utils.ExceptionUtility;
 import io.sfrei.tracksearch.utils.TrackListHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +84,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
 
     private String provideStreamUrl(final SoundCloudTrack track) {
         try {
-            return getStreamUrl(track, TrackSearchConstants.RETRY_RESOLVING_ONCE);
+            return getStreamUrl(track, TrackSearchConstants.DEFAULT_RESOLVING_RETRIES);
         } catch (TrackSearchException e) {
             log.error("Error occurred acquiring stream URL", e);
         }
@@ -106,7 +107,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
     @Override
     public String getStreamUrl(@NonNull SoundCloudTrack soundCloudTrack, final int retries) throws TrackSearchException {
         return ClientHelper.getStreamUrl(this, soundCloudTrack, this::requestAndGetCode, retries)
-                .orElseThrow(() -> new SoundCloudException(String.format("Not able to get stream URL after %s retries", retries)));
+                .orElseThrow(() -> new SoundCloudException(ExceptionUtility.noStreamUrlAfterRetriesMessage(retries)));
     }
 
     private ResponseWrapper getSearch(final String search, final boolean firstRequest, final Map<String, String> pagingParams) {

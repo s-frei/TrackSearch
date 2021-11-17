@@ -12,10 +12,7 @@ import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
-import io.sfrei.tracksearch.utils.CacheMap;
-import io.sfrei.tracksearch.utils.TrackFormatUtility;
-import io.sfrei.tracksearch.utils.TrackListHelper;
-import io.sfrei.tracksearch.utils.URLUtility;
+import io.sfrei.tracksearch.utils.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
@@ -91,7 +88,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
     private String provideStreamUrl(final YouTubeTrack track) {
         try {
-            return getStreamUrl(track, TrackSearchConstants.RETRY_RESOLVING_ONCE);
+            return getStreamUrl(track, TrackSearchConstants.DEFAULT_RESOLVING_RETRIES);
         } catch (TrackSearchException e) {
             log.error("Error occurred acquiring stream URL", e);
         }
@@ -155,7 +152,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     @Override
     public String getStreamUrl(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
         return ClientHelper.getStreamUrl(this, youtubeTrack, this::requestAndGetCode, retries)
-                .orElseThrow(() -> new YouTubeException(String.format("Not able to get stream URL after %s retries", retries)));
+                .orElseThrow(() -> new YouTubeException(ExceptionUtility.noStreamUrlAfterRetriesMessage(retries)));
     }
 
     private Map<String, String> getPagingParams(final Map<String, String> queryInformation) {

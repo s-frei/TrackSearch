@@ -13,21 +13,35 @@ import java.util.function.Function;
 public final class ClientHelper {
 
     public static <T extends Track> Optional<String> getStreamUrl(TrackSearchClient<T> searchClient, T track,
-                                                                  Function<String, Integer> requester, int retries)
-            throws TrackSearchException {
-        while (retries >= 0) {
-            try {
-                final String streamUrl = searchClient.getStreamUrl(track);
-                final int code = requester.apply(streamUrl);
-                if (Client.successResponseCode(code))
-                    return Optional.ofNullable(streamUrl);
-                log.debug("Retry to get stream URL");
-                retries--;
-            } catch (TrackSearchException e) {
-                e.printStackTrace();
+                                                                  Function<String, Integer> requestForCodeFunction,
+                                                                  final int retries) {
+
+        return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, retries + 1);
+    }
+
+    private static <T extends Track> Optional<String> tryToGetStreamUrl(TrackSearchClient<T> searchClient, T track,
+                                                                        Function<String, Integer> requestForCodeFunction,
+                                                                        int tries) {
+
+        if (tries <= 0)
+            return Optional.empty();
+
+        try {
+            final String streamUrl = searchClient.getStreamUrl(track);
+            final int code = requestForCodeFunction.apply(streamUrl);
+            if (Client.successResponseCode(code))
+                return Optional.ofNullable(streamUrl);
+            else {
+                tries -= 1;
+                log.warn("Error getting stream URL for {} - {} retries left",
+                        searchClient.getClass().getSimpleName(), tries);
+                return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, tries);
             }
+        } catch (TrackSearchException e) {
+            log.error("Error getting stream URL for {}", e, searchClient.getClass().getSimpleName());
+            return Optional.empty();
         }
-        return Optional.empty();
+
     }
 
 }

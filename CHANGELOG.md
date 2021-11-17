@@ -6,7 +6,8 @@ Changelog
 
 **Feature:**
 
-- Additional youtube video metadata path
+- Additional youtube video data path
+- Increase default URL resolving retries
 
 **Bugfix:**
   
