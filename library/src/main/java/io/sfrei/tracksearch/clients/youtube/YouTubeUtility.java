@@ -137,7 +137,7 @@ class YouTubeUtility {
         final Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
         final BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation);
         trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, foundTracks);
-        log.debug("Found {} YouTube Tracks", foundTracks);
+        log.debug("Found {} YouTube Tracks for {}: {}", foundTracks, queryType, query);
         return trackList;
     }
 

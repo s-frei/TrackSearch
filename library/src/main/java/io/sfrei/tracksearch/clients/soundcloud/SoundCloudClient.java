@@ -58,28 +58,31 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
         return new HashMap<>(Map.of(TrackList.QUERY_PARAM, query));
     }
 
-    private BaseTrackList<SoundCloudTrack> getTracksForSearch(final String search, int position, int offset) throws TrackSearchException {
+    private BaseTrackList<SoundCloudTrack> getTracksForSearch(final String search, int position, int offset, QueryType queryType)
+            throws TrackSearchException {
+
         checkClientIDAvailableOrThrow();
 
         final Map<String, String> pagingParams = getPagingParams(position, offset);
         final ResponseWrapper response = getSearch(search, true, pagingParams);
 
         final String content = response.getContentOrThrow();
-        return soundCloudUtility.getSoundCloudTracks(content, QueryType.SEARCH, search, this::provideStreamUrl);
+        return soundCloudUtility.getSoundCloudTracks(content, queryType, search, this::provideStreamUrl);
     }
 
     @Override
     public TrackList<SoundCloudTrack> getNext(@NonNull final TrackList<? extends Track> trackList) throws TrackSearchException {
         throwIfPagingValueMissing(this, trackList);
 
-        if (trackList.getQueryType().equals(QueryType.SEARCH)) {
+        final QueryType trackListQueryType = trackList.getQueryType();
+        if (trackListQueryType.equals(QueryType.SEARCH) || trackListQueryType.equals(QueryType.PAGING)) {
             final int queryPosition = trackList.getQueryInformationIntValue(OFFSET_KEY);
             final int queryOffset = TrackSearchConfig.DEFAULT_PLAYLIST_OFFSET;
 
-            final BaseTrackList<SoundCloudTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), queryPosition, queryOffset);
+            final BaseTrackList<SoundCloudTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), queryPosition, queryOffset, QueryType.PAGING);
             return TrackListHelper.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
         }
-        throw new SoundCloudException("Query type not supported");
+        throw new SoundCloudException(ExceptionUtility.unsupportedQueryTypeMessage(trackListQueryType));
     }
 
     private String provideStreamUrl(final SoundCloudTrack track) {
@@ -167,7 +170,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
 
     @Override
     public TrackList<SoundCloudTrack> getTracksForSearch(@NonNull final String search) throws TrackSearchException {
-        BaseTrackList<SoundCloudTrack> trackList = getTracksForSearch(search, 0, TrackSearchConfig.DEFAULT_PLAYLIST_OFFSET);
+        BaseTrackList<SoundCloudTrack> trackList = getTracksForSearch(search, 0, TrackSearchConfig.DEFAULT_PLAYLIST_OFFSET, QueryType.SEARCH);
         trackList.addQueryInformationValue(POSITION_KEY, 0);
         return trackList;
     }

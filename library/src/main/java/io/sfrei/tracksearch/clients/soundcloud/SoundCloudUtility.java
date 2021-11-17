@@ -87,7 +87,7 @@ class SoundCloudUtility {
         final Map<String, String> queryInformation = SoundCloudClient.makeQueryInformation(query);
         final BaseTrackList<SoundCloudTrack> trackList = new BaseTrackList<>(scTracks, queryType, queryInformation);
         trackList.addQueryInformationValue(SoundCloudClient.OFFSET_KEY, foundTracks);
-        log.debug("Found {} SoundCloud Tracks", foundTracks);
+        log.debug("Found {} SoundCloud Tracks for {}: {}", foundTracks, queryType, query);
         return trackList;
     }
 
