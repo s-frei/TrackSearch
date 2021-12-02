@@ -14,8 +14,8 @@
   <a href="https://mvnrepository.com/artifact/io.sfrei/tracksearch"> 
     <img alt="Maven Central release" src="https://img.shields.io/maven-central/v/io.sfrei/tracksearch">
   </a>
-  <a href="https://github.com/s-frei/TrackSearch/actions/workflows/maven.yml"> 
-    <img alt="Functionality Test State" src="https://github.com/s-frei/TrackSearch/actions/workflows/maven.yml/badge.svg">
+  <a href="https://github.com/s-frei/TrackSearch/actions/workflows/maven-test.yml"> 
+    <img alt="Functionality Test State" src="https://github.com/s-frei/TrackSearch/actions/workflows/maven-test.yml/badge.svg">
   </a>
   </p>
 </div>
