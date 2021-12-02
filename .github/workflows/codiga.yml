@@ -1,4 +1,4 @@
-name: code-test
+name: "Check Code"
 
 on:
   push:
@@ -9,9 +9,8 @@ on:
 jobs:
   check-code-quality:
     runs-on: ubuntu-latest
-    name: Check my code quality
     steps:
-      - name: Check code meets quality standards
+      - name: "Check code quality using Codiga"
         id: code-inspector
         uses: codeinspectorio/github-action@master
         with:
