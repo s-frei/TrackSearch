@@ -23,4 +23,4 @@ jobs:
           cache: maven
 
       - name: "Test functionality with Maven"
-        run: mvn clean test -e
+        run: mvn -Dsurefire.useFile=false clean test -e
