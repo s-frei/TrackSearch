@@ -1,14 +1,15 @@
 Changelog
 =========
 
-0.7.1 - unreleased
-------------------
+0.7.1
+-----
 
 **Feature:**
 
 - Additional youtube video data path
 - Increase default URL resolving retries
 - Avoid resolving of streams and ads
+- Updated dependencies
 
 **Bugfix:**
   
