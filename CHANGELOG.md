@@ -8,6 +8,7 @@ Changelog
 
 - Additional youtube video data path
 - Increase default URL resolving retries
+- Avoid resolving of streams and ads
 
 **Bugfix:**
   
