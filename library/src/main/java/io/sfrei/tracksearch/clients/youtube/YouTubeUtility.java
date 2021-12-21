@@ -117,14 +117,21 @@ class YouTubeUtility {
         final JsonElement contents = contentHolder.get("contents");
         final List<YouTubeTrack> ytTracks = contents.elements()
                 .filter(content -> Objects.isNull(content.get("videoRenderer", "upcomingEventData").getNode())) // Avoid premieres
-                .map(content -> {
-            try {
-                return content.mapToObject(MAPPER, YouTubeTrack.class);
-            } catch (JsonProcessingException e) {
-                log.error("Error parsing Youtube track JSON: {}", e.getMessage());
-                return null;
-            }
-        }).filter(Objects::nonNull)
+                .filter(content -> Objects.isNull(content.get("promotedSparklesWebRenderer").getNode())) // Avoid ads
+                .map(content -> content.get("videoRenderer").orElseGet(() -> content
+                        .get("searchPyvRenderer", "ads")
+                        .getFirstField()
+                        .get("promotedVideoRenderer")))
+                .filter(renderer -> Objects.nonNull(renderer.get("lengthText").getNode())) // Avoid live streams
+                .map(renderer -> {
+                    try {
+                        return renderer.mapToObject(MAPPER, YouTubeTrack.class);
+                    } catch (Exception e) {
+                        log.error("Error parsing Youtube track JSON: {}", renderer.getNode().toString(), e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
                 .collect(Collectors.toList());
 
@@ -132,7 +139,7 @@ class YouTubeUtility {
         final Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
         final BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation);
         trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, foundTracks);
-        log.debug("Found {} YouTube Tracks", foundTracks);
+        log.debug("Found {} YouTube Tracks for {}: {}", foundTracks, queryType, query);
         return trackList;
     }
 

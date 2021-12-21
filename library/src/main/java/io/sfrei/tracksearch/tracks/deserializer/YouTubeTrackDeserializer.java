@@ -9,11 +9,13 @@ import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import io.sfrei.tracksearch.utils.ReplaceUtility;
 import io.sfrei.tracksearch.utils.TimeUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@Slf4j
 public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
 
     @SuppressWarnings("unused")
@@ -28,7 +30,7 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
     @Override
     public YouTubeTrack deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
 
-        final JsonElement rootElement = JsonElement.of(ctxt.readTree(p).get("videoRenderer"));
+        final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
 
         // Track
 
@@ -54,9 +56,9 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
 
         final String streamAmountText = rootElement.get("viewCountText").getAsString("simpleText");
         final String streamAmountDigits = streamAmountText == null || streamAmountText.isEmpty() ?
-                 null : ReplaceUtility.replaceNonDigits(streamAmountText);
+                null : ReplaceUtility.replaceNonDigits(streamAmountText);
         final Long streamAmount = streamAmountDigits == null || streamAmountDigits.isEmpty() ?
-                 0L : Long.parseLong(streamAmountDigits);
+                0L : Long.parseLong(streamAmountDigits);
 
         final Stream<JsonElement> thumbNailStream = rootElement.get("thumbnail", "thumbnails").elements();
         final Optional<JsonElement> lastThumbnail = thumbNailStream.findFirst();

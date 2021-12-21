@@ -75,11 +75,12 @@ class SoundCloudUtility {
                 .map(content -> {
                     try {
                         return content.mapToObject(MAPPER, SoundCloudTrack.class);
-                    } catch (JsonProcessingException e) {
-                        log.error("Error parsing SoundCloud track JSON: {}", e.getMessage());
+                    } catch (Exception e) {
+                        log.error("Error parsing SoundCloud track JSON: {}", content.getNode().toString(), e);
                         return null;
                     }
-                }).filter(Objects::nonNull)
+                })
+                .filter(Objects::nonNull)
                 .peek(soundCloudTrack -> soundCloudTrack.setStreamUrlProvider(streamUrlProvider))
                 .collect(Collectors.toList());
 
@@ -87,7 +88,7 @@ class SoundCloudUtility {
         final Map<String, String> queryInformation = SoundCloudClient.makeQueryInformation(query);
         final BaseTrackList<SoundCloudTrack> trackList = new BaseTrackList<>(scTracks, queryType, queryInformation);
         trackList.addQueryInformationValue(SoundCloudClient.OFFSET_KEY, foundTracks);
-        log.debug("Found {} SoundCloud Tracks", foundTracks);
+        log.debug("Found {} SoundCloud Tracks for {}: {}", foundTracks, queryType, query);
         return trackList;
     }
 

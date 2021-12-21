@@ -14,8 +14,8 @@
   <a href="https://mvnrepository.com/artifact/io.sfrei/tracksearch"> 
     <img alt="Maven Central release" src="https://img.shields.io/maven-central/v/io.sfrei/tracksearch">
   </a>
-  <a href="https://github.com/s-frei/TrackSearch/actions"> 
-    <img alt="Functionality Test State" src="https://github.com/s-frei/TrackSearch/workflows/functionality-test/badge.svg">
+  <a href="https://github.com/s-frei/TrackSearch/actions/workflows/maven-test.yml"> 
+    <img alt="Functionality Test State" src="https://github.com/s-frei/TrackSearch/actions/workflows/maven-test.yml/badge.svg">
   </a>
   </p>
 </div>
@@ -57,7 +57,7 @@ Maven dependency available on [Maven Central](https://search.maven.org/artifact/
 <dependency>
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.7.0</version>
+    <version>0.7.1</version>
 </dependency>
 ```
 
@@ -66,21 +66,21 @@ Maven dependency available on [Maven Central](https://search.maven.org/artifact/
 For more information check the related interface documentation.
 
 ```java
-//Client to search on all available sources asynchronous
+// Client to search on all available sources asynchronous
 MultiTrackSearchClient searchClient = new MultiSearchClient();
 
-//Client for explicit source
+// Client for explicit source
 TrackSearchClient<SoundCloudTrack> explicitClient = new SoundCloudClient();
 
-//Do the searching
+// Search for tracks
 TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords")
 
-//Get the audio stream
+// Get the audio stream
 List<Track> tracks = tracksForSearch.getTracks();
 String streamUrl = tracks.get(anyPos).getStreamUrl();
 
-//Get next tracks page
-TrackList<Track> nextTracks=searchClient.getNext(tracksForSearch);
+// Get next tracks page
+TrackList<Track> nextTracks = searchClient.getNext(tracksForSearch);
 ```
 
 ## Why is this done ?
@@ -117,9 +117,11 @@ $ ./mvnw test -P detailed-client-test
 
 ---
 
-#### Stuff to be added
+## Contributing :handshake:
 
-Feel free to contribute!
+Feel free to contribute! - [How?](https://github.com/s-frei/TrackSearch/blob/develop/CONTRIBUTING.md)
+
+#### Stuff to be added
 
 - Standalone web module offering a RESTful API and Frontend
 - More documentation
