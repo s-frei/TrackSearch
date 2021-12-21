@@ -126,11 +126,12 @@ class YouTubeUtility {
                 .map(renderer -> {
                     try {
                         return renderer.mapToObject(MAPPER, YouTubeTrack.class);
-                    } catch (JsonProcessingException e) {
-                        log.error("Error parsing Youtube track JSON: {}", e.getMessage());
+                    } catch (Exception e) {
+                        log.error("Error parsing Youtube track JSON: {}", renderer.getNode().toString(), e);
                         return null;
                     }
-                }).filter(Objects::nonNull)
+                })
+                .filter(Objects::nonNull)
                 .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
                 .collect(Collectors.toList());
 
