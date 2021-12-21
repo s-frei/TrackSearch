@@ -12,9 +12,6 @@ public class TimeUtility {
     // Input like '1:22:45', '3:45', ...
     public Long getSecondsForTimeString(final String time) {
 
-        if (time == null)
-            return null;
-
         final char[] defaultTimeStringArray = TIME_STRING_DEFAULT.toCharArray();
         final char[] reverseTimeStringArray = new StringBuffer(time).reverse().toString().toCharArray();
 

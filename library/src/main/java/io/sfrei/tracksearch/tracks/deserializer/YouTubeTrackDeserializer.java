@@ -39,11 +39,6 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
         final String timeString = rootElement.get("lengthText").getAsString("simpleText");
         final Long length = TimeUtility.getSecondsForTimeString(timeString);
 
-        if (length == null) {
-            log.warn("Failed to parse time: {}", rootElement.getNode().toString());
-            return null;
-        }
-
         if (title == null || length == null || ref == null)
             return null;
 
@@ -61,9 +56,9 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
 
         final String streamAmountText = rootElement.get("viewCountText").getAsString("simpleText");
         final String streamAmountDigits = streamAmountText == null || streamAmountText.isEmpty() ?
-                 null : ReplaceUtility.replaceNonDigits(streamAmountText);
+                null : ReplaceUtility.replaceNonDigits(streamAmountText);
         final Long streamAmount = streamAmountDigits == null || streamAmountDigits.isEmpty() ?
-                 0L : Long.parseLong(streamAmountDigits);
+                0L : Long.parseLong(streamAmountDigits);
 
         final Stream<JsonElement> thumbNailStream = rootElement.get("thumbnail", "thumbnails").elements();
         final Optional<JsonElement> lastThumbnail = thumbNailStream.findFirst();

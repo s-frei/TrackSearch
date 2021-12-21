@@ -125,13 +125,7 @@ class YouTubeUtility {
                 .filter(renderer -> Objects.nonNull(renderer.get("lengthText").getNode())) // Avoid live streams
                 .map(renderer -> {
                     try {
-                        final YouTubeTrack youTubeTrack = renderer.mapToObject(MAPPER, YouTubeTrack.class);
-
-                        if (youTubeTrack == null) {
-                            log.warn("Found renderer: {}", renderer.getNode().toString());
-                        }
-
-                        return youTubeTrack;
+                        return renderer.mapToObject(MAPPER, YouTubeTrack.class);
                     } catch (JsonProcessingException e) {
                         log.error("Error parsing Youtube track JSON: {}", e.getMessage());
                         return null;
