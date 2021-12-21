@@ -118,18 +118,24 @@ class YouTubeUtility {
         final List<YouTubeTrack> ytTracks = contents.elements()
                 .filter(content -> Objects.isNull(content.get("videoRenderer", "upcomingEventData").getNode())) // Avoid premieres
                 .map(content -> {
-            try {
-                final JsonElement videoMetadata = content.get("videoRenderer")
-                        .orElseGet(() -> content
-                                .get("searchPyvRenderer", "ads")
-                                .getFirstField()
-                                .get("promotedVideoRenderer"));
-                return videoMetadata.mapToObject(MAPPER, YouTubeTrack.class);
-            } catch (JsonProcessingException e) {
-                log.error("Error parsing Youtube track JSON: {}", e.getMessage());
-                return null;
-            }
-        }).filter(Objects::nonNull)
+                    try {
+                        final JsonElement videoMetadata = content.get("videoRenderer")
+                                .orElseGet(() -> content
+                                        .get("searchPyvRenderer", "ads")
+                                        .getFirstField()
+                                        .get("promotedVideoRenderer"));
+                        final YouTubeTrack youTubeTrack = videoMetadata.mapToObject(MAPPER, YouTubeTrack.class);
+
+                        if (youTubeTrack == null) {
+                            log.warn("Found renderer: {}", content.getNode().toString());
+                        }
+
+                        return youTubeTrack;
+                    } catch (JsonProcessingException e) {
+                        log.error("Error parsing Youtube track JSON: {}", e.getMessage());
+                        return null;
+                    }
+                }).filter(Objects::nonNull)
                 .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
                 .collect(Collectors.toList());
 

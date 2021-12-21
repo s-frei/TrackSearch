@@ -39,8 +39,10 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
         final String timeString = rootElement.get("lengthText").getAsString("simpleText");
         final Long length = TimeUtility.getSecondsForTimeString(timeString);
 
-        if (length == null)
+        if (length == null) {
             log.warn("Failed to parse time: {}", rootElement.getNode().toString());
+            return null;
+        }
 
         if (title == null || length == null || ref == null)
             return null;
