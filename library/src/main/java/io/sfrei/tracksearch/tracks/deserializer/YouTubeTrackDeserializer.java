@@ -9,11 +9,13 @@ import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import io.sfrei.tracksearch.utils.ReplaceUtility;
 import io.sfrei.tracksearch.utils.TimeUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@Slf4j
 public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
 
     @SuppressWarnings("unused")
@@ -36,6 +38,9 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
         final String title = rootElement.get("title", "runs").getFirstField().getAsString("text");
         final String timeString = rootElement.get("lengthText").getAsString("simpleText");
         final Long length = TimeUtility.getSecondsForTimeString(timeString);
+
+        if (length == null)
+            log.warn("Failed to parse time: {}", rootElement.getNode().toString());
 
         if (title == null || length == null || ref == null)
             return null;
