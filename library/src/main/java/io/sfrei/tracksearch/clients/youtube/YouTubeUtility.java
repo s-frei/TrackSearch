@@ -117,17 +117,18 @@ class YouTubeUtility {
         final JsonElement contents = contentHolder.get("contents");
         final List<YouTubeTrack> ytTracks = contents.elements()
                 .filter(content -> Objects.isNull(content.get("videoRenderer", "upcomingEventData").getNode())) // Avoid premieres
-                .map(content -> {
+                .filter(content -> Objects.isNull(content.get("promotedSparklesWebRenderer").getNode())) // Avoid ads
+                .map(content -> content.get("videoRenderer").orElseGet(() -> content
+                        .get("searchPyvRenderer", "ads")
+                        .getFirstField()
+                        .get("promotedVideoRenderer")))
+                .filter(renderer -> Objects.nonNull(renderer.get("lengthText").getNode())) // Avoid live streams
+                .map(renderer -> {
                     try {
-                        final JsonElement videoMetadata = content.get("videoRenderer")
-                                .orElseGet(() -> content
-                                        .get("searchPyvRenderer", "ads")
-                                        .getFirstField()
-                                        .get("promotedVideoRenderer"));
-                        final YouTubeTrack youTubeTrack = videoMetadata.mapToObject(MAPPER, YouTubeTrack.class);
+                        final YouTubeTrack youTubeTrack = renderer.mapToObject(MAPPER, YouTubeTrack.class);
 
                         if (youTubeTrack == null) {
-                            log.warn("Found renderer: {}", content.getNode().toString());
+                            log.warn("Found renderer: {}", renderer.getNode().toString());
                         }
 
                         return youTubeTrack;
