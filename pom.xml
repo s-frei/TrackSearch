@@ -35,6 +35,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <!-- test n report -->
+        <maven-surefire.version>3.0.0-M5</maven-surefire.version>
+
         <!-- build n deploy -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
@@ -144,6 +147,21 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire.version}</version>
+                    <configuration>
+                        <trimStackTrace>false</trimStackTrace>
+                        <disableXmlReport>true</disableXmlReport>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
     <scm>
         <url>https://github.com/s-frei/TrackSearch</url>

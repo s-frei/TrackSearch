@@ -10,17 +10,26 @@ on:
 
 jobs:
   test-functionality:
+    
     runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v2
-
-      - name: "Set up JDK 11"
+      
+      - name: "Setup JDK 11"
         uses: actions/setup-java@v2
         with:
           distribution: adopt
           java-version: 11
           architecture: x64
           cache: maven
-
-      - name: "Test functionality with Maven"
-        run: mvn -Dsurefire.useFile=false clean test -e
+      
+      - name: "Run Maven tests"
+        run: mvn test -e
+      
+      - name: "Upload test report"
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: test-report-${GITHUB_REF_NAME}-${GITHUB_SHA::6}
+          path: library/target/surefire-reports/
