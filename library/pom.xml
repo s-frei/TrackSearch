@@ -93,6 +93,7 @@
                 <configuration>
                     <excludedGroups>DetailedClientTest</excludedGroups>
                     <trimStackTrace>false</trimStackTrace>
+                    <disableXmlReport>true</disableXmlReport>
                 </configuration>
             </plugin>
         </plugins>
