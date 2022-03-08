@@ -36,7 +36,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- test n report -->
-        <maven-surefire.version>3.0.0-M5</maven-surefire.version>
+        <maven-surefire.version>2.22.2</maven-surefire.version>
 
         <!-- build n deploy -->
         <maven-compiler-plugin.version>3.10.0</maven-compiler-plugin.version>
@@ -152,12 +152,9 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire.version}</version>
-                    <configuration>
-                        <trimStackTrace>false</trimStackTrace>
-                        <disableXmlReport>true</disableXmlReport>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

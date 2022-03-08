@@ -24,7 +24,7 @@
         <jsoup.version>1.14.3</jsoup.version>
         <logback-classic.version>1.2.11</logback-classic.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
-        <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <junit.version>5.8.2</junit.version>
     </properties>
 
     <profiles>
@@ -37,6 +37,9 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <excludedGroups>ClientTest</excludedGroups>
+                            <parallel>all</parallel>
+                            <forkCount>4</forkCount>
+                            <useUnlimitedThreads>true</useUnlimitedThreads>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -85,9 +88,11 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <excludedGroups>DetailedClientTest</excludedGroups>
+                    <trimStackTrace>false</trimStackTrace>
                 </configuration>
             </plugin>
         </plugins>
@@ -137,13 +142,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit-jupiter.version}</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit-jupiter.version}</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
