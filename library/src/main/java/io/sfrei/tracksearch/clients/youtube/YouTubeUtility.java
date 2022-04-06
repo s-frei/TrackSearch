@@ -69,12 +69,15 @@ class YouTubeUtility {
                                                            final Function<YouTubeTrack, String> streamUrlProvider)
             throws YouTubeException {
 
-        final JsonElement responseElement;
+        final JsonElement jsonElement;
         try {
-            responseElement = JsonElement.read(MAPPER, json).getIndex(1).get("response");
+            jsonElement = JsonElement.read(MAPPER, json);
         } catch (JsonProcessingException e) {
             throw new YouTubeException("Error parsing YouTubeTracks JSON", e);
         }
+
+        final JsonElement responseElement = jsonElement.get("response")
+                .orElseGet(() -> jsonElement.getIndex(1).get("response"));
 
         final JsonElement defaultElement = responseElement
                 .get(defaultRoute);
@@ -154,16 +157,25 @@ class YouTubeUtility {
                 playerElement = jsonElement.firstElementFor("player");
             }
 
-            final JsonElement args = playerElement.get("args");
-
             AtomicReference<String> scriptUrl = new AtomicReference<>(null);
+
             final JsonElement streamingData;
-            if (playerElement.present() && args.present()) {
-                scriptUrl.set(playerElement.get("assets").getAsString("js"));
-                final JsonElement playerResponseTextNode = args.get("player_response").reRead(MAPPER);
-                streamingData = playerResponseTextNode.get("streamingData");
+
+            if (playerElement != null) {
+
+                final JsonElement args = playerElement.get("args");
+                if (playerElement.present() && args.present()) {
+                    scriptUrl.set(playerElement.get("assets").getAsString("js"));
+                    final JsonElement playerResponseTextNode = args.get("player_response").reRead(MAPPER);
+                    streamingData = playerResponseTextNode.get("streamingData");
+                } else {
+                    streamingData = jsonElement.getIndex(2).get("playerResponse", "streamingData");
+                }
+
             } else {
-                streamingData = jsonElement.getIndex(2).get("playerResponse", "streamingData");
+
+                streamingData = jsonElement.get("playerResponse", "streamingData");
+
             }
 
             final JsonElement formatsElement = streamingData.get("formats");
