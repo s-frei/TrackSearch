@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Supplier;
@@ -30,7 +31,10 @@ public class JsonElement extends JsonUtility {
     }
 
     public JsonElement firstElementFor(final String path) {
-        return node.findValues(path).stream().map(JsonElement::new).collect(Collectors.toList()).get(0);
+        final List<JsonElement> jsonElements = node.findValues(path).stream().map(JsonElement::new).collect(Collectors.toList());
+        if (jsonElements.isEmpty())
+            return null;
+        return jsonElements.get(0);
     }
 
     public boolean isArray() {

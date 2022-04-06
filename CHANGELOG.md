@@ -6,6 +6,7 @@ Changelog
 
 **Feature:**
 
+- Additional youtube streaming data path 
 - Additional youtube response data path
 
 0.7.1
