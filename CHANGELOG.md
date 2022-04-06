@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.7.3 - unreleased
+------------------
+
+Nothing changed yet ...
+
 0.7.2
 -----
 
