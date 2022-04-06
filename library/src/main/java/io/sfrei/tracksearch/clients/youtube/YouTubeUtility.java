@@ -69,12 +69,15 @@ class YouTubeUtility {
                                                            final Function<YouTubeTrack, String> streamUrlProvider)
             throws YouTubeException {
 
-        final JsonElement responseElement;
+        final JsonElement jsonElement;
         try {
-            responseElement = JsonElement.read(MAPPER, json).getIndex(1).get("response");
+            jsonElement = JsonElement.read(MAPPER, json);
         } catch (JsonProcessingException e) {
             throw new YouTubeException("Error parsing YouTubeTracks JSON", e);
         }
+
+        final JsonElement responseElement = jsonElement.get("response")
+                .orElseGet(() -> jsonElement.getIndex(1).get("response"));
 
         final JsonElement defaultElement = responseElement
                 .get(defaultRoute);

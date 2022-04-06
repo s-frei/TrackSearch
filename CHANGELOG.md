@@ -4,7 +4,9 @@ Changelog
 0.7.2 - unreleased
 ------------------
 
-Nothing changed yet...
+**Feature:**
+
+- Additional youtube response data path
 
 0.7.1
 -----
