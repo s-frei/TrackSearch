@@ -24,7 +24,7 @@
         <jsoup.version>1.15.1</jsoup.version>
         <logback-classic.version>1.2.11</logback-classic.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
-        <junit.version>5.8.2</junit.version>
+        <junit.version>5.9.0</junit.version>
     </properties>
 
     <profiles>
