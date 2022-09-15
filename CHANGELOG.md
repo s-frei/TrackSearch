@@ -4,6 +4,7 @@ Changelog
 0.7.3 - unreleased
 ------------------
 
+- Improved logging
 - Improve tests
 - Avoid parsing advertisements on YouTube search results
 - Additional path for YouTube paging information

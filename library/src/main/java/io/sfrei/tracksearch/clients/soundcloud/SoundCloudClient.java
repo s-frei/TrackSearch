@@ -15,6 +15,7 @@ import io.sfrei.tracksearch.utils.ExceptionUtility;
 import io.sfrei.tracksearch.utils.TrackListHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
@@ -25,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
+public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> implements ClientHelper {
 
     public static final String HOSTNAME = "https://soundcloud.com";
     private static final String INFORMATION_PREFIX = "sc";
@@ -109,7 +110,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
 
     @Override
     public String getStreamUrl(@NonNull SoundCloudTrack soundCloudTrack, final int retries) throws TrackSearchException {
-        return ClientHelper.getStreamUrl(this, soundCloudTrack, this::requestAndGetCode, retries)
+        return getStreamUrl(this, soundCloudTrack, this::requestAndGetCode, retries)
                 .orElseThrow(() -> new SoundCloudException(ExceptionUtility.noStreamUrlAfterRetriesMessage(retries)));
     }
 
@@ -184,4 +185,8 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> {
         return TrackListHelper.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
     }
 
+    @Override
+    public Logger logger() {
+        return log;
+    }
 }

@@ -15,6 +15,7 @@ import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
@@ -22,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
+public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements ClientHelper {
 
     public static final String HOSTNAME = "https://www.youtube.com";
     public static final String PAGING_KEY = "ctoken";
@@ -152,7 +153,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
 
     @Override
     public String getStreamUrl(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
-        return ClientHelper.getStreamUrl(this, youtubeTrack, this::requestAndGetCode, retries)
+        return getStreamUrl(this, youtubeTrack, this::requestAndGetCode, retries)
                 .orElseThrow(() -> new YouTubeException(ExceptionUtility.noStreamUrlAfterRetriesMessage(retries)));
     }
 
@@ -164,6 +165,11 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> {
     @Override
     public boolean hasPagingValues(@NonNull final TrackList<? extends Track> trackList) {
         return TrackListHelper.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY, PAGING_INFORMATION);
+    }
+
+    @Override
+    public Logger logger() {
+        return log;
     }
 
 }
