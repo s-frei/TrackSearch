@@ -57,7 +57,7 @@ Maven dependency available on [Maven Central](https://search.maven.org/artifact/
 <dependency>
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.7.2</version>
+    <version>0.7.3</version>
 </dependency>
 ```
 
