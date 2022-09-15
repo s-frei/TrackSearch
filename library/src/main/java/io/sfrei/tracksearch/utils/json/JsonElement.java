@@ -7,11 +7,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -20,6 +19,10 @@ public class JsonElement extends JsonUtility {
 
     @Getter
     private final JsonNode node;
+
+    public static JsonElement empty() {
+        return new JsonElement(null);
+    }
 
     public static JsonElement read(final ObjectMapper mapper, final String jsonString) throws JsonProcessingException {
         return new JsonElement(mapper.readTree(jsonString));
@@ -31,10 +34,16 @@ public class JsonElement extends JsonUtility {
     }
 
     public JsonElement firstElementFor(final String path) {
-        final List<JsonElement> jsonElements = node.findValues(path).stream().map(JsonElement::new).collect(Collectors.toList());
-        if (jsonElements.isEmpty())
-            return null;
-        return jsonElements.get(0);
+        return node.findValues(path).stream().findFirst()
+                .map(JsonElement::new).orElse(JsonElement.empty());
+    }
+    public JsonElement firstElementForWhereNotNested(final String path, final String notPath) {
+        if (node == null)
+            return this;
+        return node.findValues(path).stream()
+                .filter(node -> Objects.isNull(node.findValue(notPath)))
+                .findFirst()
+                .map(JsonElement::new).orElse(JsonElement.empty());
     }
 
     public boolean isArray() {
@@ -79,7 +88,7 @@ public class JsonElement extends JsonUtility {
     }
 
     public JsonElement orElseGet(final Supplier<JsonElement> supplier) {
-        return node == null ? supplier.get() : new JsonElement(node);
+        return node == null ? supplier.get() : this;
     }
 
     public JsonElement reRead(final ObjectMapper mapper) throws JsonProcessingException {

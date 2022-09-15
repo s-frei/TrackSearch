@@ -83,8 +83,7 @@ class YouTubeUtility {
                 .get(defaultRoute);
 
         final JsonElement contentHolder = defaultElement
-                .getFirstField()
-                .get("itemSectionRenderer")
+                .firstElementForWhereNotNested("itemSectionRenderer", "promotedSparklesWebRenderer")
                 .orElseGet(() -> responseElement
                         .get("onResponseReceivedCommands")
                         .getFirstField()
