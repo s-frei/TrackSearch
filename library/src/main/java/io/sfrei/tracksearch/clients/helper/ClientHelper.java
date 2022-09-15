@@ -36,7 +36,7 @@ public interface ClientHelper {
                 return Optional.ofNullable(streamUrl);
             else {
                 tries -= 1;
-                logger().warn("Error getting stream URL for {} - {} retries left",
+                logger().warn("Not able getting stream URL for {} - {} retries left",
                         searchClient.getClass().getSimpleName(), tries);
                 return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, tries);
             }
