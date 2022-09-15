@@ -12,6 +12,7 @@ public class ClientTestConstants {
     static {
         SEARCH_KEYS = new ArrayList<>();
         SEARCH_KEYS.add(DEFAULT_SEARCH_KEY);
+        SEARCH_KEYS.add("Hans Zimmer");
         SEARCH_KEYS.add("Paul Kalkbrenner");
         SEARCH_KEYS.add("Einmusik");
         SEARCH_KEYS.add("Mind Against");
