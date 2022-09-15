@@ -50,11 +50,6 @@ class YouTubeUtility {
     );
     private static final Pattern EMBEDDED_PLAYER_SCRIPT_PATTERN = Pattern.compile("src=\"(/[a-zA-Z0-9/-_.]+base.js)\"");
 
-    // JSON Routes
-    private static final String[] defaultRoute = {"contents", "twoColumnSearchResultsRenderer", "primaryContents",
-            "sectionListRenderer", "contents"};
-    private static final String[] continuationItemRenderer = {"continuationItemRenderer", "continuationEndpoint", "continuationCommand"};
-
     private final CacheMap<String, SignatureResolver> sigResolverCache;
 
     public YouTubeUtility() {
@@ -80,11 +75,10 @@ class YouTubeUtility {
                 .orElseGet(() -> jsonElement.getIndex(1).get("response"));
 
         final JsonElement defaultElement = responseElement
-                .get(defaultRoute);
+                .get("contents", "twoColumnSearchResultsRenderer", "primaryContents", "sectionListRenderer", "contents");
 
         final JsonElement contentHolder = defaultElement
-                .getFirstField()
-                .get("itemSectionRenderer")
+                .firstElementForWhereNotNested("itemSectionRenderer", "promotedSparklesWebRenderer")
                 .orElseGet(() -> responseElement
                         .get("onResponseReceivedCommands")
                         .getFirstField()
@@ -111,9 +105,10 @@ class YouTubeUtility {
                     .getFirstField()
                     .get("appendContinuationItemsAction", "continuationItems")
                     .getIndex(1)
+                    .get("continuationItemRenderer", "continuationEndpoint", "continuationCommand")
                     .orElseGet(() -> defaultElement
-                            .getIndex(1))
-                    .get(continuationItemRenderer)
+                            .firstElementFor("continuationItemRenderer")
+                            .get("continuationEndpoint", "continuationCommand"))
                     .getAsString("token");
         }
 

@@ -1,6 +1,18 @@
 Changelog
 =========
 
+0.7.3
+-----
+
+**Features:**
+
+- Additional path for YouTube paging information
+- Improved tests and logging
+
+**Bugfixes:**
+
+- Avoid parsing advertisements on YouTube search results
+
 0.7.2
 -----
 

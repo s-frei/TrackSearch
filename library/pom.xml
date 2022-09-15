@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.sfrei</groupId>
         <artifactId>tracksearch-parent</artifactId>
-        <version>0.7.2</version>
+        <version>0.7.3</version>
     </parent>
 
     <artifactId>tracksearch</artifactId>
@@ -19,12 +19,12 @@
     <properties>
         <java-version>11</java-version>
         <retrofit.version>2.9.0</retrofit.version>
-        <okhttp.version>4.9.3</okhttp.version>
-        <jackson-databind.version>2.13.2.2</jackson-databind.version>
-        <jsoup.version>1.14.3</jsoup.version>
-        <logback-classic.version>1.2.11</logback-classic.version>
-        <slf4j-api.version>1.7.36</slf4j-api.version>
-        <junit.version>5.8.2</junit.version>
+        <okhttp.version>4.10.0</okhttp.version>
+        <jackson-databind.version>2.13.4</jackson-databind.version>
+        <jsoup.version>1.15.3</jsoup.version>
+        <logback-classic.version>1.4.1</logback-classic.version>
+        <slf4j-api.version>2.0.1</slf4j-api.version>
+        <junit.version>5.9.0</junit.version>
     </properties>
 
     <profiles>
@@ -90,10 +90,24 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>me.fabriciorby</groupId>
+                        <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                        <version>1.1.0</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
                     <excludedGroups>DetailedClientTest</excludedGroups>
                     <trimStackTrace>false</trimStackTrace>
                     <disableXmlReport>true</disableXmlReport>
+                    <reportFormat>plain</reportFormat>
+                    <consoleOutputReporter>
+                        <disable>true</disable>
+                    </consoleOutputReporter>
+                    <statelessTestsetInfoReporter
+                            implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                    </statelessTestsetInfoReporter>
                 </configuration>
             </plugin>
         </plugins>
@@ -126,19 +140,9 @@
             <version>${jsoup.version}</version>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback-classic.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j-api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -150,6 +154,23 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+                <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-classic.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

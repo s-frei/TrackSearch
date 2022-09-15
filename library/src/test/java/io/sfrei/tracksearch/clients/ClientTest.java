@@ -1,19 +1,21 @@
 package io.sfrei.tracksearch.clients;
 
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
+import io.sfrei.tracksearch.tracks.Track;
+import io.sfrei.tracksearch.tracks.TrackList;
 
 import java.io.IOException;
 
-public interface ClientTest {
+public interface ClientTest<T extends Track> {
 
-    void tracksFoSearch() throws TrackSearchException;
+    void tracksForSearch(String key) throws TrackSearchException;
 
-    void getNextTracks() throws TrackSearchException;
+    void trackListGotPagingValues(TrackList<T> trackList);
 
-    void trackListGotPagingValues();
+    void getNextTracks(TrackList<T> trackList) throws TrackSearchException;
 
-    void checkMetadata();
+    void checkMetadata(TrackList<T> trackList);
 
-    void getStreamUrl() throws IOException;
+    void getStreamUrl(T track) throws IOException;
 
 }
