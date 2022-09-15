@@ -111,9 +111,10 @@ class YouTubeUtility {
                     .getFirstField()
                     .get("appendContinuationItemsAction", "continuationItems")
                     .getIndex(1)
+                    .get("continuationItemRenderer", "continuationEndpoint", "continuationCommand")
                     .orElseGet(() -> defaultElement
-                            .getIndex(1))
-                    .get(continuationItemRenderer)
+                            .firstElementFor("continuationItemRenderer")
+                            .get("continuationEndpoint", "continuationCommand"))
                     .getAsString("token");
         }
 

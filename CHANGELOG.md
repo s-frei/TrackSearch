@@ -4,7 +4,7 @@ Changelog
 0.7.3 - unreleased
 ------------------
 
-Nothing changed yet ...
+- Additional path for YouTube paging information
 
 0.7.2
 -----
