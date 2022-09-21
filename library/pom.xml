@@ -23,7 +23,7 @@
         <jackson-databind.version>2.13.4</jackson-databind.version>
         <jsoup.version>1.15.3</jsoup.version>
         <logback-classic.version>1.4.1</logback-classic.version>
-        <slf4j-api.version>2.0.1</slf4j-api.version>
+        <slf4j-api.version>2.0.2</slf4j-api.version>
         <junit.version>5.9.0</junit.version>
     </properties>
 
