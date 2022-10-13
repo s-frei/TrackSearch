@@ -7,10 +7,7 @@ import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.config.TrackSearchConstants;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
-import io.sfrei.tracksearch.tracks.BaseTrackList;
-import io.sfrei.tracksearch.tracks.SoundCloudTrack;
-import io.sfrei.tracksearch.tracks.Track;
-import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.*;
 import io.sfrei.tracksearch.utils.ExceptionUtility;
 import io.sfrei.tracksearch.utils.TrackListHelper;
 import lombok.NonNull;
@@ -174,6 +171,11 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> implem
         BaseTrackList<SoundCloudTrack> trackList = getTracksForSearch(search, 0, TrackSearchConfig.DEFAULT_PLAYLIST_OFFSET, QueryType.SEARCH);
         trackList.addQueryInformationValue(POSITION_KEY, 0);
         return trackList;
+    }
+
+    @Override
+    public TrackList<YouTubeTrack> getRelatedTracks(@NonNull String videoID) throws TrackSearchException {
+        return null;
     }
 
     private Map<String, String> getPagingParams(final int position, final int offset) {

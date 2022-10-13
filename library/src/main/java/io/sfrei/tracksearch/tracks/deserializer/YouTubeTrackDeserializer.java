@@ -29,24 +29,30 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
 
     @Override
     public YouTubeTrack deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-
         final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
-
         // Track
 
         final String ref = rootElement.getAsString("videoId");
-        final String title = rootElement.get("title", "runs").getFirstField().getAsString("text");
+        String title = rootElement.get("title", "runs").getFirstField().getAsString("text");
+        if (title==null)
+            title = rootElement.get("title").getAsString("simpleText");
         final String timeString = rootElement.get("lengthText").getAsString("simpleText");
         final Long length = TimeUtility.getSecondsForTimeString(timeString);
 
-        if (title == null || length == null || ref == null)
+        if (title == null || length == null || ref == null) {
             return null;
+        }
 
         final String url = YouTubeClient.HOSTNAME.concat("/watch?v=").concat(ref);
 
         // Metadata
 
-        final JsonElement owner = rootElement.get("ownerText", "runs").getFirstField();
+        JsonElement owner = rootElement.get("ownerText", "runs").getFirstField();
+
+        if (!owner.present()){
+            owner = rootElement.get("longBylineText", "runs").getFirstField();
+        }
+
 
         final String channelName = owner.getAsString("text");
 
@@ -66,7 +72,6 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
 
         final YouTubeTrackMetadata trackMetadata = new YouTubeTrackMetadata(channelName, channelUrl,
                 streamAmount, thumbNailUrl);
-
         return new YouTubeTrack(title, length, url, trackMetadata);
     }
 

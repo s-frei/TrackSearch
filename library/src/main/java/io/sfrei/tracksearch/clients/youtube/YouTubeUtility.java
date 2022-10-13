@@ -7,6 +7,7 @@ import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
+import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
@@ -142,24 +143,30 @@ class YouTubeUtility {
         return trackList;
     }
 
-    protected List<String> getRelatedTracks(final String json)
+    protected BaseTrackList<YouTubeTrack> getRelatedTracks(final String json, final Function<YouTubeTrack, String> streamUrlProvider)
             throws YouTubeException {
         final JsonElement jsonElement;
         try {
             jsonElement = JsonElement.read(MAPPER, json);
             JsonElement results = jsonElement.getIndex(3).get("response").get("contents").get("twoColumnWatchNextResults")
                     .get("secondaryResults").get("secondaryResults").get("results");
-
-            List<String> urls = results.elements()
+            final List<YouTubeTrack> ytTracks = results.elements()
+                    .filter(content -> content.get("compactVideoRenderer").present())
+                    .filter(content -> Objects.nonNull(content.get("compactVideoRenderer").get("lengthText").getNode()))
                     .map(content ->{
-                        return content.get("compactVideoRenderer").present()?content.get("compactVideoRenderer")
-                                .get("navigationEndpoint")
-                                .get("commandMetadata")
-                                .get("webCommandMetadata")
-                                .get("url")
-                                .getNode().toString():null;
-                    }).filter(Objects::nonNull).collect(Collectors.toList());
-            return urls;
+                        try {
+                             return content.get("compactVideoRenderer").mapToObject(MAPPER, YouTubeTrack.class);
+                        } catch (Exception e) {
+                            log.error("Error parsing Youtube track JSON: {}", content.getNode().toString(), e);
+                            return null;
+                        }
+                    }).filter(Objects::nonNull)
+                    .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
+                    .collect(Collectors.toList());
+
+            final BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, QueryType.SEARCH, new HashMap<>());
+            trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, ytTracks.size());
+            return trackList;
 
         } catch (JsonProcessingException e) {
             throw new YouTubeException("Error parsing YouTubeTracks JSON", e);

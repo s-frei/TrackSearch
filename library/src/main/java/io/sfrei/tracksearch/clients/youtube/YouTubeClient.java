@@ -89,20 +89,12 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements C
         return trackList;
     }
 
+    @Override
     public BaseTrackList<YouTubeTrack> getRelatedTracks(@NonNull final String videoID) throws TrackSearchException {
         final Call<ResponseWrapper> request = requestService.getVideoPage(videoID, DEFAULT_SEARCH_PARAMS);
         final ResponseWrapper response = Client.request(request);
         final String content = response.getContentOrThrow();
-        List<YouTubeTrack> tracks = new ArrayList<>();
-        Map<String, String> queryInfo = new HashMap<>();
-        for(String url : youTubeUtility.getRelatedTracks(content)){
-            BaseTrackList<YouTubeTrack> list = getTracksForSearch(url);
-            if (list.isEmpty())continue;
-            queryInfo.putAll(list.getQueryInformation());
-            tracks.add(list.getTracks().get(0));
-        }
-
-        return new BaseTrackList<>(tracks, QueryType.SEARCH, queryInfo);
+        return youTubeUtility.getRelatedTracks(content, this::provideStreamUrl);
     }
 
     private String provideStreamUrl(final YouTubeTrack track) {

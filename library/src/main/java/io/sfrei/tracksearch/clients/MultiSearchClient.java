@@ -44,6 +44,11 @@ public class MultiSearchClient implements MultiTrackSearchClient {
     }
 
     @Override
+    public TrackList<YouTubeTrack> getRelatedTracks(@NonNull String videoID) throws TrackSearchException {
+        return null;
+    }
+
+    @Override
     public TrackList<Track> getNext(@NonNull final TrackList<? extends Track> trackList) throws TrackSearchException {
 
         final List<TrackSearchClient<? extends Track>> callClients = new ArrayList<>(clients);

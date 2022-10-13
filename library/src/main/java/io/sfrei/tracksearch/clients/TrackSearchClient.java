@@ -1,8 +1,10 @@
 package io.sfrei.tracksearch.clients;
 
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
+import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import lombok.NonNull;
 
 /**
@@ -18,6 +20,14 @@ public interface TrackSearchClient<T extends Track> {
      * @throws TrackSearchException when the client encountered a problem on searching.
      */
     TrackList<T> getTracksForSearch(@NonNull String search) throws TrackSearchException;
+
+    /**
+     * Search for related tracks using a videoID.
+     * @param videoID videoID of the youTube video.
+     * @return a track list containing all found tracks.
+     * @throws TrackSearchException when the client encountered a problem on searching.
+     */
+    TrackList<YouTubeTrack> getRelatedTracks(@NonNull final String videoID) throws TrackSearchException;
 
     /**
      * Search for the next tracks for last result.
