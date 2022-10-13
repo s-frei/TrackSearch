@@ -1,6 +1,7 @@
 package io.sfrei.tracksearch.clients.youtube;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
@@ -139,6 +140,30 @@ class YouTubeUtility {
         trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, foundTracks);
         log.debug("Found {} YouTube Tracks for {}: {}", foundTracks, queryType, query);
         return trackList;
+    }
+
+    protected List<String> getRelatedTracks(final String json)
+            throws YouTubeException {
+        final JsonElement jsonElement;
+        try {
+            jsonElement = JsonElement.read(MAPPER, json);
+            JsonElement results = jsonElement.getIndex(3).get("response").get("contents").get("twoColumnWatchNextResults")
+                    .get("secondaryResults").get("secondaryResults").get("results");
+
+            List<String> urls = results.elements()
+                    .map(content ->{
+                        return content.get("compactVideoRenderer").present()?content.get("compactVideoRenderer")
+                                .get("navigationEndpoint")
+                                .get("commandMetadata")
+                                .get("webCommandMetadata")
+                                .get("url")
+                                .getNode().toString():null;
+                    }).filter(Objects::nonNull).collect(Collectors.toList());
+            return urls;
+
+        } catch (JsonProcessingException e) {
+            throw new YouTubeException("Error parsing YouTubeTracks JSON", e);
+        }
     }
 
     protected YouTubeTrackInfo getTrackInfo(final String json, final String trackUrl, Function<String, ResponseWrapper> requester) {

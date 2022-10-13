@@ -27,4 +27,13 @@ public interface YouTubeService {
     Call<ResponseWrapper> getSearchForKeywords(@Query("search_query") String search,
                                                @QueryMap Map<String, String> params);
 
+    @GET("/watch")
+    @Headers({
+            TrackSearchConfig.HEADER_LANGUAGE_ENGLISH,
+            TrackSearchConfig.HEADER_YOUTUBE_CLIENT_NAME,
+            TrackSearchConfig.HEADER_YOUTUBE_CLIENT_VERSION
+    })
+    Call<ResponseWrapper> getVideoPage(@Query("v") String search,
+                                       @QueryMap Map<String, String> params);
+
 }
