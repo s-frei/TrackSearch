@@ -20,7 +20,7 @@
         <java-version>11</java-version>
         <retrofit.version>2.9.0</retrofit.version>
         <okhttp.version>4.10.0</okhttp.version>
-        <jackson-databind.version>2.13.4</jackson-databind.version>
+        <jackson-databind.version>2.13.4.2</jackson-databind.version>
         <jsoup.version>1.15.3</jsoup.version>
         <logback-classic.version>1.4.1</logback-classic.version>
         <slf4j-api.version>2.0.1</slf4j-api.version>
