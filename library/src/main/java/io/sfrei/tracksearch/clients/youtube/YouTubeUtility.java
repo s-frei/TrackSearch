@@ -15,6 +15,7 @@ import io.sfrei.tracksearch.utils.URLUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -116,29 +117,37 @@ class YouTubeUtility {
         final List<YouTubeTrack> ytTracks = contents.elements()
                 .filter(content -> Objects.isNull(content.get("videoRenderer", "upcomingEventData").getNode())) // Avoid premieres
                 .filter(content -> Objects.isNull(content.get("promotedSparklesWebRenderer").getNode())) // Avoid ads
-                .map(content -> content.get("videoRenderer").orElseGet(() -> content
-                        .get("searchPyvRenderer", "ads")
-                        .getFirstField()
-                        .get("promotedVideoRenderer")))
+                .map(content ->
+                        content.get("videoRenderer")
+                                .orElseGet(() -> content
+                                        .get("searchPyvRenderer", "ads")
+                                        .getFirstField()
+                                        .get("promotedVideoRenderer"))
+                )
                 .filter(renderer -> Objects.nonNull(renderer.get("lengthText").getNode())) // Avoid live streams
-                .map(renderer -> {
-                    try {
-                        return renderer.mapToObject(MAPPER, YouTubeTrack.class);
-                    } catch (Exception e) {
-                        log.error("Error parsing Youtube track JSON: {}", renderer.getNode().toString(), e);
-                        return null;
-                    }
-                })
+                .map(this::mapJsonElementToYouTubeTrack)
                 .filter(Objects::nonNull)
                 .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
                 .collect(Collectors.toList());
 
-        int foundTracks = ytTracks.size();
+
         final Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
         final BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation);
-        trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, foundTracks);
-        log.debug("Found {} YouTube Tracks for {}: {}", foundTracks, queryType, query);
+
+        int tracksSize = ytTracks.size();
+        trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, tracksSize);
+        log.debug("Found {} YouTube Tracks for {}: {}", tracksSize, queryType, query);
         return trackList;
+    }
+
+    @Nullable
+    private YouTubeTrack mapJsonElementToYouTubeTrack(JsonElement renderer) {
+        try {
+            return renderer.mapToObject(MAPPER, YouTubeTrack.class);
+        } catch (Exception e) {
+            log.error("Error parsing Youtube track JSON: {}", renderer.getNode(), e);
+            return null;
+        }
     }
 
     protected YouTubeTrackInfo getTrackInfo(final String json, final String trackUrl, Function<String, ResponseWrapper> requester) {
