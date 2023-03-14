@@ -32,8 +32,8 @@ jobs:
           architecture: x64
           cache: maven
       
-      - name: "Run Maven tests"
-        run: mvn test -e
+      - name: "Run Maven 'test'"
+        run: mvn test -e --color always
       
       - name: "Upload test report"
         uses: actions/upload-artifact@v2
