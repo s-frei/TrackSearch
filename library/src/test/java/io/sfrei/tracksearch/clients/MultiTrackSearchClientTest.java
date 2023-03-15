@@ -7,9 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
-import static io.sfrei.tracksearch.clients.ClientTestConstants.DEFAULT_SEARCH_KEY;
+import static io.sfrei.tracksearch.clients.setup.TrackSource.Soundcloud;
+import static io.sfrei.tracksearch.clients.setup.TrackSource.Youtube;
 
 /**
  * Even tho the clients are already tested separately
@@ -17,27 +16,24 @@ import static io.sfrei.tracksearch.clients.ClientTestConstants.DEFAULT_SEARCH_KE
  */
 @Slf4j
 @Tag("ClientTest")
-public class MultiTrackSearchClientTest extends ClientTestImpl<Track> {
-
+public class MultiTrackSearchClientTest extends ClientTest<Track> {
 
     public MultiTrackSearchClientTest() {
-        super(new MultiSearchClient(), Collections.singletonList(DEFAULT_SEARCH_KEY));
+        super(new MultiSearchClient(), true);
     }
 
     @Test
     public void testYTSource() throws TrackSearchException {
         MultiTrackSearchClient searchClient = (MultiTrackSearchClient) this.searchClient;
-        TrackSource trackSource = TrackSource.Youtube;
-        log.debug("MultiTrackSearchClient with explicit source ->  {}", trackSource);
-        searchClient.getTracksForSearch(DEFAULT_SEARCH_KEY, TrackSource.setOf(trackSource));
+        log.debug("MultiTrackSearchClient with explicit source ->  {}", Youtube);
+        searchClient.getTracksForSearch(SINGLE_SEARCH_KEY, TrackSource.setOf(Youtube));
     }
 
     @Test
     public void testSCSource() throws TrackSearchException {
         MultiTrackSearchClient searchClient = (MultiTrackSearchClient) this.searchClient;
-        TrackSource trackSource = TrackSource.Soundcloud;
-        log.debug("MultiTrackSearchClient with explicit source ->  {}", trackSource);
-        searchClient.getTracksForSearch(DEFAULT_SEARCH_KEY, TrackSource.setOf(trackSource));
+        log.debug("MultiTrackSearchClient with explicit source ->  {}", Soundcloud);
+        searchClient.getTracksForSearch(SINGLE_SEARCH_KEY, TrackSource.setOf(Soundcloud));
     }
 
 }

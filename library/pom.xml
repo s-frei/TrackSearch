@@ -22,9 +22,10 @@
         <okhttp.version>4.10.0</okhttp.version>
         <jackson-databind.version>2.14.2</jackson-databind.version>
         <jsoup.version>1.15.4</jsoup.version>
-        <logback-classic.version>1.4.5</logback-classic.version>
         <slf4j-api.version>2.0.6</slf4j-api.version>
         <junit.version>5.9.2</junit.version>
+        <assertj-core.version>3.24.2</assertj-core.version>
+        <logback-classic.version>1.4.5</logback-classic.version>
     </properties>
 
     <profiles>
@@ -140,6 +141,11 @@
             <version>${jsoup.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>compile</scope>
@@ -162,11 +168,12 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j-api.version}</version>
-        </dependency>
+      <dependency>
+          <groupId>org.assertj</groupId>
+          <artifactId>assertj-core</artifactId>
+          <version>${assertj-core.version}</version>
+          <scope>test</scope>
+      </dependency>
                 <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>

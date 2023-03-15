@@ -1,16 +1,14 @@
 package io.sfrei.tracksearch.clients.soundcloud;
 
-import io.sfrei.tracksearch.clients.ClientTestImpl;
+import io.sfrei.tracksearch.clients.ClientTest;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import org.junit.jupiter.api.Tag;
 
-import static io.sfrei.tracksearch.clients.ClientTestConstants.SEARCH_KEYS;
-
 @Tag("DetailedClientTest")
-public class DetailedSoundCloudClientTest extends ClientTestImpl<SoundCloudTrack> {
+public class DetailedSoundCloudClientTest extends ClientTest<SoundCloudTrack> {
 
     public DetailedSoundCloudClientTest() {
-        super(new SoundCloudClient(), SEARCH_KEYS);
+        super(new SoundCloudClient(), false);
     }
 
 }
