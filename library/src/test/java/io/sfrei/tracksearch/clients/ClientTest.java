@@ -120,8 +120,8 @@ public abstract class ClientTest<T extends Track> extends Client {
                     .isNotEmpty();
 
             assertThat(track)
-                    .extracting(Track::getLength)
-                    .as("Track should have length for '%s'", track.getUrl())
+                    .extracting(Track::getDuration)
+                    .as("Track should have duration for '%s'", track.getUrl())
                     .isNotNull();
 
             final TrackMetadata trackMetadata = track.getTrackMetadata();

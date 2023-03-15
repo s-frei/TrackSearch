@@ -12,6 +12,7 @@ import io.sfrei.tracksearch.utils.TimeUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,10 +34,10 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
 
         final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
         final String title = rootElement.fieldAsString("title");
-        final Long length = TimeUtility.getSecondsForMilliseconds(rootElement.fieldAsLong("duration"));
+        final Duration duration = TimeUtility.getDurationForMilliseconds(rootElement.fieldAsLong("duration"));
         final String url = rootElement.fieldAsString("permalink_url");
 
-        if (title == null || length == null || url == null)
+        if (title == null || duration == null || url == null)
             return null;
 
         // Metadata
@@ -57,7 +58,7 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
         final SoundCloudTrackMetadata trackMetadata = new SoundCloudTrackMetadata(channelName, channelUrl,
                 streamAmount, thumbNailUrl);
 
-        final SoundCloudTrack soundcloudTrack = new SoundCloudTrack(title, length, url, trackMetadata);
+        final SoundCloudTrack soundcloudTrack = new SoundCloudTrack(title, duration, url, trackMetadata);
 
         // Formats
 

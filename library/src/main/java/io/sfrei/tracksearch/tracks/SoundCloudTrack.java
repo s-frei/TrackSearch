@@ -8,6 +8,7 @@ import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.util.function.Function;
 
 
@@ -24,8 +25,8 @@ public class SoundCloudTrack extends BaseTrack implements Track {
     @Setter
     private Function<SoundCloudTrack, String> streamUrlProvider;
 
-    public SoundCloudTrack(String title, Long length, String mrl, SoundCloudTrackMetadata trackMetadata) {
-        super(TrackSource.Soundcloud, title, length, mrl);
+    public SoundCloudTrack(String title, Duration duration, String mrl, SoundCloudTrackMetadata trackMetadata) {
+        super(TrackSource.Soundcloud, title, duration, mrl);
         this.trackMetadata = trackMetadata;
     }
 

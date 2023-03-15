@@ -5,6 +5,8 @@ import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
 import io.sfrei.tracksearch.utils.ReplaceUtility;
 import io.sfrei.tracksearch.utils.TimeUtility;
 
+import java.time.Duration;
+
 public interface Track {
 
     /**
@@ -28,18 +30,18 @@ public interface Track {
     }
 
     /**
-     * Get the track length in seconds.
-     * @return the track length.
+     * Get the track duration.
+     * @return the track duration.
      */
-    Long getLength();
+    Duration getDuration();
 
     /**
-     * Get the track length formatted like "hh:mm:ss" when
+     * Get the track duration formatted like "hh:mm:ss" when
      * hours present, else like "mm:ss".
-     * @return the formatted length.
+     * @return the formatted duration.
      */
-    default String lengthFormatted() {
-        return TimeUtility.formatSeconds(getLength());
+    default String durationFormatted() {
+        return TimeUtility.formatSeconds(getDuration());
     }
 
     /**

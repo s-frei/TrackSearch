@@ -12,6 +12,7 @@ import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -37,9 +38,9 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
         final String ref = rootElement.fieldAsString("videoId");
         final String title = rootElement.path("title", "runs").getFirstField().fieldAsString("text");
         final String timeString = rootElement.path("lengthText").fieldAsString("simpleText");
-        final Long length = TimeUtility.getSecondsForTimeString(timeString);
+        final Duration duration = TimeUtility.getDurationForTimeString(timeString);
 
-        if (title == null || length == null || ref == null)
+        if (title == null || duration == null || ref == null)
             return null;
 
         final String url = YouTubeClient.HOSTNAME.concat("/watch?v=").concat(ref);
@@ -67,7 +68,7 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
         final YouTubeTrackMetadata trackMetadata = new YouTubeTrackMetadata(channelName, channelUrl,
                 streamAmount, thumbNailUrl);
 
-        return new YouTubeTrack(title, length, url, trackMetadata);
+        return new YouTubeTrack(title, duration, url, trackMetadata);
     }
 
 }

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.time.Duration;
+
 @Getter
 @ToString
 @RequiredArgsConstructor
@@ -16,13 +18,13 @@ public abstract class BaseTrack implements Track {
 
     private final String title;
 
-    private final Long length;
+    private final Duration duration;
 
     @EqualsAndHashCode.Include
     private final String url;
 
     private String pretty(String title) {
-        return String.format("%s: Title: '%s' - %s - URL: %s", source.name(), title, lengthFormatted(), url);
+        return String.format("%s: Title: '%s' - %s - URL: %s", source.name(), title, durationFormatted(), url);
     }
 
     public String pretty() {

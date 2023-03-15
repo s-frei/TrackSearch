@@ -11,7 +11,7 @@ public class TimeUtility {
 
     private static final String TIME_STRING_DEFAULT = "00:00:00";
 
-    public Long getSecondsForTimeString(@NonNull final String time) {
+    public Duration getDurationForTimeString(@NonNull final String time) {
 
         final char[] defaultTimeStringArray = TIME_STRING_DEFAULT.toCharArray();
         final char[] reverseTimeStringArray = new StringBuffer(time).reverse().toString().toCharArray();
@@ -20,18 +20,19 @@ public class TimeUtility {
             defaultTimeStringArray[defaultTimeStringArray.length - 1 - i] = reverseTimeStringArray[i];
         }
 
-        return Integer.toUnsignedLong(LocalTime.parse(String.valueOf(defaultTimeStringArray)).toSecondOfDay());
+        LocalTime localTime = LocalTime.parse(String.valueOf(defaultTimeStringArray));
+        LocalTime midnight = LocalTime.MIDNIGHT;
+        return Duration.between(midnight, localTime);
     }
 
-    public Long getSecondsForMilliseconds(final Long milliseconds) {
+    public Duration getDurationForMilliseconds(final Long milliseconds) {
         if (milliseconds == null)
             return null;
 
-        return Duration.ofMillis(milliseconds).toSeconds();
+        return Duration.ofMillis(milliseconds);
     }
 
-    public String formatSeconds(long seconds) {
-        Duration duration = Duration.ofSeconds(seconds);
+    public String formatSeconds(Duration duration) {
         final String mmss = String.format("%02d:%02d", duration.toMinutesPart(), duration.toSecondsPart());
 
         final long hours = duration.toHours();

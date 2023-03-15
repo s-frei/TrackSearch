@@ -45,7 +45,7 @@ There could be more added if there is interesting content offered to go for.
 - Paging of track lists
 - Expose audio stream url
 - Interact with multiple clients asynchronous
-- Get track metadata like: length, channel, views, thumbnail, ...
+- Get track metadata like: duration, channel, views, thumbnail, ...
 
 ## How to use it ? :books:
 

@@ -8,6 +8,7 @@ import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.util.function.Function;
 
 
@@ -24,8 +25,8 @@ public class YouTubeTrack extends BaseTrack implements Track {
     @Setter
     private Function<YouTubeTrack, String> streamUrlProvider;
 
-    public YouTubeTrack(String title, Long length, String url, YouTubeTrackMetadata trackMetadata) {
-        super(TrackSource.Youtube, title, length, url);
+    public YouTubeTrack(String title, Duration duration, String url, YouTubeTrackMetadata trackMetadata) {
+        super(TrackSource.Youtube, title, duration, url);
         this.trackMetadata = trackMetadata;
     }
 
