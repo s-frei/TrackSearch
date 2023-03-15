@@ -3,6 +3,7 @@ package io.sfrei.tracksearch.utils;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
+import java.time.Duration;
 import java.time.LocalTime;
 
 @UtilityClass
@@ -10,7 +11,6 @@ public class TimeUtility {
 
     private static final String TIME_STRING_DEFAULT = "00:00:00";
 
-    // Input like '1:22:45', '3:45', ...
     public Long getSecondsForTimeString(@NonNull final String time) {
 
         final char[] defaultTimeStringArray = TIME_STRING_DEFAULT.toCharArray();
@@ -27,7 +27,15 @@ public class TimeUtility {
         if (milliseconds == null)
             return null;
 
-        return milliseconds / 1000;
+        return Duration.ofMillis(milliseconds).toSeconds();
+    }
+
+    public String formatSeconds(long seconds) {
+        Duration duration = Duration.ofSeconds(seconds);
+        final String mmss = String.format("%02d:%02d", duration.toMinutesPart(), duration.toSecondsPart());
+
+        final long hours = duration.toHours();
+        return hours > 0 ? String.format("%02d:%s", hours, mmss) : mmss;
     }
 
 }

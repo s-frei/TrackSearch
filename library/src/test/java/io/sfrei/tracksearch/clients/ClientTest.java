@@ -101,6 +101,8 @@ public abstract class ClientTest<T extends Track> extends Client {
     public void checkTrackAndMetadata(TrackList<T> trackList) {
         for (T track : trackList.getTracks()) {
 
+            log.trace("{}", track.pretty());
+
             assertThat(track)
                     .as("Track should not be null")
                     .isNotNull();

@@ -2,6 +2,8 @@ package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
+import io.sfrei.tracksearch.utils.ReplaceUtility;
+import io.sfrei.tracksearch.utils.TimeUtility;
 
 public interface Track {
 
@@ -21,13 +23,24 @@ public interface Track {
      * Get the track title without unnecessary stuff.
      * @return the clean track title.
      */
-    String getCleanTitle();
+    default String getCleanTitle() {
+        return ReplaceUtility.cleanOutTitle(getTitle());
+    }
 
     /**
      * Get the track length in seconds.
      * @return the track length.
      */
     Long getLength();
+
+    /**
+     * Get the track length formatted like "hh:mm:ss" when
+     * hours present, else like "mm:ss".
+     * @return the formatted length.
+     */
+    default String lengthFormatted() {
+        return TimeUtility.formatSeconds(getLength());
+    }
 
     /**
      * Get the URL for the real content.
@@ -63,12 +76,12 @@ public interface Track {
      * Get a pretty string representation.
      * @return the pretty string.
      */
-    String toPrettyString();
+    String pretty();
 
     /**
      * Get a pretty string representation with a clean title.
      * @return the pretty string with clean title.
      */
-    String toPrettyCleanString();
+    String prettyAndClean();
 
 }

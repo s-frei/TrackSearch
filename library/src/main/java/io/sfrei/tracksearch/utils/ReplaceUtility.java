@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class ReplaceUtility {
 
-    public String replaceUnnecessary(final String chars) {
+    public String cleanOutTitle(final String chars) {
         return chars
                 .replaceAll("@", " at ")
                 .replaceAll("_", " ")

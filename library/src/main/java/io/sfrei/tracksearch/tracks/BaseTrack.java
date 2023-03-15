@@ -1,7 +1,6 @@
 package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.setup.TrackSource;
-import io.sfrei.tracksearch.utils.ReplaceUtility;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,7 @@ import lombok.ToString;
 @ToString
 @RequiredArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class BaseTrack {
+public abstract class BaseTrack implements Track {
 
     private final TrackSource source;
 
@@ -22,20 +21,16 @@ public class BaseTrack {
     @EqualsAndHashCode.Include
     private final String url;
 
-    public String getCleanTitle() {
-        return ReplaceUtility.replaceUnnecessary(title);
+    private String pretty(String title) {
+        return String.format("%s: Title: '%s' - %s - URL: %s", source.name(), title, lengthFormatted(), url);
     }
 
-    public String toPrettyString() {
+    public String pretty() {
         return pretty(title);
     }
 
-    public String toPrettyCleanString() {
+    public String prettyAndClean() {
         return pretty(getCleanTitle());
-    }
-
-    private String pretty(String title) {
-        return "SOURCE: " + source.name() + " - Title: " + title + " - Length: " + length + " - Url: " + url;
     }
 
 }
