@@ -1,6 +1,5 @@
 package io.sfrei.tracksearch.clients.soundcloud;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
@@ -8,7 +7,6 @@ import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -65,15 +63,12 @@ class SoundCloudUtility {
                                                                  final Function<SoundCloudTrack, String> streamUrlProvider)
             throws SoundCloudException {
 
-        final JsonElement responseElement;
-        try {
-            responseElement = JsonElement.read(MAPPER, json).get("collection");
-        } catch (JsonProcessingException e) {
-            throw new SoundCloudException("Error parsing SoundCloudTracks JSON", e);
-        }
+        final JsonElement responseElement = JsonElement.readHandled(MAPPER, json)
+                .orElseThrow(() -> new SoundCloudException("Cannot parse SoundCloudTracks JSON"))
+                .path("collection");
 
         final List<SoundCloudTrack> scTracks = responseElement.elements()
-                .map(this::mapJsonElementToSoundCloudTrack)
+                .map(element -> element.mapToObjectHandled(MAPPER, SoundCloudTrack.class))
                 .filter(Objects::nonNull)
                 .peek(soundCloudTrack -> soundCloudTrack.setStreamUrlProvider(streamUrlProvider))
                 .collect(Collectors.toList());
@@ -85,16 +80,6 @@ class SoundCloudUtility {
         trackList.addQueryInformationValue(SoundCloudClient.OFFSET_KEY, tracksSize);
         log.debug("Found {} SoundCloud Tracks for {}: {}", tracksSize, queryType, query);
         return trackList;
-    }
-
-    @Nullable
-    private SoundCloudTrack mapJsonElementToSoundCloudTrack(JsonElement content) {
-        try {
-            return content.mapToObject(MAPPER, SoundCloudTrack.class);
-        } catch (Exception e) {
-            log.error("Error parsing SoundCloud track JSON: {}", content.getNode(), e);
-            return null;
-        }
     }
 
     protected Optional<String> getUrlForStream(final String html) {

@@ -3,108 +3,152 @@ package io.sfrei.tracksearch.utils.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-@RequiredArgsConstructor(staticName = "of")
-public class JsonElement extends JsonUtility {
 
-    @Getter
-    private final JsonNode node;
+@Slf4j
+public class JsonElement extends JsonNodeResolver {
 
-    public static JsonElement empty() {
-        return new JsonElement(null);
+    public JsonElement(JsonNode node, boolean resolved) {
+        super(node, resolved);
     }
 
-    public static JsonElement read(final ObjectMapper mapper, final String jsonString) throws JsonProcessingException {
-        return new JsonElement(mapper.readTree(jsonString));
+    public static JsonElement read(final ObjectMapper mapper, final String json) throws JsonProcessingException {
+        return new JsonElement(mapper.readTree(json), false);
+    }
+
+    public static Optional<JsonElement> readHandled(final ObjectMapper mapper, final  String json) {
+        try {
+            return Optional.of(read(mapper, json));
+        } catch (JsonProcessingException e) {
+            log.error("Error occurred reading JSON: '{}'", json, e);
+            return Optional.empty();
+        }
+    }
+
+    public static JsonElement of(JsonNode node) {
+        return new JsonElement(node, false);
+    }
+
+    private JsonElement resolved() {
+        return new JsonElement(node(), true);
+    }
+
+    public JsonElement asUnresolved() {
+        return of(node());
     }
 
     public Stream<JsonElement> elements() {
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(node.elements(), Spliterator.ORDERED), false)
-                .map(JsonElement::new);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(node().elements(), Spliterator.ORDERED), false)
+                .map(JsonElement::of);
     }
 
     public JsonElement firstElementFor(final String path) {
-        return node.findValues(path).stream().findFirst()
-                .map(JsonElement::new).orElse(JsonElement.empty());
-    }
-    public JsonElement firstElementForWhereNotNested(final String path, final String notPath) {
-        if (node == null)
-            return this;
-        return node.findValues(path).stream()
-                .filter(node -> Objects.isNull(node.findValue(notPath)))
-                .findFirst()
-                .map(JsonElement::new).orElse(JsonElement.empty());
+        return nextElement(node -> node.findValues(path).stream().findFirst().orElse(null));
     }
 
-    public boolean isArray() {
-        return node.isArray();
+    public JsonElement firstElementWhereNotFound(final String path, final String notPath) {
+        if (nodeIsNull(node()))
+            return this;
+
+        return nextElement(node ->
+                node.findValues(path).stream()
+                        .filter(pathNode -> Objects.isNull(pathNode.findValue(notPath)))
+                        .findFirst()
+                        .orElse(null)
+        );
     }
 
     public Stream<JsonElement> arrayElements() {
-        if (isArray()) {
-            final ArrayNode arrayNode = (ArrayNode) this.node;
-            return StreamSupport.stream(arrayNode.spliterator(), false).map(JsonElement::new);
+        return isArray() ? StreamSupport.stream(arrayNode().spliterator(), false).map(JsonElement::of) : Stream.empty();
+    }
+
+    public String fieldAsString(final String... paths) {
+        return getAsString(path(paths).node());
+    }
+
+    public String fieldAsString() {
+        return getAsString();
+    }
+
+    public Long fieldAsLong(final String... paths) {
+        return getAsLong(path(paths).node());
+    }
+
+    public JsonElement path(final String... paths) {
+        return nextElement(e -> nodeForPath(paths));
+    }
+
+    private JsonNode nodeForPath(String... paths) {
+        final AtomicReference<JsonNode> tempNode = new AtomicReference<>(node());
+
+        for (final String path : paths) {
+            if (tempNode.get() == null)
+                return null;
+            tempNode.getAndUpdate(tmp -> tmp.get(path));
         }
-        return Stream.empty();
+
+        return tempNode.get();
     }
 
-    public String getAsString(final String path) {
-        return getAsString(node, path);
+    public JsonElement getFirstField() {
+        return nextElement(node -> atIndex(0));
     }
 
-    public String getAsString(final String... paths) {
-        for (final String value : paths) {
-            String result = getAsString(node, value);
-            if (result != null)
-                return result;
+    public JsonElement getAtIndex(final int index) {
+        return nextElement(node -> atIndex(index));
+    }
+
+    public JsonElement reRead(final ObjectMapper mapper) throws JsonProcessingException {
+        return read(mapper, getAsString(node()));
+    }
+
+    public <T> T mapToObject(final ObjectMapper mapper, final Class<T> clazz) throws JsonProcessingException {
+        return mapper.treeToValue(node(), clazz);
+    }
+
+    public <T> T mapToObjectHandled(final ObjectMapper mapper, final Class<T> clazz) {
+        try {
+            return mapToObject(mapper, clazz);
+        } catch (JsonProcessingException e) {
+            log.error("Error parsing JSON as {}: '{}'", clazz.getSimpleName(), node(), e);
         }
         return null;
     }
 
-    public Long getLongFor(final String path) {
-        return getAsLong(node, path);
+    public JsonElement orElse(JsonElement alternative) {
+        if (nodeIsNull() && !isResolved()) {
+            return JsonElement.of(alternative.node());
+        }
+        return resolved();
     }
 
-    public JsonElement get(final String... route) {
-        return new JsonElement(get(node, route));
-    }
-
-    public JsonElement getFirstField() {
-        return new JsonElement(getFirstField(node));
-    }
-
-    public JsonElement getIndex(final int index) {
-        return new JsonElement(get(node, index));
-    }
-
-    public JsonElement orElseGet(final Supplier<JsonElement> supplier) {
-        return node == null ? supplier.get() : this;
-    }
-
-    public JsonElement reRead(final ObjectMapper mapper) throws JsonProcessingException {
-        return new JsonElement(mapper.readTree(getAsText(node)));
-    }
-
-    public <T> T mapToObject(final ObjectMapper mapper, final Class<T> clazz) throws JsonProcessingException {
-        return mapper.treeToValue(node, clazz);
+    private JsonElement nextElement(Function<JsonNode, JsonNode> function) {
+        if (nodeIsNull() || isResolved()) {
+            return this;
+        }
+        return JsonElement.of(function.apply(node()));
     }
 
     public boolean isNull() {
-        return node == null;
+        return nodeIsNull();
     }
 
-    public boolean present() {
-        return node != null;
+    public boolean isPresent() {
+        return !isNull();
+    }
+
+    public boolean fieldPresent(String field) {
+        return JsonElement.of(nodeForPath(field)).isPresent();
     }
 
 }

@@ -32,24 +32,24 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
         // Track
 
         final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
-        final String title = rootElement.getAsString("title");
-        final Long length = TimeUtility.getSecondsForMilliseconds(rootElement.getLongFor("duration"));
-        final String url = rootElement.getAsString("permalink_url");
+        final String title = rootElement.fieldAsString("title");
+        final Long length = TimeUtility.getSecondsForMilliseconds(rootElement.fieldAsLong("duration"));
+        final String url = rootElement.fieldAsString("permalink_url");
 
         if (title == null || length == null || url == null)
             return null;
 
         // Metadata
 
-        final JsonElement owner = rootElement.get("user");
+        final JsonElement owner = rootElement.path("user");
 
-        final String channelName = owner.getAsString("username");
+        final String channelName = owner.fieldAsString("username");
 
-        final String channelUrl = owner.getAsString("permalink_url");
+        final String channelUrl = owner.fieldAsString("permalink_url");
 
-        final Long streamAmount = rootElement.getLongFor("playback_count");
+        final Long streamAmount = rootElement.fieldAsLong("playback_count");
 
-        final String thumbNailUrl = rootElement.getAsString("artwork_url");
+        final String thumbNailUrl = rootElement.fieldAsString("artwork_url");
 
         final SoundCloudTrackMetadata trackMetadata = new SoundCloudTrackMetadata(channelName, channelUrl,
                 streamAmount, thumbNailUrl);
@@ -58,16 +58,16 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
 
         // Formats
 
-        final List<SoundCloudTrackFormat> trackFormats = rootElement.get("media", "transcodings")
+        final List<SoundCloudTrackFormat> trackFormats = rootElement.path("media", "transcodings")
                 .arrayElements()
                 .map(transcoding -> {
 
-                    final String formatUrl = transcoding.getAsString("url");
-                    final String audioQuality = transcoding.getAsString("quality");
+                    final String formatUrl = transcoding.fieldAsString("url");
+                    final String audioQuality = transcoding.fieldAsString("quality");
 
-                    final JsonElement formatElement = transcoding.get("format");
-                    final String mimeType = formatElement.getAsString("mime_type");
-                    final String protocol = formatElement.getAsString("protocol");
+                    final JsonElement formatElement = transcoding.path("format");
+                    final String mimeType = formatElement.fieldAsString("mime_type");
+                    final String protocol = formatElement.fieldAsString("protocol");
 
                     return SoundCloudTrackFormat.builder()
                             .mimeType(mimeType)

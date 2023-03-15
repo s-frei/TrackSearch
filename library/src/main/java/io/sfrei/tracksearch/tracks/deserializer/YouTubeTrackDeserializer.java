@@ -34,9 +34,9 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
 
         // Track
 
-        final String ref = rootElement.getAsString("videoId");
-        final String title = rootElement.get("title", "runs").getFirstField().getAsString("text");
-        final String timeString = rootElement.get("lengthText").getAsString("simpleText");
+        final String ref = rootElement.fieldAsString("videoId");
+        final String title = rootElement.path("title", "runs").getFirstField().fieldAsString("text");
+        final String timeString = rootElement.path("lengthText").fieldAsString("simpleText");
         final Long length = TimeUtility.getSecondsForTimeString(timeString);
 
         if (title == null || length == null || ref == null)
@@ -46,23 +46,23 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
 
         // Metadata
 
-        final JsonElement owner = rootElement.get("ownerText", "runs").getFirstField();
+        final JsonElement owner = rootElement.path("ownerText", "runs").getFirstField();
 
-        final String channelName = owner.getAsString("text");
+        final String channelName = owner.fieldAsString("text");
 
-        final String channelUrlSuffix = owner.get("navigationEndpoint", "commandMetadata", "webCommandMetadata")
-                .getAsString("url");
+        final String channelUrlSuffix = owner.path("navigationEndpoint", "commandMetadata", "webCommandMetadata")
+                .fieldAsString("url");
         final String channelUrl = YouTubeClient.HOSTNAME.concat(channelUrlSuffix);
 
-        final String streamAmountText = rootElement.get("viewCountText").getAsString("simpleText");
+        final String streamAmountText = rootElement.path("viewCountText").fieldAsString("simpleText");
         final String streamAmountDigits = streamAmountText == null || streamAmountText.isEmpty() ?
                 null : ReplaceUtility.replaceNonDigits(streamAmountText);
         final Long streamAmount = streamAmountDigits == null || streamAmountDigits.isEmpty() ?
                 0L : Long.parseLong(streamAmountDigits);
 
-        final Stream<JsonElement> thumbNailStream = rootElement.get("thumbnail", "thumbnails").elements();
+        final Stream<JsonElement> thumbNailStream = rootElement.path("thumbnail", "thumbnails").elements();
         final Optional<JsonElement> lastThumbnail = thumbNailStream.findFirst();
-        final String thumbNailUrl = lastThumbnail.map(thumbNail -> thumbNail.getAsString("url")).orElse(null);
+        final String thumbNailUrl = lastThumbnail.map(thumbNail -> thumbNail.fieldAsString("url")).orElse(null);
 
         final YouTubeTrackMetadata trackMetadata = new YouTubeTrackMetadata(channelName, channelUrl,
                 streamAmount, thumbNailUrl);
