@@ -1,5 +1,6 @@
 package io.sfrei.tracksearch.utils;
 
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalTime;
@@ -10,7 +11,7 @@ public class TimeUtility {
     private static final String TIME_STRING_DEFAULT = "00:00:00";
 
     // Input like '1:22:45', '3:45', ...
-    public Long getSecondsForTimeString(final String time) {
+    public Long getSecondsForTimeString(@NonNull final String time) {
 
         final char[] defaultTimeStringArray = TIME_STRING_DEFAULT.toCharArray();
         final char[] reverseTimeStringArray = new StringBuffer(time).reverse().toString().toCharArray();
