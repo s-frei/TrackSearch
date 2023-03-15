@@ -4,7 +4,19 @@ Changelog
 0.7.4 - unreleased
 ------------------
 
-No changes yet...
+**Major:**
+
+- The *length* (`java.langLong`) field of Track is now *duration* (`java.time.Duration`)
+
+**Features:**
+
+- Improved code quality and readability especially for JSON processing
+- Improved tests
+- Improved duration parsing
+
+**Bugfixes:**
+
+- SC: When a track has no thumbnail default to channel thumbnail
 
 0.7.3
 -----
