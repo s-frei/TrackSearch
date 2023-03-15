@@ -49,7 +49,10 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
 
         final Long streamAmount = rootElement.fieldAsLong("playback_count");
 
-        final String thumbNailUrl = rootElement.fieldAsString("artwork_url");
+        final String thumbNailUrl = rootElement.path("artwork_url")
+                .orElse(rootElement)
+                .path("user", "avatar_url") // Fallback to channel thumbnail
+                .fieldAsString();
 
         final SoundCloudTrackMetadata trackMetadata = new SoundCloudTrackMetadata(channelName, channelUrl,
                 streamAmount, thumbNailUrl);
