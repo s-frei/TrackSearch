@@ -27,7 +27,7 @@ import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
-import io.sfrei.tracksearch.utils.ExceptionUtility;
+import io.sfrei.tracksearch.exceptions.UniformClientException;
 import io.sfrei.tracksearch.utils.TrackListHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> implements ClientHelper {
+public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> implements ClientHelper, UniformClientException {
 
     public static final String HOSTNAME = "https://soundcloud.com";
     private static final String INFORMATION_PREFIX = "sc";
@@ -99,7 +99,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> implem
             final BaseTrackList<SoundCloudTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), queryPosition, queryOffset, QueryType.PAGING);
             return TrackListHelper.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
         }
-        throw new SoundCloudException(ExceptionUtility.unsupportedQueryTypeMessage(trackListQueryType));
+        throw unsupportedQueryTypeException(SoundCloudException::new, trackListQueryType);
     }
 
     private String provideStreamUrl(final SoundCloudTrack track) {
@@ -127,7 +127,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack> implem
     @Override
     public String getStreamUrl(@NonNull SoundCloudTrack soundCloudTrack, final int retries) throws TrackSearchException {
         return getStreamUrl(this, soundCloudTrack, this::requestAndGetCode, retries)
-                .orElseThrow(() -> new SoundCloudException(ExceptionUtility.noStreamUrlAfterRetriesMessage(retries)));
+                .orElseThrow(() -> noStreamUrlAfterRetriesException(SoundCloudException::new, retries));
     }
 
     private ResponseWrapper getSearch(final String search, final boolean firstRequest, final Map<String, String> pagingParams) {

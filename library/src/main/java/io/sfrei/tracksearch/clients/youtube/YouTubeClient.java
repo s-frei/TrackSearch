@@ -20,6 +20,7 @@ import io.sfrei.tracksearch.clients.helper.ClientHelper;
 import io.sfrei.tracksearch.clients.setup.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.config.TrackSearchConstants;
+import io.sfrei.tracksearch.exceptions.UniformClientException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
@@ -28,7 +29,10 @@ import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
-import io.sfrei.tracksearch.utils.*;
+import io.sfrei.tracksearch.utils.CacheMap;
+import io.sfrei.tracksearch.utils.TrackFormatUtility;
+import io.sfrei.tracksearch.utils.TrackListHelper;
+import io.sfrei.tracksearch.utils.URLUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -39,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements ClientHelper {
+public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements ClientHelper, UniformClientException {
 
     public static final String HOSTNAME = "https://www.youtube.com";
     public static final String PAGING_KEY = "ctoken";
@@ -125,7 +129,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements C
             final BaseTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), params, QueryType.PAGING);
             return TrackListHelper.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
         }
-        throw new YouTubeException(ExceptionUtility.unsupportedQueryTypeMessage(trackListQueryType));
+        throw unsupportedQueryTypeException(YouTubeException::new, trackListQueryType);
     }
 
     public YouTubeTrackInfo loadTrackInfo(final YouTubeTrack youtubeTrack) throws TrackSearchException {
@@ -170,7 +174,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements C
     @Override
     public String getStreamUrl(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
         return getStreamUrl(this, youtubeTrack, this::requestAndGetCode, retries)
-                .orElseThrow(() -> new YouTubeException(ExceptionUtility.noStreamUrlAfterRetriesMessage(retries)));
+                .orElseThrow(() -> noStreamUrlAfterRetriesException(YouTubeException::new, retries));
     }
 
     private Map<String, String> getPagingParams(final Map<String, String> queryInformation) {

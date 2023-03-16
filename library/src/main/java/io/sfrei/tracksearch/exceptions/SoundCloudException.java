@@ -25,4 +25,5 @@ public class SoundCloudException extends TrackSearchException {
     public SoundCloudException(String message, Throwable cause) {
         super(message, cause);
     }
+
 }
