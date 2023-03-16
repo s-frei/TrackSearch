@@ -16,6 +16,7 @@
 
 package io.sfrei.tracksearch.exceptions;
 
+import io.sfrei.tracksearch.clients.interfaces.ClientHelper;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 
 import java.util.function.Function;
@@ -31,7 +32,7 @@ public interface UniformClientException {
      */
     default TrackSearchException noStreamUrlAfterRetriesException(Function<String, TrackSearchException> exceptionConstructor,
                                                                   int retries) {
-        return exceptionConstructor.apply(String.format("Not able to get stream URL after %s tries", retries + 1));
+        return exceptionConstructor.apply(String.format("Not able to get stream URL after %s tries", retries + ClientHelper.INITIAL_TRY));
     }
 
     /**

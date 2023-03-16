@@ -27,18 +27,21 @@ public interface Track {
 
     /**
      * Identify where the tracks came from.
+     *
      * @return the source the track was received from.
      */
     TrackSource getSource();
 
     /**
      * Get the track title.
+     *
      * @return the track title.
      */
     String getTitle();
 
     /**
      * Get the track title without unnecessary stuff.
+     *
      * @return the clean track title.
      */
     default String getCleanTitle() {
@@ -47,6 +50,7 @@ public interface Track {
 
     /**
      * Get the track duration.
+     *
      * @return the track duration.
      */
     Duration getDuration();
@@ -54,6 +58,7 @@ public interface Track {
     /**
      * Get the track duration formatted like "hh:mm:ss" when
      * hours present, else like "mm:ss".
+     *
      * @return the formatted duration.
      */
     default String durationFormatted() {
@@ -62,6 +67,7 @@ public interface Track {
 
     /**
      * Get the URL for the real content.
+     *
      * @return the real content URL.
      */
     String getUrl();
@@ -69,9 +75,10 @@ public interface Track {
     /**
      * Get the audio stream URL in the highest possible quality. The resulting URL will be
      * checked if it can be successfully accessed, if under some circumstances this fails,
-     * the resolver will start another attempt - once.
+     * the resolver will start some more attempts.
+     * To override default {@link io.sfrei.tracksearch.config.TrackSearchConfig#resolvingRetries}
      *
-     * @return the audio stream URL, null when exception occurred.
+     * @return the audio stream URL or null when resolving fails.
      */
     String getStreamUrl();
 
@@ -92,12 +99,14 @@ public interface Track {
 
     /**
      * Get a pretty string representation.
+     *
      * @return the pretty string.
      */
     String pretty();
 
     /**
      * Get a pretty string representation with a clean title.
+     *
      * @return the pretty string with clean title.
      */
     String prettyAndClean();

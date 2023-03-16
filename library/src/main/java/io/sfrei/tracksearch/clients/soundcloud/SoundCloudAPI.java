@@ -25,7 +25,7 @@ import retrofit2.http.Url;
 
 import java.util.Map;
 
-public interface SoundCloudService {
+public interface SoundCloudAPI {
 
     @GET("/")
     Call<ResponseWrapper> getStartPage();

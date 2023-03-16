@@ -16,12 +16,12 @@
 
 package io.sfrei.tracksearch.clients.youtube;
 
-import io.sfrei.tracksearch.clients.helper.ClientHelper;
+import io.sfrei.tracksearch.clients.interfaces.ClientHelper;
+import io.sfrei.tracksearch.clients.interfaces.StreamURLProvider;
 import io.sfrei.tracksearch.clients.setup.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
-import io.sfrei.tracksearch.config.TrackSearchConstants;
-import io.sfrei.tracksearch.exceptions.UniformClientException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
+import io.sfrei.tracksearch.exceptions.UniformClientException;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.Track;
@@ -35,6 +35,7 @@ import io.sfrei.tracksearch.utils.TrackListHelper;
 import io.sfrei.tracksearch.utils.URLUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -43,7 +44,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements ClientHelper, UniformClientException {
+public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
+        implements ClientHelper, StreamURLProvider<YouTubeTrack>, UniformClientException {
 
     public static final String HOSTNAME = "https://www.youtube.com";
     public static final String PAGING_KEY = "ctoken";
@@ -64,7 +66,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements C
         DEFAULT_SEARCH_PARAMS.putAll(TRACK_PARAMS);
     }
 
-    private final YouTubeService requestService;
+    private final YouTubeAPI api;
     private final YouTubeUtility youTubeUtility;
 
     private final CacheMap<String, String> scriptCache;
@@ -82,7 +84,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements C
                 .addConverterFactory(ResponseProviderFactory.create())
                 .build();
 
-        requestService = base.create(YouTubeService.class);
+        api = base.create(YouTubeAPI.class);
         youTubeUtility = new YouTubeUtility();
         scriptCache = new CacheMap<>();
     }
@@ -94,7 +96,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements C
     private BaseTrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search, @NonNull final Map<String, String> params, QueryType queryType)
             throws TrackSearchException {
 
-        final Call<ResponseWrapper> request = requestService.getSearchForKeywords(search, params);
+        final Call<ResponseWrapper> request = api.getSearchForKeywords(search, params);
         final ResponseWrapper response = Client.request(request);
         final String content = response.getContentOrThrow();
         return youTubeUtility.getYouTubeTracks(content, queryType, search, this::provideStreamUrl);
@@ -107,9 +109,10 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements C
         return trackList;
     }
 
-    private String provideStreamUrl(final YouTubeTrack track) {
+    @Nullable
+    public String provideStreamUrl(final YouTubeTrack track) {
         try {
-            return getStreamUrl(track, TrackSearchConstants.DEFAULT_RESOLVING_RETRIES);
+            return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
         } catch (TrackSearchException e) {
             log.error("Error occurred acquiring stream URL", e);
         }
@@ -134,7 +137,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements C
 
     public YouTubeTrackInfo loadTrackInfo(final YouTubeTrack youtubeTrack) throws TrackSearchException {
         final String trackUrl = youtubeTrack.getUrl();
-        final Call<ResponseWrapper> trackRequest = requestService.getForUrlWithParams(trackUrl, TRACK_PARAMS);
+        final Call<ResponseWrapper> trackRequest = api.getForUrlWithParams(trackUrl, TRACK_PARAMS);
         final ResponseWrapper trackResponse = Client.request(trackRequest);
 
         final String trackContent = trackResponse.getContentOrThrow();
@@ -188,7 +191,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack> implements C
     }
 
     @Override
-    public Logger logger() {
+    public Logger log() {
         return log;
     }
 

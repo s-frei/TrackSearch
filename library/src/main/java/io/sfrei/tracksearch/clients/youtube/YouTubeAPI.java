@@ -23,7 +23,7 @@ import retrofit2.http.*;
 
 import java.util.Map;
 
-public interface YouTubeService {
+public interface YouTubeAPI {
 
     @GET
     @Headers({

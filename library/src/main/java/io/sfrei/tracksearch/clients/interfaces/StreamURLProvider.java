@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.config;
+package io.sfrei.tracksearch.clients.interfaces;
 
-public interface TrackSearchConstants {
+public interface StreamURLProvider<T> {
 
-    int DEFAULT_RESOLVING_RETRIES = 2;
+    String provideStreamUrl(final T track);
 
 }

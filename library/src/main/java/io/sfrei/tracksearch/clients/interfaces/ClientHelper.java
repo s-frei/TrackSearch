@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.helper;
+package io.sfrei.tracksearch.clients.interfaces;
 
 import io.sfrei.tracksearch.clients.TrackSearchClient;
 import io.sfrei.tracksearch.clients.setup.Client;
@@ -28,19 +28,21 @@ import java.util.function.Function;
 
 public interface ClientHelper {
 
-    Logger logger();
+    int INITIAL_TRY = 1;
 
-     default <T extends Track> Optional<String> getStreamUrl(TrackSearchClient<T> searchClient, T track,
-                                                                  Function<String, Integer> requestForCodeFunction,
-                                                                  final int retries) {
+    Logger log();
 
-        logger().trace("Get stream url for: {}", track);
-        return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, retries + 1);
+    default <T extends Track> Optional<String> getStreamUrl(TrackSearchClient<T> searchClient, T track,
+                                                            Function<String, Integer> requestForCodeFunction,
+                                                            final int retries) {
+
+        log().trace("Get stream url for: {}", track);
+        return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, retries + INITIAL_TRY);
     }
 
     private <T extends Track> Optional<String> tryToGetStreamUrl(TrackSearchClient<T> searchClient, T track,
-                                                                        Function<String, Integer> requestForCodeFunction,
-                                                                        int tries) {
+                                                                 Function<String, Integer> requestForCodeFunction,
+                                                                 int tries) {
 
         if (tries <= 0)
             return Optional.empty();
@@ -51,13 +53,13 @@ public interface ClientHelper {
             if (Client.successResponseCode(code))
                 return Optional.ofNullable(streamUrl);
             else {
-                tries -= 1;
-                logger().warn("Not able getting stream URL for {} - {} retries left",
+                tries--;
+                log().warn("Not able getting stream URL for {} - {} retries left",
                         searchClient.getClass().getSimpleName(), tries);
                 return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, tries);
             }
         } catch (TrackSearchException e) {
-            logger().error("Error getting stream URL for {}", e, searchClient.getClass().getSimpleName());
+            log().error("Error getting stream URL for {}", e, searchClient.getClass().getSimpleName());
             return Optional.empty();
         }
 
