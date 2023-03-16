@@ -16,8 +16,12 @@
 
 package io.sfrei.tracksearch.clients.interfaces;
 
-public interface StreamURLProvider<T> {
+import io.sfrei.tracksearch.tracks.Track;
+import io.sfrei.tracksearch.tracks.TrackList;
 
+public interface Provider<T extends Track> {
+
+    TrackList<T> provideNext(final TrackList<? extends Track> trackList);
     String provideStreamUrl(final T track);
 
 }

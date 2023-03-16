@@ -17,7 +17,7 @@
 package io.sfrei.tracksearch.clients.youtube;
 
 import io.sfrei.tracksearch.clients.interfaces.ClientHelper;
-import io.sfrei.tracksearch.clients.interfaces.StreamURLProvider;
+import io.sfrei.tracksearch.clients.interfaces.Provider;
 import io.sfrei.tracksearch.clients.setup.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
@@ -45,7 +45,7 @@ import java.util.Map;
 
 @Slf4j
 public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
-        implements ClientHelper, StreamURLProvider<YouTubeTrack>, UniformClientException {
+        implements ClientHelper, Provider<YouTubeTrack>, UniformClientException {
 
     public static final String HOSTNAME = "https://www.youtube.com";
     public static final String PAGING_KEY = "ctoken";
@@ -99,7 +99,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         final Call<ResponseWrapper> request = api.getSearchForKeywords(search, params);
         final ResponseWrapper response = Client.request(request);
         final String content = response.getContentOrThrow();
-        return youTubeUtility.getYouTubeTracks(content, queryType, search, this::provideStreamUrl);
+        return youTubeUtility.getYouTubeTracks(content, queryType, search, this::provideNext, this::provideStreamUrl);
     }
 
     @Override
@@ -109,12 +109,12 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         return trackList;
     }
 
-    @Nullable
-    public String provideStreamUrl(final YouTubeTrack track) {
+    @Override
+    public TrackList<YouTubeTrack> provideNext(final TrackList<? extends Track> trackList) {
         try {
-            return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
+            return getNext(trackList);
         } catch (TrackSearchException e) {
-            log.error("Error occurred acquiring stream URL", e);
+            log.error("Error occurred acquiring next tracklist", e);
         }
         return null;
     }
@@ -143,6 +143,16 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         final String trackContent = trackResponse.getContentOrThrow();
         final YouTubeTrackInfo trackInfo = youTubeUtility.getTrackInfo(trackContent, trackUrl, this::requestURL);
         return youtubeTrack.setAndGetTrackInfo(trackInfo);
+    }
+
+    @Nullable
+    public String provideStreamUrl(final YouTubeTrack track) {
+        try {
+            return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
+        } catch (TrackSearchException e) {
+            log.error("Error occurred acquiring stream URL", e);
+        }
+        return null;
     }
 
     @Override

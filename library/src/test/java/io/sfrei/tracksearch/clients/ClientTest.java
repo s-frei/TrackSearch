@@ -104,10 +104,19 @@ public abstract class ClientTest<T extends Track> extends Client {
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
     public void getNextTracks(TrackList<T> trackList) throws TrackSearchException {
+
+        log.trace("Get next: {}", trackList);
         TrackList<T> nextTracksForSearch = searchClient.getNext(trackList);
 
         assertThat(nextTracksForSearch.isEmpty())
                 .as("Paged TrackList should contain tracks")
+                .isFalse();
+
+        log.trace("Get next again: {}", nextTracksForSearch);
+        TrackList<T> moreTracksForSearch = nextTracksForSearch.next();
+
+        assertThat(moreTracksForSearch.isEmpty())
+                .as("Further paged TrackList should contain tracks")
                 .isFalse();
     }
 

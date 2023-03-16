@@ -21,6 +21,7 @@ import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
+import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -76,7 +77,8 @@ class SoundCloudUtility {
     }
 
     protected BaseTrackList<SoundCloudTrack> getSoundCloudTracks(final String json, final QueryType queryType, final String query,
-                                                                 final Function<SoundCloudTrack, String> streamUrlProvider)
+                                                                 final Function<TrackList<SoundCloudTrack>, TrackList<SoundCloudTrack>> nextTrackListFunction,
+                                                                 final Function<SoundCloudTrack, String> streamUrlFunction)
             throws SoundCloudException {
 
         final JsonElement responseElement = JsonElement.readHandled(MAPPER, json)
@@ -86,11 +88,11 @@ class SoundCloudUtility {
         final List<SoundCloudTrack> scTracks = responseElement.elements()
                 .map(element -> element.mapToObjectHandled(MAPPER, SoundCloudTrack.class))
                 .filter(Objects::nonNull)
-                .peek(soundCloudTrack -> soundCloudTrack.setStreamUrlProvider(streamUrlProvider))
+                .peek(soundCloudTrack -> soundCloudTrack.setStreamUrlProvider(streamUrlFunction))
                 .collect(Collectors.toList());
 
         final Map<String, String> queryInformation = SoundCloudClient.makeQueryInformation(query);
-        final BaseTrackList<SoundCloudTrack> trackList = new BaseTrackList<>(scTracks, queryType, queryInformation);
+        final BaseTrackList<SoundCloudTrack> trackList = new BaseTrackList<>(scTracks, queryType, queryInformation, nextTrackListFunction);
 
         final int tracksSize = scTracks.size();
         trackList.addQueryInformationValue(SoundCloudClient.OFFSET_KEY, tracksSize);

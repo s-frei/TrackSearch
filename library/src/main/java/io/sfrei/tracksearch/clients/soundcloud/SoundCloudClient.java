@@ -18,7 +18,7 @@ package io.sfrei.tracksearch.clients.soundcloud;
 
 
 import io.sfrei.tracksearch.clients.interfaces.ClientHelper;
-import io.sfrei.tracksearch.clients.interfaces.StreamURLProvider;
+import io.sfrei.tracksearch.clients.interfaces.Provider;
 import io.sfrei.tracksearch.clients.setup.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
@@ -44,7 +44,7 @@ import java.util.Optional;
 
 @Slf4j
 public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
-        implements ClientHelper, StreamURLProvider<SoundCloudTrack>, UniformClientException {
+        implements ClientHelper, Provider<SoundCloudTrack>, UniformClientException {
 
     public static final String HOSTNAME = "https://soundcloud.com";
     private static final String INFORMATION_PREFIX = "sc";
@@ -86,7 +86,17 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         final ResponseWrapper response = getSearch(search, true, pagingParams);
 
         final String content = response.getContentOrThrow();
-        return soundCloudUtility.getSoundCloudTracks(content, queryType, search, this::provideStreamUrl);
+        return soundCloudUtility.getSoundCloudTracks(content, queryType, search, this::provideNext, this::provideStreamUrl);
+    }
+
+    @Nullable
+    public TrackList<SoundCloudTrack> provideNext(final TrackList<? extends Track> trackList) {
+        try {
+            return getNext(trackList);
+        } catch (TrackSearchException e) {
+            log.error("Error occurred acquiring next tracklist", e);
+        }
+        return null;
     }
 
     @Override
@@ -104,6 +114,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         throw unsupportedQueryTypeException(SoundCloudException::new, trackListQueryType);
     }
 
+    @Override
     @Nullable
     public String provideStreamUrl(final SoundCloudTrack track) {
         try {

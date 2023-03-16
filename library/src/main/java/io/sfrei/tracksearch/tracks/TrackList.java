@@ -39,4 +39,6 @@ public interface TrackList<T extends Track> {
 
     String getQueryParam();
 
+    TrackList<T> next();
+
 }

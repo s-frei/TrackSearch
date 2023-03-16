@@ -19,20 +19,29 @@ package io.sfrei.tracksearch.tracks;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 @Getter
+@ToString
 @AllArgsConstructor
 public class BaseTrackList<T extends Track> implements TrackList<T> {
 
+    @ToString.Exclude
     private final List<T> tracks;
 
     private QueryType queryType = QueryType.UNKNOWN;
     private final Map<String, String> queryInformation;
+
+    @Setter
+    @ToString.Exclude
+    private Function<TrackList<T>, TrackList<T>> nextTrackListFunction;
 
     public BaseTrackList() {
         this.tracks = new ArrayList<>();
@@ -71,6 +80,11 @@ public class BaseTrackList<T extends Track> implements TrackList<T> {
     @Override
     public boolean isEmpty() {
         return tracks.isEmpty();
+    }
+
+    @Override
+    public TrackList<T> next() {
+        return nextTrackListFunction.apply(this);
     }
 
 }

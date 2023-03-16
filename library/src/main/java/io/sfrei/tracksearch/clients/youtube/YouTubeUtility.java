@@ -22,6 +22,7 @@ import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.BaseTrackList;
+import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
@@ -77,6 +78,7 @@ class YouTubeUtility {
     }
 
     protected BaseTrackList<YouTubeTrack> getYouTubeTracks(final String json, final QueryType queryType, final String query,
+                                                           final Function<TrackList<YouTubeTrack>, TrackList<YouTubeTrack>> nextTrackListFunction,
                                                            final Function<YouTubeTrack, String> streamUrlProvider)
             throws YouTubeException {
 
@@ -124,7 +126,7 @@ class YouTubeUtility {
 
 
         final Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
-        final BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation);
+        final BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation, nextTrackListFunction);
 
         int tracksSize = ytTracks.size();
         trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, tracksSize);

@@ -4,12 +4,13 @@ Changelog
 0.7.4 - unreleased
 ------------------
 
-**Major:**
+**Breaking:**
 
-- The *length* (`java.langLong`) field of Track is now *duration* (`java.time.Duration`)
+- The *length* (`java.lang.Long`) field of Track is now *duration* (`java.time.Duration`)
 
 **Features:**
 
+- Obtain next/paged tracks using the TrackList `next()` function
 - Improved code quality and readability especially for JSON processing
 - Improved tests
 - Improved duration parsing

@@ -80,7 +80,7 @@ List<Track> tracks = tracksForSearch.getTracks();
 String streamUrl = tracks.get(anyPos).getStreamUrl();
 
 // Get next tracks page
-TrackList<Track> nextTracks = searchClient.getNext(tracksForSearch);
+TrackList<Track> nextTracks = tracksForSearch.next();
 ```
 
 ## Why is this done ?
