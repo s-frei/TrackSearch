@@ -46,6 +46,7 @@
 
     <!-- test n report -->
     <maven-surefire.version>3.0.0</maven-surefire.version>
+    <maven-surefire-tree-reporter.version>1.1.0</maven-surefire-tree-reporter.version>
 
     <!-- build n deploy -->
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -138,6 +139,36 @@
                 </configuration>
               </execution>
             </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>fancy-report</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <dependencies>
+              <dependency>
+                <groupId>me.fabriciorby</groupId>
+                <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                <version>${maven-surefire-tree-reporter.version}</version>
+              </dependency>
+            </dependencies>
+            <configuration>
+              <excludedGroups>DetailedClientTest</excludedGroups>
+              <trimStackTrace>false</trimStackTrace>
+              <disableXmlReport>true</disableXmlReport>
+              <reportFormat>plain</reportFormat>
+              <consoleOutputReporter>
+                <disable>true</disable>
+              </consoleOutputReporter>
+              <statelessTestsetInfoReporter
+                implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+              </statelessTestsetInfoReporter>
+            </configuration>
           </plugin>
         </plugins>
       </build>

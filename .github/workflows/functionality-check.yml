@@ -35,7 +35,7 @@ jobs:
           cache: maven
       
       - name: "Run Maven 'test'"
-        run: mvn test -e --color always
+        run: mvn test -e -P fancy-report --color always
       
       - name: "Upload test report"
         uses: actions/upload-artifact@v2
