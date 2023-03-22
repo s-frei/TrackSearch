@@ -23,6 +23,7 @@ import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -169,10 +171,10 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                     .isNotEmpty();
 
             assertThat(trackMetadata)
-                    .extracting(TrackMetadata::getStreamAmount)
+                    .extracting(TrackMetadata::getStreamAmount, as(InstanceOfAssertFactories.LONG))
                     .as("TrackMetadata should have stream amount for Track '%s'", track.getUrl())
-                    .asString()
-                    .isNotEmpty();
+                    .isNotNull()
+                    .isNotNegative();
 
             assertThat(trackMetadata)
                     .extracting(TrackMetadata::getThumbNailUrl)

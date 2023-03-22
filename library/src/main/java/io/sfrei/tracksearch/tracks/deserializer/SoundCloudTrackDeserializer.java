@@ -64,7 +64,8 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
 
         final String channelUrl = owner.fieldAsString("permalink_url");
 
-        final Long streamAmount = rootElement.fieldAsLong("playback_count");
+        final Long playbackCount = rootElement.fieldAsLong("playback_count");
+        final Long streamAmount = playbackCount == null ? 0L : playbackCount; // Apparently can be 'null' in the JSON
 
         final String thumbNailUrl = rootElement.path("artwork_url")
                 .orElse(rootElement)
