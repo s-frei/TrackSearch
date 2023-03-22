@@ -16,6 +16,7 @@
 
 package io.sfrei.tracksearch.clients;
 
+import io.sfrei.tracksearch.clients.interfaces.Provider;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.clients.soundcloud.SoundCloudClient;
@@ -35,10 +36,10 @@ import java.util.concurrent.*;
 
 @Slf4j
 @SuppressWarnings({"FieldCanBeLocal", "unchecked"})
-public class MultiSearchClient implements MultiTrackSearchClient {
+public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track> {
 
     public static final String POSITION_KEY = "multi" + TrackSearchConfig.POSITION_KEY_SUFFIX;
-    public static final String OFFSET_KEY = "multi" +  TrackSearchConfig.OFFSET_KEY_SUFFIX;
+    public static final String OFFSET_KEY = "multi" + TrackSearchConfig.OFFSET_KEY_SUFFIX;
 
     private final TrackSearchClient<YouTubeTrack> youTubeClient;
     private final TrackSearchClient<SoundCloudTrack> soundCloudClient;
@@ -71,6 +72,26 @@ public class MultiSearchClient implements MultiTrackSearchClient {
             callClients.remove(soundCloudClient);
         }
         return getNext(trackList, callClients);
+    }
+
+    @Override
+    public String provideStreamUrl(Track track) {
+        try {
+            return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
+        } catch (TrackSearchException e) {
+            log.error("Error occurred acquiring stream URL", e);
+        }
+        return null;
+    }
+
+    @Override
+    public TrackList<Track> provideNext(TrackList<? extends Track> trackList) {
+        try {
+            return getNext(trackList);
+        } catch (TrackSearchException e) {
+            log.error("Error occurred acquiring next tracklist", e);
+        }
+        return null;
     }
 
     @Override
@@ -159,6 +180,7 @@ public class MultiSearchClient implements MultiTrackSearchClient {
 
         TrackListHelper.mergePositionValues(resultTrackList, POSITION_KEY, OFFSET_KEY);
         resultTrackList.setQueryType(queryType);
+        resultTrackList.setNextTrackListFunction(this::provideNext);
         return resultTrackList;
     }
 
