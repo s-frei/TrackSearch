@@ -35,7 +35,6 @@ import io.sfrei.tracksearch.utils.TrackListHelper;
 import io.sfrei.tracksearch.utils.URLUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -110,16 +109,6 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     }
 
     @Override
-    public TrackList<YouTubeTrack> provideNext(final TrackList<? extends Track> trackList) {
-        try {
-            return getNext(trackList);
-        } catch (TrackSearchException e) {
-            log.error("Error occurred acquiring next tracklist", e);
-        }
-        return null;
-    }
-
-    @Override
     public BaseTrackList<YouTubeTrack> getNext(@NonNull final TrackList<? extends Track> trackList) throws TrackSearchException {
         throwIfPagingValueMissing(this, trackList);
 
@@ -143,16 +132,6 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         final String trackContent = trackResponse.getContentOrThrow();
         final YouTubeTrackInfo trackInfo = youTubeUtility.getTrackInfo(trackContent, trackUrl, this::requestURL);
         return youtubeTrack.setAndGetTrackInfo(trackInfo);
-    }
-
-    @Nullable
-    public String provideStreamUrl(final YouTubeTrack track) {
-        try {
-            return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
-        } catch (TrackSearchException e) {
-            log.error("Error occurred acquiring stream URL", e);
-        }
-        return null;
     }
 
     @Override

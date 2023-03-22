@@ -28,6 +28,7 @@ import io.sfrei.tracksearch.utils.TrackListHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,26 +73,6 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
             callClients.remove(soundCloudClient);
         }
         return getNext(trackList, callClients);
-    }
-
-    @Override
-    public String provideStreamUrl(Track track) {
-        try {
-            return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
-        } catch (TrackSearchException e) {
-            log.error("Error occurred acquiring stream URL", e);
-        }
-        return null;
-    }
-
-    @Override
-    public TrackList<Track> provideNext(TrackList<? extends Track> trackList) {
-        try {
-            return getNext(trackList);
-        } catch (TrackSearchException e) {
-            log.error("Error occurred acquiring next tracklist", e);
-        }
-        return null;
     }
 
     @Override
@@ -187,6 +168,11 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
     @Override
     public boolean hasPagingValues(@NotNull final TrackList<? extends Track> trackList) {
         return TrackListHelper.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
+    }
+
+    @Override
+    public Logger log() {
+        return log;
     }
 
 }

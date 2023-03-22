@@ -16,12 +16,34 @@
 
 package io.sfrei.tracksearch.clients.interfaces;
 
+import io.sfrei.tracksearch.clients.TrackSearchClient;
+import io.sfrei.tracksearch.config.TrackSearchConfig;
+import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import org.jetbrains.annotations.Nullable;
 
-public interface Provider<T extends Track> {
+public interface Provider<T extends Track> extends TrackSearchClient<T>, ClassLogger {
 
-    TrackList<T> provideNext(final TrackList<? extends Track> trackList);
-    String provideStreamUrl(final T track);
+    @Nullable
+    default TrackList<T> provideNext(final TrackList<T> trackList) {
+        try {
+            return getNext(trackList);
+        } catch (TrackSearchException e) {
+            log().error("Error occurred acquiring next tracklist", e);
+        }
+        return null;
+    }
+
+
+    @Nullable
+    default String provideStreamUrl(final T track) {
+        try {
+            return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
+        } catch (TrackSearchException e) {
+            log().error("Error occurred acquiring stream URL", e);
+        }
+        return null;
+    }
 
 }

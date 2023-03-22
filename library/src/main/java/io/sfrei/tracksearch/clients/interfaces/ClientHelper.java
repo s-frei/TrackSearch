@@ -20,17 +20,14 @@ import io.sfrei.tracksearch.clients.TrackSearchClient;
 import io.sfrei.tracksearch.clients.setup.Client;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
-import org.slf4j.Logger;
 
 import java.util.Optional;
 import java.util.function.Function;
 
 
-public interface ClientHelper {
+public interface ClientHelper extends ClassLogger {
 
     int INITIAL_TRY = 1;
-
-    Logger log();
 
     default <T extends Track> Optional<String> getStreamUrl(TrackSearchClient<T> searchClient, T track,
                                                             Function<String, Integer> requestForCodeFunction,

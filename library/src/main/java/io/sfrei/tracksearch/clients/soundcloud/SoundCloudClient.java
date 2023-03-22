@@ -31,7 +31,6 @@ import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.utils.TrackListHelper;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -89,16 +88,6 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         return soundCloudUtility.getSoundCloudTracks(content, queryType, search, this::provideNext, this::provideStreamUrl);
     }
 
-    @Nullable
-    public TrackList<SoundCloudTrack> provideNext(final TrackList<? extends Track> trackList) {
-        try {
-            return getNext(trackList);
-        } catch (TrackSearchException e) {
-            log.error("Error occurred acquiring next tracklist", e);
-        }
-        return null;
-    }
-
     @Override
     public TrackList<SoundCloudTrack> getNext(@NonNull final TrackList<? extends Track> trackList) throws TrackSearchException {
         throwIfPagingValueMissing(this, trackList);
@@ -112,17 +101,6 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
             return TrackListHelper.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw unsupportedQueryTypeException(SoundCloudException::new, trackListQueryType);
-    }
-
-    @Override
-    @Nullable
-    public String provideStreamUrl(final SoundCloudTrack track) {
-        try {
-            return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
-        } catch (TrackSearchException e) {
-            log.error("Error occurred acquiring stream URL", e);
-        }
-        return null;
     }
 
     @Override
