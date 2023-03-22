@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Getter
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public abstract class ClientTest<T extends Track> extends Client {
+public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track> extends Client {
 
     protected static final String SINGLE_SEARCH_KEY = "Ben Böhmer";
 
@@ -56,21 +56,21 @@ public abstract class ClientTest<T extends Track> extends Client {
             "Christian Löffler"
     );
 
-    protected final TrackSearchClient<T> searchClient;
+    protected final C searchClient;
 
     private final List<String> searchKeys;
 
     private final List<Named<TrackList<T>>> tracksForSearch;
 
-    private Stream<Named<T>> getAllTracksFromTrackLists() {
+    private Stream<Named<Track>> getAllTracksFromTrackLists() {
         return tracksForSearch.stream()
                 .flatMap(trackList -> trackList.getPayload().getTracks().stream())
                 .map(track -> Named.of(String.format("%s - %s", track.getTitle(), track.getUrl()), track));
     }
 
-    public ClientTest(TrackSearchClient<T> trackSearchClient, boolean single) {
+    public ClientTest(C searchClient, boolean single) {
         super(CookiePolicy.ACCEPT_ALL, null);
-        searchClient = trackSearchClient;
+        this.searchClient = searchClient;
         this.searchKeys = single ? List.of(SINGLE_SEARCH_KEY) : SEARCH_KEYS;
         tracksForSearch = new ArrayList<>();
     }
@@ -92,7 +92,7 @@ public abstract class ClientTest<T extends Track> extends Client {
     @Order(2)
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
-    public void trackListGotPagingValues(TrackList<T> trackList) {
+    public void trackListGotPagingValues(TrackList<Track> trackList) {
         final boolean hasPagingValues = searchClient.hasPagingValues(trackList);
 
         assertThat(hasPagingValues)
@@ -103,7 +103,7 @@ public abstract class ClientTest<T extends Track> extends Client {
     @Order(3)
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
-    public void getNextTracks(TrackList<T> trackList) throws TrackSearchException {
+    public void getNextTracks(TrackList<Track> trackList) throws TrackSearchException {
 
         log.trace("Get next: {}", trackList);
         TrackList<T> nextTracksForSearch = searchClient.getNext(trackList);
@@ -123,8 +123,8 @@ public abstract class ClientTest<T extends Track> extends Client {
     @Order(4)
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
-    public void checkTrackAndMetadata(TrackList<T> trackList) {
-        for (T track : trackList.getTracks()) {
+    public void checkTrackAndMetadata(TrackList<Track> trackList) {
+        for (Track track : trackList.getTracks()) {
 
             log.trace("{}", track.pretty());
 

@@ -19,6 +19,7 @@ package io.sfrei.tracksearch.clients;
 import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
+import io.sfrei.tracksearch.tracks.TrackList;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ import static io.sfrei.tracksearch.clients.setup.TrackSource.Youtube;
  */
 @Slf4j
 @Tag("ClientTest")
-public class MultiTrackSearchClientTest extends ClientTest<Track> {
+public class MultiTrackSearchClientTest extends ClientTest<MultiTrackSearchClient, Track> {
 
     public MultiTrackSearchClientTest() {
         super(new MultiSearchClient(), true);
@@ -40,16 +41,18 @@ public class MultiTrackSearchClientTest extends ClientTest<Track> {
 
     @Test
     public void testYTSource() throws TrackSearchException {
-        MultiTrackSearchClient searchClient = (MultiTrackSearchClient) this.searchClient;
-        log.debug("MultiTrackSearchClient with explicit source ->  {}", Youtube);
-        searchClient.getTracksForSearch(SINGLE_SEARCH_KEY, TrackSource.setOf(Youtube));
+        testSource(Youtube);
     }
 
     @Test
     public void testSCSource() throws TrackSearchException {
-        MultiTrackSearchClient searchClient = (MultiTrackSearchClient) this.searchClient;
-        log.debug("MultiTrackSearchClient with explicit source ->  {}", Soundcloud);
-        searchClient.getTracksForSearch(SINGLE_SEARCH_KEY, TrackSource.setOf(Soundcloud));
+        testSource(Soundcloud);
+    }
+
+    private void testSource(TrackSource source) throws TrackSearchException {
+        log.debug("MultiTrackSearchClient with explicit source ->  {}", source);
+        final TrackList<Track> trackList = searchClient.getTracksForSearch(SINGLE_SEARCH_KEY, TrackSource.setOf(source));
+        log.debug("Found '{}' tracks for {}", trackList.getTracks().size(), source);
     }
 
 }

@@ -21,7 +21,7 @@ import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import org.junit.jupiter.api.Tag;
 
 @Tag("DetailedClientTest")
-public class DetailedSoundCloudClientTest extends ClientTest<SoundCloudTrack> {
+public class DetailedSoundCloudClientTest extends ClientTest<SoundCloudClient, SoundCloudTrack> {
 
     public DetailedSoundCloudClientTest() {
         super(new SoundCloudClient(), false);

@@ -21,7 +21,7 @@ import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import org.junit.jupiter.api.Tag;
 
 @Tag("DetailedClientTest")
-public class DetailedYouTubeClientTest extends ClientTest<YouTubeTrack> {
+public class DetailedYouTubeClientTest extends ClientTest<YouTubeClient, YouTubeTrack> {
 
     public DetailedYouTubeClientTest() {
         super(new YouTubeClient(), false);
