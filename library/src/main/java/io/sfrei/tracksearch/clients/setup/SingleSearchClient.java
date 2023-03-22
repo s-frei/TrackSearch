@@ -31,11 +31,12 @@ public abstract class SingleSearchClient<T extends Track> extends Client impleme
         super(cookiePolicy, headers);
     }
 
-    protected void throwIfPagingValueMissing(ClientProvider source, TrackList<? extends Track> trackList)
+    protected void throwIfPagingValueMissing(SingleSearchClient<?> source, TrackList<? extends Track> trackList)
             throws TrackSearchException {
 
         if (!hasPagingValues(trackList))
-            throw new TrackSearchException("Can not get next - paging value/s missing for " + source.getClass().getSimpleName());
+            throw new TrackSearchException(String.format("Can not get next - paging value/s missing for %s", source.getClass().getSimpleName()));
+
     }
 
 }
