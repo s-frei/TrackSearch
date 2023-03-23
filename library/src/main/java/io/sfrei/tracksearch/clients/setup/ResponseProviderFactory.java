@@ -18,6 +18,7 @@ package io.sfrei.tracksearch.clients.setup;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
+import org.jetbrains.annotations.NotNull;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 
@@ -34,7 +35,9 @@ public class ResponseProviderFactory extends Converter.Factory {
     }
 
     @Override
-    public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
+    public Converter<ResponseBody, ?> responseBodyConverter(@NotNull Type type,
+                                                            @NotNull Annotation[] annotations,
+                                                            @NotNull Retrofit retrofit) {
         return StringProvider.INSTANCE;
     }
 
@@ -44,17 +47,17 @@ public class ResponseProviderFactory extends Converter.Factory {
 
         @Override
         public ResponseWrapper convert(ResponseBody responseBody) {
-            return getWrapper(responseBody);
+            return wrapResponse(responseBody);
         }
     }
 
-    public static ResponseWrapper getWrapper(ResponseBody responseBody) {
+    public static ResponseWrapper wrapResponse(ResponseBody responseBody) {
         if (responseBody != null) {
             try {
                 String body = new String(responseBody.string().getBytes(StandardCharsets.UTF_8));
                 return ResponseWrapper.of(Client.OK, body);
             } catch (IOException e) {
-                log.error(e.getMessage());
+                log.error("Cannot process response", e);
             }
         }
         return ResponseWrapper.empty();

@@ -17,15 +17,16 @@
 package io.sfrei.tracksearch.tracks;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.sfrei.tracksearch.clients.interfaces.functional.StreamURLFunction;
 import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.tracks.deserializer.YouTubeTrackDeserializer;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Duration;
-import java.util.function.Function;
 
 
 @JsonDeserialize(using = YouTubeTrackDeserializer.class)
@@ -38,12 +39,15 @@ public class YouTubeTrack extends BaseTrack implements Track {
     @Getter
     private final YouTubeTrackMetadata trackMetadata;
 
-    @Setter
-    private Function<YouTubeTrack, String> streamUrlProvider;
+    private final StreamURLFunction<YouTubeTrack> streamUrlFunction;
 
-    public YouTubeTrack(String title, Duration duration, String url, YouTubeTrackMetadata trackMetadata) {
+    @Builder
+    public YouTubeTrack(String title, Duration duration, String url, YouTubeTrackInfo trackInfo,
+                        YouTubeTrackMetadata trackMetadata, StreamURLFunction<YouTubeTrack> streamUrlFunction) {
         super(TrackSource.Youtube, title, duration, url);
+        this.trackInfo = trackInfo;
         this.trackMetadata = trackMetadata;
+        this.streamUrlFunction = streamUrlFunction;
     }
 
     public YouTubeTrackInfo setAndGetTrackInfo(YouTubeTrackInfo trackInfo) {
@@ -53,7 +57,7 @@ public class YouTubeTrack extends BaseTrack implements Track {
 
     @Override
     public String getStreamUrl() {
-        return streamUrlProvider.apply(this);
+        return streamUrlFunction.apply(this);
     }
 
 }

@@ -24,11 +24,11 @@ import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.exceptions.UniformClientException;
-import io.sfrei.tracksearch.tracks.BaseTrackList;
+import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
-import io.sfrei.tracksearch.utils.TrackListHelper;
+import io.sfrei.tracksearch.utils.TrackListUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -76,7 +76,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         return new HashMap<>(Map.of(TrackList.QUERY_PARAM, query));
     }
 
-    private BaseTrackList<SoundCloudTrack> getTracksForSearch(final String search, int position, int offset, QueryType queryType)
+    private GenericTrackList<SoundCloudTrack> getTracksForSearch(final String search, int position, int offset, QueryType queryType)
             throws TrackSearchException {
 
         checkClientIDAvailableOrThrow();
@@ -89,6 +89,13 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
     }
 
     @Override
+    public TrackList<SoundCloudTrack> getTracksForSearch(@NonNull final String search) throws TrackSearchException {
+        GenericTrackList<SoundCloudTrack> trackList = getTracksForSearch(search, 0, TrackSearchConfig.playListOffset, QueryType.SEARCH);
+        trackList.addQueryInformationValue(POSITION_KEY, 0);
+        return trackList;
+    }
+
+    @Override
     public TrackList<SoundCloudTrack> getNext(@NonNull final TrackList<? extends Track> trackList) throws TrackSearchException {
         throwIfPagingValueMissing(this, trackList);
 
@@ -97,8 +104,8 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
             final int queryPosition = trackList.getQueryInformationIntValue(OFFSET_KEY);
             final int queryOffset = TrackSearchConfig.playListOffset;
 
-            final BaseTrackList<SoundCloudTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), queryPosition, queryOffset, QueryType.PAGING);
-            return TrackListHelper.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
+            final GenericTrackList<SoundCloudTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), queryPosition, queryOffset, QueryType.PAGING);
+            return TrackListUtility.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw unsupportedQueryTypeException(SoundCloudException::new, trackListQueryType);
     }
@@ -177,20 +184,13 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         throw new SoundCloudException("ClientId can not be found");
     }
 
-    @Override
-    public TrackList<SoundCloudTrack> getTracksForSearch(@NonNull final String search) throws TrackSearchException {
-        BaseTrackList<SoundCloudTrack> trackList = getTracksForSearch(search, 0, TrackSearchConfig.playListOffset, QueryType.SEARCH);
-        trackList.addQueryInformationValue(POSITION_KEY, 0);
-        return trackList;
-    }
-
     private Map<String, String> getPagingParams(final int position, final int offset) {
         return Map.of(PAGING_OFFSET, String.valueOf(offset), PAGING_POSITION, String.valueOf(position));
     }
 
     @Override
     public boolean hasPagingValues(@NonNull final TrackList<? extends Track> trackList) {
-        return TrackListHelper.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
+        return TrackListUtility.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
     }
 
     @Override

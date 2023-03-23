@@ -54,7 +54,7 @@ public class Client extends ClientProvider {
         log.trace("Requesting: {}", url);
         final Request request = new Request.Builder().url(url).build();
         try (final okhttp3.Response response = okHttpClient.newCall(request).execute()) {
-            return ResponseProviderFactory.getWrapper(response.body());
+            return ResponseProviderFactory.wrapResponse(response.body());
         } catch (IOException e) {
             logRequestException(url, e);
         }

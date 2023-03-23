@@ -16,55 +16,46 @@
 
 package io.sfrei.tracksearch.tracks;
 
+import io.sfrei.tracksearch.clients.interfaces.functional.NextTrackListFunction;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 @Getter
+@Builder
 @ToString
 @AllArgsConstructor
-public class BaseTrackList<T extends Track> implements TrackList<T> {
+public class GenericTrackList<T extends Track> implements TrackList<T> {
+
+    @Builder.Default
+    @ToString.Exclude
+    private final List<T> tracks = new ArrayList<>();
+
+    @Builder.Default
+    private final QueryType queryType = QueryType.UNKNOWN;
+
+    @Builder.Default
+    private final Map<String, String> queryInformation = new HashMap<>();
 
     @ToString.Exclude
-    private final List<T> tracks;
-
-    private QueryType queryType = QueryType.UNKNOWN;
-    private final Map<String, String> queryInformation;
-
-    @Setter
-    @ToString.Exclude
-    private Function<TrackList<T>, TrackList<T>> nextTrackListFunction;
-
-    public BaseTrackList() {
-        this.tracks = new ArrayList<>();
-        this.queryInformation = new HashMap<>();
-    }
+    private final NextTrackListFunction<T> nextTrackListFunction;
 
     @Override
-    public void mergeIn(BaseTrackList<T> from) {
+    public void mergeIn(GenericTrackList<T> from) {
         this.tracks.addAll(from.tracks);
         this.queryInformation.putAll(from.queryInformation);
     }
 
-    public void setQueryType(QueryType queryType) {
-        this.queryType = queryType;
-    }
-
-    public BaseTrackList<T> setPagingValues(String positionKey, int position, String offsetKey, int offset) {
+    public GenericTrackList<T> setPagingValues(String positionKey, int position, String offsetKey, int offset) {
         queryInformation.putAll(Map.of(positionKey, String.valueOf(position), offsetKey, String.valueOf(offset)));
         return this;
-    }
-
-    public void addQueryInformationValue(String key, int value) {
-        queryInformation.put(key, String.valueOf(value));
     }
 
     @Override
@@ -75,6 +66,11 @@ public class BaseTrackList<T extends Track> implements TrackList<T> {
     @Override
     public String getQueryParam() {
         return queryInformation.get(QUERY_PARAM);
+    }
+
+    @Override
+    public void addQueryInformationValue(String key, int value) {
+        queryInformation.put(key, String.valueOf(value));
     }
 
     @Override

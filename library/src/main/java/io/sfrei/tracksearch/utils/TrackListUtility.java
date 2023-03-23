@@ -17,7 +17,7 @@
 package io.sfrei.tracksearch.utils;
 
 import io.sfrei.tracksearch.config.TrackSearchConfig;
-import io.sfrei.tracksearch.tracks.BaseTrackList;
+import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import lombok.experimental.UtilityClass;
@@ -28,10 +28,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @UtilityClass
-public class TrackListHelper {
+public class TrackListUtility {
 
-    public <T extends Track> BaseTrackList<T> updatePagingValues(final BaseTrackList<T> newTrackList, final TrackList<?> oldTrackList,
-                                                                        final String positionKey, String offsetKey) {
+    public <T extends Track> TrackList<T> updatePagingValues(final GenericTrackList<T> newTrackList,
+                                                             final TrackList<? extends Track> oldTrackList,
+                                                             final String positionKey, String offsetKey) {
 
         final String oldOffsetValue = oldTrackList.getQueryInformation().get(offsetKey);
         final String newOffsetValue = newTrackList.getQueryInformation().get(offsetKey);
@@ -45,7 +46,7 @@ public class TrackListHelper {
         return newTrackList.setPagingValues(positionKey, newPosition, offsetKey, newOffset);
     }
 
-    public void mergePositionValues(final BaseTrackList<? extends Track> trackList, final String positionKey, final String offsetKey) {
+    public void mergePositionValues(final GenericTrackList<? extends Track> trackList, final String positionKey, final String offsetKey) {
         final AtomicInteger position = new AtomicInteger(0);
         final AtomicInteger offset = new AtomicInteger(0);
 

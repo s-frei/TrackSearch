@@ -24,7 +24,7 @@ import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.*;
-import io.sfrei.tracksearch.utils.TrackListHelper;
+import io.sfrei.tracksearch.utils.TrackListUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -114,12 +114,12 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
         return getTracksForSearch(search, callClients);
     }
 
-    private BaseTrackList<Track> getTracksForSearch(final String search, final List<TrackSearchClient<? extends Track>> callClients)
+    private GenericTrackList<Track> getTracksForSearch(final String search, final List<TrackSearchClient<? extends Track>> callClients)
             throws TrackSearchException {
-        final List<Callable<BaseTrackList<Track>>> searchCalls = new ArrayList<>();
+        final List<Callable<GenericTrackList<Track>>> searchCalls = new ArrayList<>();
 
         for (final TrackSearchClient<? extends Track> client : callClients) {
-            searchCalls.add(() -> (BaseTrackList<Track>) client.getTracksForSearch(search));
+            searchCalls.add(() -> (GenericTrackList<Track>) client.getTracksForSearch(search));
         }
 
         log.debug("Performing search call for {} clients", callClients.size());
@@ -129,45 +129,46 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
     private TrackList<Track> getNext(final TrackList<? extends Track> trackList, final List<TrackSearchClient<? extends Track>> callClients)
             throws TrackSearchException {
 
-        final List<Callable<BaseTrackList<Track>>> nextCalls = new ArrayList<>();
+        final List<Callable<GenericTrackList<Track>>> nextCalls = new ArrayList<>();
 
         for (final TrackSearchClient<? extends Track> client : callClients) {
-            nextCalls.add(() -> (BaseTrackList<Track>) client.getNext(trackList));
+            nextCalls.add(() -> (GenericTrackList<Track>) client.getNext(trackList));
         }
         log.debug("Performing next call for {} clients", callClients.size());
         return getMergedTrackListFromCalls(nextCalls, trackList.getQueryType());
     }
 
-    private BaseTrackList<Track> getMergedTrackListFromCalls(final List<Callable<BaseTrackList<Track>>> calls, final QueryType queryType)
+    private GenericTrackList<Track> getMergedTrackListFromCalls(final List<Callable<GenericTrackList<Track>>> calls, final QueryType queryType)
             throws TrackSearchException {
 
         final ExecutorService executorService = Executors.newFixedThreadPool(calls.size());
-        final BaseTrackList<Track> resultTrackList = new BaseTrackList<>();
 
-        final List<Future<BaseTrackList<Track>>> trackLists;
+        final GenericTrackList<Track> list = GenericTrackList.builder().queryType(queryType)
+                .nextTrackListFunction(this::provideNext)
+                .build();
+
+        final List<Future<GenericTrackList<Track>>> trackLists;
         try {
             trackLists = executorService.invokeAll(calls);
         } catch (InterruptedException e) {
             throw new TrackSearchException(e);
         }
 
-        for (final Future<BaseTrackList<Track>> trackList : trackLists) {
+        for (final Future<GenericTrackList<Track>> trackList : trackLists) {
             try {
-                resultTrackList.mergeIn(trackList.get());
+                list.mergeIn(trackList.get());
             } catch (InterruptedException | ExecutionException e) {
                 throw new TrackSearchException("An error occurred acquiring a tracklist", e);
             }
         }
 
-        TrackListHelper.mergePositionValues(resultTrackList, POSITION_KEY, OFFSET_KEY);
-        resultTrackList.setQueryType(queryType);
-        resultTrackList.setNextTrackListFunction(this::provideNext);
-        return resultTrackList;
+        TrackListUtility.mergePositionValues(list, POSITION_KEY, OFFSET_KEY);
+        return list;
     }
 
     @Override
     public boolean hasPagingValues(@NotNull final TrackList<? extends Track> trackList) {
-        return TrackListHelper.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
+        return TrackListUtility.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
     }
 
     @Override

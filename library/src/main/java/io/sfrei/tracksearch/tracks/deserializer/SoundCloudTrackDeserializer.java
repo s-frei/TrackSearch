@@ -32,7 +32,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack> {
+public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack.SoundCloudTrackBuilder> {
 
     @SuppressWarnings("unused")
     public SoundCloudTrackDeserializer() {
@@ -44,7 +44,7 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
     }
 
     @Override
-    public SoundCloudTrack deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
+    public SoundCloudTrack.SoundCloudTrackBuilder deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
 
         // Track
 
@@ -55,6 +55,11 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
 
         if (title == null || duration == null || url == null)
             return null;
+
+        final SoundCloudTrack.SoundCloudTrackBuilder soundCloudTrackBuilder = SoundCloudTrack.builder()
+                .title(title)
+                .duration(duration)
+                .url(url);
 
         // Metadata
 
@@ -72,39 +77,37 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
                 .path("user", "avatar_url") // Fallback to channel thumbnail
                 .fieldAsString();
 
-        final SoundCloudTrackMetadata trackMetadata = new SoundCloudTrackMetadata(channelName, channelUrl,
-                streamAmount, thumbNailUrl);
-
-        final SoundCloudTrack soundcloudTrack = new SoundCloudTrack(title, duration, url, trackMetadata);
+       soundCloudTrackBuilder.trackMetadata(SoundCloudTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
 
         // Formats
 
         final List<SoundCloudTrackFormat> trackFormats = rootElement.path("media", "transcodings")
                 .arrayElements()
-                .map(transcoding -> {
+                .map(SoundCloudTrackDeserializer::transcodingToTrackFormat)
+                .collect(Collectors.toList());
 
-                    final String formatUrl = transcoding.fieldAsString("url");
-                    final String audioQuality = transcoding.fieldAsString("quality");
+        soundCloudTrackBuilder.trackInfo(new SoundCloudTrackInfo(trackFormats));
 
-                    final JsonElement formatElement = transcoding.path("format");
-                    final String mimeType = formatElement.fieldAsString("mime_type");
-                    final String protocol = formatElement.fieldAsString("protocol");
+        return soundCloudTrackBuilder;
+    }
 
-                    return SoundCloudTrackFormat.builder()
-                            .mimeType(mimeType)
-                            .formatType(FormatType.Audio)
-                            .audioQuality(audioQuality)
-                            .streamReady(true)
-                            .protocol(protocol)
-                            .url(formatUrl)
-                            .build();
+    private static SoundCloudTrackFormat transcodingToTrackFormat(JsonElement transcoding) {
 
-                }).collect(Collectors.toList());
+        final String formatUrl = transcoding.fieldAsString("url");
+        final String audioQuality = transcoding.fieldAsString("quality");
 
-        final SoundCloudTrackInfo trackInfo = new SoundCloudTrackInfo(trackFormats);
-        soundcloudTrack.setTrackInfo(trackInfo);
+        final JsonElement formatElement = transcoding.path("format");
+        final String mimeType = formatElement.fieldAsString("mime_type");
+        final String protocol = formatElement.fieldAsString("protocol");
 
-        return soundcloudTrack;
+        return SoundCloudTrackFormat.builder()
+                .mimeType(mimeType)
+                .formatType(FormatType.Audio)
+                .audioQuality(audioQuality)
+                .streamReady(true)
+                .protocol(protocol)
+                .url(formatUrl)
+                .build();
     }
 
 }

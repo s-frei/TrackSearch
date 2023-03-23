@@ -16,38 +16,38 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.sfrei.tracksearch.clients.interfaces.functional.StreamURLFunction;
 import io.sfrei.tracksearch.clients.setup.TrackSource;
-import io.sfrei.tracksearch.tracks.deserializer.SoundCloudTrackDeserializer;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Duration;
-import java.util.function.Function;
 
 
-@JsonDeserialize(using = SoundCloudTrackDeserializer.class)
 public class SoundCloudTrack extends BaseTrack implements Track {
 
     @Getter
-    @Setter
-    private SoundCloudTrackInfo trackInfo;
+    private final SoundCloudTrackInfo trackInfo;
 
     @Getter
     private final SoundCloudTrackMetadata trackMetadata;
 
-    @Setter
-    private Function<SoundCloudTrack, String> streamUrlProvider;
+    private final StreamURLFunction<SoundCloudTrack> streamUrlFunction;
 
-    public SoundCloudTrack(String title, Duration duration, String mrl, SoundCloudTrackMetadata trackMetadata) {
-        super(TrackSource.Soundcloud, title, duration, mrl);
+    @Builder
+    public SoundCloudTrack(String title, Duration duration, String url, SoundCloudTrackInfo trackInfo,
+                           SoundCloudTrackMetadata trackMetadata, StreamURLFunction<SoundCloudTrack> streamUrlFunction) {
+        super(TrackSource.Soundcloud, title, duration, url);
+        this.trackInfo = trackInfo;
         this.trackMetadata = trackMetadata;
+        this.streamUrlFunction = streamUrlFunction;
     }
 
     @Override
     public String getStreamUrl() {
-        return streamUrlProvider.apply(this);
+        return streamUrlFunction.apply(this);
     }
+
 }

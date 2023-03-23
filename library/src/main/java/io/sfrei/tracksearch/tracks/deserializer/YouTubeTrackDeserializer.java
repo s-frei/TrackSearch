@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Slf4j
-public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
+public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack.YouTubeTrackBuilder> {
 
     @SuppressWarnings("unused")
     public YouTubeTrackDeserializer() {
@@ -45,7 +45,7 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
     }
 
     @Override
-    public YouTubeTrack deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
+    public YouTubeTrack.YouTubeTrackBuilder deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
 
         final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
 
@@ -60,6 +60,11 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
             return null;
 
         final String url = YouTubeClient.HOSTNAME.concat("/watch?v=").concat(ref);
+
+        final YouTubeTrack.YouTubeTrackBuilder youTubeTrackBuilder = YouTubeTrack.builder()
+                .title(title)
+                .duration(duration)
+                .url(url);
 
         // Metadata
 
@@ -81,10 +86,9 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack> {
         final Optional<JsonElement> lastThumbnail = thumbNailStream.findFirst();
         final String thumbNailUrl = lastThumbnail.map(thumbNail -> thumbNail.fieldAsString("url")).orElse(null);
 
-        final YouTubeTrackMetadata trackMetadata = new YouTubeTrackMetadata(channelName, channelUrl,
-                streamAmount, thumbNailUrl);
+        youTubeTrackBuilder.trackMetadata(YouTubeTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
 
-        return new YouTubeTrack(title, duration, url, trackMetadata);
+        return youTubeTrackBuilder;
     }
 
 }

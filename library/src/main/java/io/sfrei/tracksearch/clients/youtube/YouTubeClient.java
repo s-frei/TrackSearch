@@ -23,7 +23,7 @@ import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.exceptions.UniformClientException;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
-import io.sfrei.tracksearch.tracks.BaseTrackList;
+import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
@@ -31,7 +31,7 @@ import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.CacheMap;
 import io.sfrei.tracksearch.utils.TrackFormatUtility;
-import io.sfrei.tracksearch.utils.TrackListHelper;
+import io.sfrei.tracksearch.utils.TrackListUtility;
 import io.sfrei.tracksearch.utils.URLUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +92,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         return new HashMap<>(Map.of(TrackList.QUERY_PARAM, query, PAGING_INFORMATION, pagingToken));
     }
 
-    private BaseTrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search, @NonNull final Map<String, String> params, QueryType queryType)
+    private GenericTrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search, @NonNull final Map<String, String> params, QueryType queryType)
             throws TrackSearchException {
 
         final Call<ResponseWrapper> request = api.getSearchForKeywords(search, params);
@@ -102,14 +102,14 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     }
 
     @Override
-    public BaseTrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search) throws TrackSearchException {
-        final BaseTrackList<YouTubeTrack> trackList = getTracksForSearch(search, DEFAULT_SEARCH_PARAMS, QueryType.SEARCH);
+    public TrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search) throws TrackSearchException {
+        final TrackList<YouTubeTrack> trackList = getTracksForSearch(search, DEFAULT_SEARCH_PARAMS, QueryType.SEARCH);
         trackList.addQueryInformationValue(POSITION_KEY, 0);
         return trackList;
     }
 
     @Override
-    public BaseTrackList<YouTubeTrack> getNext(@NonNull final TrackList<? extends Track> trackList) throws TrackSearchException {
+    public TrackList<YouTubeTrack> getNext(@NonNull final TrackList<? extends Track> trackList) throws TrackSearchException {
         throwIfPagingValueMissing(this, trackList);
 
         final QueryType trackListQueryType = trackList.getQueryType();
@@ -118,8 +118,8 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
             params.putAll(getPagingParams(trackList.getQueryInformation()));
             params.putAll(DEFAULT_SEARCH_PARAMS);
 
-            final BaseTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), params, QueryType.PAGING);
-            return TrackListHelper.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
+            final GenericTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), params, QueryType.PAGING);
+            return TrackListUtility.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw unsupportedQueryTypeException(YouTubeException::new, trackListQueryType);
     }
@@ -176,7 +176,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
 
     @Override
     public boolean hasPagingValues(@NonNull final TrackList<? extends Track> trackList) {
-        return TrackListHelper.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY, PAGING_INFORMATION);
+        return TrackListUtility.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY, PAGING_INFORMATION);
     }
 
     @Override

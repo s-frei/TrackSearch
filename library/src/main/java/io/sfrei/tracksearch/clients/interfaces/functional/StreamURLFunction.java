@@ -14,33 +14,23 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.tracks;
+package io.sfrei.tracksearch.clients.interfaces.functional;
 
-import io.sfrei.tracksearch.clients.setup.QueryType;
+import io.sfrei.tracksearch.tracks.Track;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Map;
+import java.util.function.Function;
 
-public interface TrackList<T extends Track> {
+@FunctionalInterface
+public interface StreamURLFunction<T extends Track> extends Function<T, String> {
 
-    String QUERY_PARAM = "query";
-
-    QueryType getQueryType();
-
-    void mergeIn(GenericTrackList<T> from);
-
-    List<T> getTracks();
-
-    boolean isEmpty();
-
-    String getQueryParam();
-
-    TrackList<T> next();
-
-    Map<String, String> getQueryInformation();
-
-    Integer getQueryInformationIntValue(String key);
-
-    void addQueryInformationValue(String key, int value);
+    /**
+     * Function to return the stream URL for given track.
+     * @param t the track to get the stream URL for.
+     * @return the stream URL or null when any exception occurred.
+     */
+    @Nullable
+    @Override
+    String apply(T t);
 
 }

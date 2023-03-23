@@ -18,16 +18,19 @@ package io.sfrei.tracksearch.clients.youtube;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.sfrei.tracksearch.clients.interfaces.functional.NextTrackListFunction;
+import io.sfrei.tracksearch.clients.interfaces.functional.StreamURLFunction;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
-import io.sfrei.tracksearch.tracks.BaseTrackList;
-import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
+import io.sfrei.tracksearch.tracks.deserializer.YouTubeTrackDeserializer;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.CacheMap;
+import io.sfrei.tracksearch.utils.DeserializerUtility;
 import io.sfrei.tracksearch.utils.URLUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.Value;
@@ -44,7 +47,6 @@ import java.util.stream.Stream;
 @Slf4j
 class YouTubeUtility {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String JS_SPLICE = ".splice";
     private static final String JS_SLICE = ".slice";
     private static final String JS_REVERSE = ".reverse";
@@ -67,19 +69,17 @@ class YouTubeUtility {
     );
     private static final Pattern EMBEDDED_PLAYER_SCRIPT_PATTERN = Pattern.compile("src=\"(/[a-zA-Z0-9/-_.]+base.js)\"");
 
-    private final CacheMap<String, SignatureResolver> sigResolverCache;
+    private final CacheMap<String, SignatureResolver> sigResolverCache =  new CacheMap<>();
 
-    public YouTubeUtility() {
-        sigResolverCache = new CacheMap<>();
-    }
+    private static final ObjectMapper MAPPER = DeserializerUtility.mapperFor(YouTubeTrack.YouTubeTrackBuilder.class, new YouTubeTrackDeserializer());
 
     private static String wrap(String functionContent) {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
 
-    protected BaseTrackList<YouTubeTrack> getYouTubeTracks(final String json, final QueryType queryType, final String query,
-                                                           final Function<TrackList<YouTubeTrack>, TrackList<YouTubeTrack>> nextTrackListFunction,
-                                                           final Function<YouTubeTrack, String> streamUrlProvider)
+    protected GenericTrackList<YouTubeTrack> getYouTubeTracks(final String json, final QueryType queryType, final String query,
+                                                       final NextTrackListFunction<YouTubeTrack> nextTrackListFunction,
+                                                       final StreamURLFunction<YouTubeTrack> streamUrlFunction)
             throws YouTubeException {
 
         final JsonElement rootElement = JsonElement.readHandled(MAPPER, json)
@@ -119,14 +119,15 @@ class YouTubeUtility {
                 .filter(content -> content.path("promotedSparklesWebRenderer").isNull()) // Avoid ads
                 .map(content -> content.path("videoRenderer").orElse(content).path("searchPyvRenderer", "ads").getFirstField().path("promotedVideoRenderer"))
                 .filter(renderer -> renderer.asUnresolved().path("lengthText").isPresent()) // Avoid live streams
-                .map(renderer -> renderer.mapToObjectHandled(MAPPER, YouTubeTrack.class))
+                .map(renderer -> renderer.mapToObjectHandled(MAPPER, YouTubeTrack.YouTubeTrackBuilder.class))
                 .filter(Objects::nonNull)
-                .peek(youTubeTrack -> youTubeTrack.setStreamUrlProvider(streamUrlProvider))
+                .peek(youTubeTrackBuilder -> youTubeTrackBuilder.streamUrlFunction(streamUrlFunction))
+                .map(YouTubeTrack.YouTubeTrackBuilder::build)
                 .collect(Collectors.toList());
 
 
         final Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
-        final BaseTrackList<YouTubeTrack> trackList = new BaseTrackList<>(ytTracks, queryType, queryInformation, nextTrackListFunction);
+        final GenericTrackList<YouTubeTrack> trackList = new GenericTrackList<>(ytTracks, queryType, queryInformation, nextTrackListFunction);
 
         int tracksSize = ytTracks.size();
         trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, tracksSize);

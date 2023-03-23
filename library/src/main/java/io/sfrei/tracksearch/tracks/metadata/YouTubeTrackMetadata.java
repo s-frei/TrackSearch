@@ -19,7 +19,7 @@ package io.sfrei.tracksearch.tracks.metadata;
 import lombok.ToString;
 import lombok.Value;
 
-@Value
+@Value(staticConstructor = "of")
 @ToString
 public class YouTubeTrackMetadata implements TrackMetadata {
 
