@@ -124,9 +124,7 @@ $ ./mvnw test -P detailed-client-test
 
 Feel free to contribute! - [How?](https://github.com/s-frei/TrackSearch/blob/develop/CONTRIBUTING.md)
 
-#### Stuff to be added
+#### Stuff to be added 
 
-- Standalone web module offering a RESTful API and Frontend
-- More documentation
-- Playlist URL search
 - Direct audio stream URL resolving
+- Playlist URL search
