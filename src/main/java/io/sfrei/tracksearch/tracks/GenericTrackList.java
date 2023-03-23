@@ -24,19 +24,15 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Getter
 @Builder
 @ToString
-@AllArgsConstructor
-public class GenericTrackList<T extends Track> implements TrackList<T> {
-
-    @Builder.Default
-    @ToString.Exclude
-    private final List<T> tracks = new ArrayList<>();
+@AllArgsConstructor(staticName = "using")
+public class GenericTrackList<T extends Track> extends ArrayList<T> implements TrackList<T> {
 
     @Builder.Default
     private final QueryType queryType = QueryType.UNKNOWN;
@@ -47,10 +43,14 @@ public class GenericTrackList<T extends Track> implements TrackList<T> {
     @ToString.Exclude
     private final NextTrackListFunction<T> nextTrackListFunction;
 
-    @Override
+    public GenericTrackList<T> withTracks(Collection<T> tracks) {
+        super.addAll(tracks);
+        return this;
+    }
+
     public void mergeIn(GenericTrackList<T> from) {
-        this.tracks.addAll(from.tracks);
-        this.queryInformation.putAll(from.queryInformation);
+        super.addAll(from);
+        this.queryInformation.putAll(from.getQueryInformation());
     }
 
     public GenericTrackList<T> setPagingValues(String positionKey, int position, String offsetKey, int offset) {
@@ -59,23 +59,13 @@ public class GenericTrackList<T extends Track> implements TrackList<T> {
     }
 
     @Override
-    public Integer getQueryInformationIntValue(String key) {
+    public Integer queryInformationAsInt(String key) {
         return Integer.parseInt(queryInformation.get(key));
-    }
-
-    @Override
-    public String getQueryParam() {
-        return queryInformation.get(QUERY_PARAM);
     }
 
     @Override
     public void addQueryInformationValue(String key, int value) {
         queryInformation.put(key, String.valueOf(value));
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return tracks.isEmpty();
     }
 
     @Override

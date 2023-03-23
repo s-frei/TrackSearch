@@ -21,28 +21,49 @@ import io.sfrei.tracksearch.clients.setup.QueryType;
 import java.util.List;
 import java.util.Map;
 
-public interface TrackList<T extends Track> {
+public interface TrackList<T extends Track> extends List<T> {
 
-    String QUERY_PARAM = "query";
+    String QUERY_KEY = "query";
 
+    /**
+     * The type of query tracks were returned for.
+     * @return the used query type.
+     */
     QueryType getQueryType();
 
-    List<T> getTracks();
-
-    boolean isEmpty();
-
-    default int size() {
-        return getTracks().size();
-    }
-
-    String getQueryParam();
-
+    /**
+     * Return the next tracklist for query.
+     * @return the next tracklist.
+     */
     TrackList<T> next();
 
+    /**
+     * Get all information used for the query.
+     * @return all query information.
+     */
     Map<String, String> getQueryInformation();
 
-    Integer getQueryInformationIntValue(String key);
 
+    /**
+     * Get a query information parsed to an int.
+     * @param key the key of the query information.
+     * @return the int value of the query information.
+     */
+    Integer queryInformationAsInt(String key);
+
+    /**
+     * Add a query information value.
+     * @param key the key of the query information.
+     * @param value the value of the query information.
+     */
     void addQueryInformationValue(String key, int value);
+
+    /**
+     * Get the value used for the query.
+     * @return the query value.
+     */
+    default String getQueryValue() {
+        return getQueryInformation().get(QUERY_KEY);
+    }
 
 }

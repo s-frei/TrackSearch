@@ -89,7 +89,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     }
 
     public static Map<String, String> makeQueryInformation(final String query, final String pagingToken) {
-        return new HashMap<>(Map.of(TrackList.QUERY_PARAM, query, PAGING_INFORMATION, pagingToken));
+        return new HashMap<>(Map.of(TrackList.QUERY_KEY, query, PAGING_INFORMATION, pagingToken));
     }
 
     private GenericTrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search, @NonNull final Map<String, String> params, QueryType queryType)
@@ -118,7 +118,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
             params.putAll(getPagingParams(trackList.getQueryInformation()));
             params.putAll(DEFAULT_SEARCH_PARAMS);
 
-            final GenericTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryParam(), params, QueryType.PAGING);
+            final GenericTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryValue(), params, QueryType.PAGING);
             return TrackListUtility.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw unsupportedQueryTypeException(YouTubeException::new, trackListQueryType);

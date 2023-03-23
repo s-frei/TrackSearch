@@ -52,9 +52,9 @@ public class TrackListUtility {
 
         for (final String key : trackList.getQueryInformation().keySet()) {
             if (key.contains(TrackSearchConfig.POSITION_KEY_SUFFIX)) {
-                position.getAndUpdate(pos -> pos += trackList.getQueryInformationIntValue(key));
+                position.getAndUpdate(pos -> pos += trackList.queryInformationAsInt(key));
             } else if (key.contains(TrackSearchConfig.OFFSET_KEY_SUFFIX)) {
-                offset.getAndUpdate(off -> off += trackList.getQueryInformationIntValue(key));
+                offset.getAndUpdate(off -> off += trackList.queryInformationAsInt(key));
             }
         }
         trackList.setPagingValues(positionKey, position.get(), offsetKey, offset.get());

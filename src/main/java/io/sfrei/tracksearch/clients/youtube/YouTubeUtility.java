@@ -127,7 +127,7 @@ class YouTubeUtility {
 
 
         final Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
-        final GenericTrackList<YouTubeTrack> trackList = new GenericTrackList<>(ytTracks, queryType, queryInformation, nextTrackListFunction);
+        final GenericTrackList<YouTubeTrack> trackList = GenericTrackList.using(queryType, queryInformation, nextTrackListFunction).withTracks(ytTracks);
 
         int tracksSize = ytTracks.size();
         trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, tracksSize);

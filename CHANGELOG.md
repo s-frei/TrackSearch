@@ -7,6 +7,7 @@ Changelog
 **Breaking:**
 
 - The *length* (`java.lang.Long`) field of Track is now *duration* (`java.time.Duration`)
+- The TrackList is now extending `List` and `getTracks()` isn't possible anymore
 
 **Features:**
 

@@ -95,7 +95,7 @@ class SoundCloudUtility {
                 .collect(Collectors.toList());
 
         final Map<String, String> queryInformation = SoundCloudClient.makeQueryInformation(query);
-        final GenericTrackList<SoundCloudTrack> trackList = new GenericTrackList<>(scTracks, queryType, queryInformation, nextTrackListFunction);
+        final GenericTrackList<SoundCloudTrack> trackList = GenericTrackList.using(queryType, queryInformation, nextTrackListFunction).withTracks(scTracks);
 
         final int tracksSize = scTracks.size();
         trackList.addQueryInformationValue(SoundCloudClient.OFFSET_KEY, tracksSize);

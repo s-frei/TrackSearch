@@ -66,7 +66,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
 
     private Stream<Named<Track>> getAllTracksFromTrackLists() {
         return tracksForSearch.stream()
-                .flatMap(trackList -> trackList.getPayload().getTracks().stream())
+                .flatMap(trackList -> trackList.getPayload().stream())
                 .map(track -> Named.of(String.format("%s - %s", track.getTitle(), track.getUrl()), track));
     }
 
@@ -82,13 +82,12 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @MethodSource("getSearchKeys")
     public void tracksForSearch(String key) throws TrackSearchException {
         TrackList<T> tracksForSearch = searchClient.getTracksForSearch(key);
-        assertFalse(tracksForSearch.isEmpty());
 
         assertThat(tracksForSearch.isEmpty())
                 .as("TrackList should contain tracks")
                 .isFalse();
 
-        this.tracksForSearch.add(Named.of(tracksForSearch.getQueryInformation().get(TrackList.QUERY_PARAM), tracksForSearch));
+        this.tracksForSearch.add(Named.of(tracksForSearch.getQueryValue(), tracksForSearch));
     }
 
     @Order(2)
@@ -126,7 +125,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
     public void checkTrackAndMetadata(TrackList<Track> trackList) {
-        for (Track track : trackList.getTracks()) {
+        for (Track track : trackList) {
 
             log.trace("{}", track.pretty());
 

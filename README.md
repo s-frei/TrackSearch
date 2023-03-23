@@ -79,8 +79,7 @@ TrackSearchClient<SoundCloudTrack> explicitClient = new SoundCloudClient();
 TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords")
 
 // Get the audio stream
-List<Track> tracks = tracksForSearch.getTracks();
-String streamUrl = tracks.get(anyPos).getStreamUrl();
+String streamUrl = tracksForSearch.get(anyPos).getStreamUrl();
 
 // Get next tracks page
 TrackList<Track> nextTracks = tracksForSearch.next();
