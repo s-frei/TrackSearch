@@ -158,7 +158,6 @@
               </dependency>
             </dependencies>
             <configuration>
-              <excludedGroups>DetailedClientTest</excludedGroups>
               <trimStackTrace>false</trimStackTrace>
               <disableXmlReport>true</disableXmlReport>
               <reportFormat>plain</reportFormat>
