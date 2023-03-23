@@ -27,11 +27,13 @@ public interface TrackList<T extends Track> {
 
     QueryType getQueryType();
 
-    void mergeIn(GenericTrackList<T> from);
-
     List<T> getTracks();
 
     boolean isEmpty();
+
+    default int size() {
+        return getTracks().size();
+    }
 
     String getQueryParam();
 

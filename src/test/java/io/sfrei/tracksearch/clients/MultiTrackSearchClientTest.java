@@ -52,7 +52,7 @@ public class MultiTrackSearchClientTest extends ClientTest<MultiTrackSearchClien
     private void testSource(TrackSource source) throws TrackSearchException {
         log.debug("MultiTrackSearchClient with explicit source ->  {}", source);
         final TrackList<Track> trackList = searchClient.getTracksForSearch(SINGLE_SEARCH_KEY, TrackSource.setOf(source));
-        log.debug("Found '{}' tracks for {}", trackList.getTracks().size(), source);
+        log.debug("Found '{}' tracks for {}", trackList.size(), source);
     }
 
 }
