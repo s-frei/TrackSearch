@@ -24,6 +24,7 @@ import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -129,23 +130,25 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
 
             log.trace("{}", track.pretty());
 
-            assertThat(track)
+            final SoftAssertions assertions = new SoftAssertions();
+
+            assertions.assertThat(track)
                     .as("Track should not be null")
                     .isNotNull();
 
-            assertThat(track)
+            assertions.assertThat(track)
                     .extracting(Track::getUrl)
                     .as("Track should have URL")
                     .asString()
                     .isNotEmpty();
 
-            assertThat(track)
+            assertions.assertThat(track)
                     .extracting(Track::getTitle)
                     .as("Track should have title for '%s'", track.getUrl())
                     .asString()
                     .isNotEmpty();
 
-            assertThat(track)
+            assertions.assertThat(track)
                     .extracting(Track::getDuration)
                     .as("Track should have duration for '%s'", track.getUrl())
                     .isNotNull();
@@ -153,33 +156,35 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
             final TrackMetadata trackMetadata = track.getTrackMetadata();
             assertNotNull(trackMetadata);
 
-            assertThat(trackMetadata)
+            assertions.assertThat(trackMetadata)
                     .as("TrackMetadata should not be null for Track '%s'", track.getUrl())
                     .isNotNull();
 
-            assertThat(trackMetadata)
+            assertions.assertThat(trackMetadata)
                     .extracting(TrackMetadata::getChannelName)
                     .as("TrackMetadata should have channel name for Track '%s'", track.getUrl())
                     .asString()
                     .isNotEmpty();
 
-            assertThat(trackMetadata)
+            assertions.assertThat(trackMetadata)
                     .extracting(TrackMetadata::getChannelUrl)
                     .as("TrackMetadata should have channel URL for Track '%s'", track.getUrl())
                     .asString()
                     .isNotEmpty();
 
-            assertThat(trackMetadata)
+            assertions.assertThat(trackMetadata)
                     .extracting(TrackMetadata::getStreamAmount, as(InstanceOfAssertFactories.LONG))
                     .as("TrackMetadata should have stream amount for Track '%s'", track.getUrl())
                     .isNotNull()
                     .isNotNegative();
 
-            assertThat(trackMetadata)
+            assertions.assertThat(trackMetadata)
                     .extracting(TrackMetadata::getThumbNailUrl)
                     .as("TrackMetadata should have thumbnail URL for Track '%s'", track.getUrl())
                     .asString()
                     .isNotEmpty();
+
+            assertions.assertAll();
         }
     }
 
