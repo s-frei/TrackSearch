@@ -30,10 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @SuppressWarnings({"FieldCanBeLocal", "unchecked"})
@@ -45,34 +44,35 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
     private final TrackSearchClient<YouTubeTrack> youTubeClient;
     private final TrackSearchClient<SoundCloudTrack> soundCloudClient;
 
-    private final List<TrackSearchClient<? extends Track>> clients = new ArrayList<>();
+    private final Map<TrackSource, TrackSearchClient<? extends Track>> clientsForSource = new HashMap<>();
 
     public MultiSearchClient() {
         this.youTubeClient = new YouTubeClient();
         this.soundCloudClient = new SoundCloudClient();
 
-        clients.add(youTubeClient);
-        clients.add(soundCloudClient);
-        log.info("TrackSearchClient created with {} clients", clients.size());
+        clientsForSource.put(TrackSource.Youtube, youTubeClient);
+        clientsForSource.put(TrackSource.Soundcloud, soundCloudClient);
+
+        log.info("TrackSearchClient created with {} clients", allClients().size());
+    }
+
+    private List<TrackSearchClient<? extends Track>> allClients() {
+        return new ArrayList<>(clientsForSource.values());
     }
 
     @Override
     public TrackList<Track> getTracksForSearch(@NonNull final String search) throws TrackSearchException {
-        return getTracksForSearch(search, clients);
+        return getTracksForSearch(search, allClients());
     }
 
     @Override
     public TrackList<Track> getNext(@NonNull final TrackList<? extends Track> trackList) throws TrackSearchException {
 
-        final List<TrackSearchClient<? extends Track>> callClients = new ArrayList<>(clients);
+        final List<TrackSearchClient<? extends Track>> callClient = allClients().stream()
+                .filter(client -> client.hasPagingValues(trackList))
+                .collect(Collectors.toList());
 
-        if (!youTubeClient.hasPagingValues(trackList)) {
-            callClients.remove(youTubeClient);
-        }
-        if (!soundCloudClient.hasPagingValues(trackList)) {
-            callClients.remove(soundCloudClient);
-        }
-        return getNext(trackList, callClients);
+        return getNext(trackList, callClient);
     }
 
     @Override
@@ -103,14 +103,11 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
         if (sources.isEmpty())
             throw new TrackSearchException("Provide at least one source");
 
-        final List<TrackSearchClient<? extends Track>> callClients = new ArrayList<>(clients);
+        final List<TrackSearchClient<? extends Track>> callClients = sources.stream()
+                .filter(clientsForSource::containsKey)
+                .map(clientsForSource::get)
+                .collect(Collectors.toList());
 
-        if (!sources.contains(TrackSource.Youtube)) {
-            callClients.remove(youTubeClient);
-        }
-        if (!sources.contains(TrackSource.Soundcloud)) {
-            callClients.remove(soundCloudClient);
-        }
         return getTracksForSearch(search, callClients);
     }
 
@@ -143,26 +140,23 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
 
         final ExecutorService executorService = Executors.newFixedThreadPool(calls.size());
 
-        final GenericTrackList<Track> list = GenericTrackList.builder().queryType(queryType)
+        final GenericTrackList<Track> list = GenericTrackList.builder()
+                .queryType(queryType)
                 .nextTrackListFunction(this::provideNext)
                 .build();
 
-        final List<Future<GenericTrackList<Track>>> trackLists;
         try {
-            trackLists = executorService.invokeAll(calls);
+            for (final Future<GenericTrackList<Track>> trackList : executorService.invokeAll(calls)) {
+                list.mergeIn(trackList.get());
+            }
         } catch (InterruptedException e) {
             throw new TrackSearchException(e);
-        }
-
-        for (final Future<GenericTrackList<Track>> trackList : trackLists) {
-            try {
-                list.mergeIn(trackList.get());
-            } catch (InterruptedException | ExecutionException e) {
-                throw new TrackSearchException("An error occurred acquiring a tracklist", e);
-            }
+        } catch (ExecutionException e) {
+            throw new TrackSearchException("An error occurred acquiring a tracklist", e);
         }
 
         TrackListUtility.mergePositionValues(list, POSITION_KEY, OFFSET_KEY);
+
         return list;
     }
 

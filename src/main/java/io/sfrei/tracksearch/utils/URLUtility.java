@@ -16,8 +16,6 @@
 
 package io.sfrei.tracksearch.utils;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -27,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 public class URLUtility {
 
     private static final String PARAMS_DELIMITER = "&";
