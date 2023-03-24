@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.8.1 - unreleased
+------------------
+
+No changes for now...
+
 0.8.0
 -----
 
