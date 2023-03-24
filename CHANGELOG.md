@@ -1,6 +1,26 @@
 Changelog
 =========
 
+0.8.0
+-----
+
+**Breaking:**
+
+- The *length* (`java.lang.Long`) field of Track is now *duration* (`java.time.Duration`)
+- The TrackList is now extending `List` and `getTracks()` isn't possible anymore
+
+**Features:**
+
+- Obtain next/paged tracks using the TrackList `next()` function
+- Improved code quality and readability especially for JSON processing
+- Improved tests
+- Improved duration parsing
+- Updated dependencies
+
+**Bugfixes:**
+
+- SC: When a track has no thumbnail default to channel thumbnail
+
 0.7.3
 -----
 

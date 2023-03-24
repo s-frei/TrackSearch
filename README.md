@@ -14,8 +14,11 @@
   <a href="https://mvnrepository.com/artifact/io.sfrei/tracksearch"> 
     <img alt="Maven Central release" src="https://img.shields.io/maven-central/v/io.sfrei/tracksearch">
   </a>
-  <a href="https://github.com/s-frei/TrackSearch/actions/workflows/maven-test.yml"> 
-    <img alt="Functionality Test State" src="https://github.com/s-frei/TrackSearch/actions/workflows/maven-test.yml/badge.svg">
+  <a href="https://github.com/s-frei/TrackSearch/actions/workflows/functionality-check.yml"> 
+    <img alt="Functionality Test State" src="https://github.com/s-frei/TrackSearch/actions/workflows/functionality-check.yml/badge.svg">
+  </a>
+	<a href="https://github.com/s-frei/TrackSearch/actions/workflows/maven-test.yml"> 
+    <img alt="Latest" src="https://github.com/s-frei/TrackSearch/actions/workflows/maven-test.yml/badge.svg">
   </a>
   </p>
 </div>
@@ -45,7 +48,7 @@ There could be more added if there is interesting content offered to go for.
 - Paging of track lists
 - Expose audio stream url
 - Interact with multiple clients asynchronous
-- Get track metadata like: length, channel, views, thumbnail, ...
+- Get track metadata like: duration, channel, views, thumbnail, ...
 
 ## How to use it ? :books:
 
@@ -57,7 +60,7 @@ Maven dependency available on [Maven Central](https://search.maven.org/artifact/
 <dependency>
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.7.3</version>
+    <version>0.8.0</version>
 </dependency>
 ```
 
@@ -76,11 +79,10 @@ TrackSearchClient<SoundCloudTrack> explicitClient = new SoundCloudClient();
 TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords")
 
 // Get the audio stream
-List<Track> tracks = tracksForSearch.getTracks();
-String streamUrl = tracks.get(anyPos).getStreamUrl();
+String streamUrl = tracksForSearch.get(anyPos).getStreamUrl();
 
 // Get next tracks page
-TrackList<Track> nextTracks = searchClient.getNext(tracksForSearch);
+TrackList<Track> nextTracks = tracksForSearch.next();
 ```
 
 ## Why is this done ?
@@ -121,9 +123,7 @@ $ ./mvnw test -P detailed-client-test
 
 Feel free to contribute! - [How?](https://github.com/s-frei/TrackSearch/blob/develop/CONTRIBUTING.md)
 
-#### Stuff to be added
+#### Stuff to be added 
 
-- Standalone web module offering a RESTful API and Frontend
-- More documentation
-- Playlist URL search
 - Direct audio stream URL resolving
+- Playlist URL search
