@@ -18,9 +18,10 @@ package io.sfrei.tracksearch.tracks.deserializer;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
+import io.sfrei.tracksearch.tracks.YouTubeTrack.YouTubeTrackBuilder;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import io.sfrei.tracksearch.utils.ReplaceUtility;
 import io.sfrei.tracksearch.utils.TimeUtility;
@@ -33,19 +34,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Slf4j
-public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack.YouTubeTrackBuilder> {
+public class YouTubeTrackDeserializer extends JsonDeserializer<YouTubeTrackBuilder> {
 
-    @SuppressWarnings("unused")
-    public YouTubeTrackDeserializer() {
-        this(null);
-    }
-
-    protected YouTubeTrackDeserializer(Class<?> vc) {
-        super(vc);
-    }
-
-    @Override
-    public YouTubeTrack.YouTubeTrackBuilder deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
+    public YouTubeTrackBuilder deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
 
         final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
 
@@ -61,7 +52,7 @@ public class YouTubeTrackDeserializer extends StdDeserializer<YouTubeTrack.YouTu
 
         final String url = YouTubeClient.HOSTNAME.concat("/watch?v=").concat(ref);
 
-        final YouTubeTrack.YouTubeTrackBuilder youTubeTrackBuilder = YouTubeTrack.builder()
+        final YouTubeTrackBuilder youTubeTrackBuilder = YouTubeTrack.builder()
                 .title(title)
                 .duration(duration)
                 .url(url);

@@ -18,8 +18,9 @@ package io.sfrei.tracksearch.tracks.deserializer;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
+import io.sfrei.tracksearch.tracks.SoundCloudTrack.SoundCloudTrackBuilder;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
@@ -32,19 +33,9 @@ import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack.SoundCloudTrackBuilder> {
+public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrackBuilder> {
 
-    @SuppressWarnings("unused")
-    public SoundCloudTrackDeserializer() {
-        this(null);
-    }
-
-    protected SoundCloudTrackDeserializer(Class<?> vc) {
-        super(vc);
-    }
-
-    @Override
-    public SoundCloudTrack.SoundCloudTrackBuilder deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
+    public SoundCloudTrackBuilder deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
 
         // Track
 
@@ -56,7 +47,7 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
         if (title == null || duration == null || url == null)
             return null;
 
-        final SoundCloudTrack.SoundCloudTrackBuilder soundCloudTrackBuilder = SoundCloudTrack.builder()
+        final SoundCloudTrackBuilder soundCloudTrackBuilder = SoundCloudTrack.builder()
                 .title(title)
                 .duration(duration)
                 .url(url);
@@ -77,7 +68,7 @@ public class SoundCloudTrackDeserializer extends StdDeserializer<SoundCloudTrack
                 .path("user", "avatar_url") // Fallback to channel thumbnail
                 .fieldAsString();
 
-       soundCloudTrackBuilder.trackMetadata(SoundCloudTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
+        soundCloudTrackBuilder.trackMetadata(SoundCloudTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
 
         // Formats
 
