@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.7.4 - unreleased
-------------------
+0.8.0
+-----
 
 **Breaking:**
 
@@ -15,6 +15,7 @@ Changelog
 - Improved code quality and readability especially for JSON processing
 - Improved tests
 - Improved duration parsing
+- Updated dependencies
 
 **Bugfixes:**
 
