@@ -16,10 +16,8 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.sfrei.tracksearch.clients.interfaces.functional.StreamURLFunction;
 import io.sfrei.tracksearch.clients.setup.TrackSource;
-import io.sfrei.tracksearch.tracks.deserializer.YouTubeTrackDeserializer;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import lombok.Builder;
@@ -28,8 +26,6 @@ import lombok.Setter;
 
 import java.time.Duration;
 
-
-@JsonDeserialize(using = YouTubeTrackDeserializer.class)
 public class YouTubeTrack extends BaseTrack implements Track {
 
     @Getter
