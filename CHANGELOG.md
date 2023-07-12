@@ -1,10 +1,12 @@
 Changelog
 =========
 
-0.8.1 - unreleased
-------------------
+0.8.1
+-----
 
-No changes for now...
+**Features:**
+
+- Updated dependencies
 
 0.8.0
 -----
