@@ -54,7 +54,7 @@
 
     <!-- test n report -->
     <maven-surefire.version>3.1.2</maven-surefire.version>
-    <maven-surefire-tree-reporter.version>1.1.0</maven-surefire-tree-reporter.version>
+    <maven-surefire-tree-reporter.version>1.2.1</maven-surefire-tree-reporter.version>
 
     <!-- build n deploy -->
     <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
