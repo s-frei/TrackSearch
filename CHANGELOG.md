@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.8.1
+-----
+
+**Features:**
+
+- Updated dependencies
+
 0.8.0
 -----
 

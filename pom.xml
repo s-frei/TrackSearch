@@ -6,7 +6,7 @@
 
   <groupId>io.sfrei</groupId>
   <artifactId>tracksearch</artifactId>
-  <version>0.8.0</version>
+  <version>0.8.1</version>
 
   <packaging>jar</packaging>
 
@@ -44,17 +44,17 @@
     <!-- deps -->
     <lombok.version>1.18.26</lombok.version>
     <retrofit.version>2.9.0</retrofit.version>
-    <okhttp.version>4.10.0</okhttp.version>
-    <jackson-databind.version>2.14.2</jackson-databind.version>
-    <jsoup.version>1.15.4</jsoup.version>
+    <okhttp.version>4.11.0</okhttp.version>
+    <jackson-databind.version>2.15.2</jackson-databind.version>
+    <jsoup.version>1.16.1</jsoup.version>
     <slf4j-api.version>2.0.7</slf4j-api.version>
-    <junit.version>5.9.2</junit.version>
+    <junit.version>5.9.3</junit.version>
     <assertj-core.version>3.24.2</assertj-core.version>
-    <logback-classic.version>1.4.6</logback-classic.version>
+    <logback-classic.version>1.4.8</logback-classic.version>
 
     <!-- test n report -->
-    <maven-surefire.version>3.0.0</maven-surefire.version>
-    <maven-surefire-tree-reporter.version>1.1.0</maven-surefire-tree-reporter.version>
+    <maven-surefire.version>3.1.2</maven-surefire.version>
+    <maven-surefire-tree-reporter.version>1.2.1</maven-surefire-tree-reporter.version>
 
     <!-- build n deploy -->
     <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
@@ -62,10 +62,10 @@
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
     <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
-    <maven-scm-provider-gitexe.version>2.0.0</maven-scm-provider-gitexe.version>
-    <maven-scm-api.version>2.0.0</maven-scm-api.version>
+    <maven-scm-provider-gitexe.version>2.0.1</maven-scm-provider-gitexe.version>
+    <maven-scm-api.version>2.0.1</maven-scm-api.version>
     <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
-    <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+    <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
   </properties>
 
   <profiles>
