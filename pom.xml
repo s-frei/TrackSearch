@@ -50,10 +50,10 @@
     <slf4j-api.version>2.0.7</slf4j-api.version>
     <junit.version>5.9.2</junit.version>
     <assertj-core.version>3.24.2</assertj-core.version>
-    <logback-classic.version>1.4.6</logback-classic.version>
+    <logback-classic.version>1.4.8</logback-classic.version>
 
     <!-- test n report -->
-    <maven-surefire.version>3.0.0</maven-surefire.version>
+    <maven-surefire.version>3.1.2</maven-surefire.version>
     <maven-surefire-tree-reporter.version>1.2.1</maven-surefire-tree-reporter.version>
 
     <!-- build n deploy -->
