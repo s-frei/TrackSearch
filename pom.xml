@@ -63,7 +63,7 @@
     <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
     <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
     <maven-scm-provider-gitexe.version>2.0.0</maven-scm-provider-gitexe.version>
-    <maven-scm-api.version>2.0.0</maven-scm-api.version>
+    <maven-scm-api.version>2.0.1</maven-scm-api.version>
     <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
     <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
   </properties>
