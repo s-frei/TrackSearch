@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.8.2 - unreleased
+------------------
+
+Nothing to see here yet...
+
 0.8.1
 -----
 
