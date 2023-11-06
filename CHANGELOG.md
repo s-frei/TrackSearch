@@ -1,10 +1,17 @@
 Changelog
 =========
 
-0.8.2 - unreleased
-------------------
+0.8.2
+-----
 
-Nothing to see here yet...
+**Features:**
+
+- Updated dependencies
+- First shot of getting YouTubeTrack by URL
+
+**Bugfix:**
+
+- Fix YouTube tracks parsing
 
 0.8.1
 -----
