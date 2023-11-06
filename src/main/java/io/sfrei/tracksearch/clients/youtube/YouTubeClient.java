@@ -137,9 +137,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         return trackResponse.getContentOrThrow();
     }
 
-    public YouTubeTrackInfo loadTrackInfo(final YouTubeTrack youtubeTrack) throws TrackSearchException {
-        if (youtubeTrack.getTrackInfo() != null) return youtubeTrack.getTrackInfo();
-
+    private YouTubeTrackInfo loadTrackInfo(final YouTubeTrack youtubeTrack) throws TrackSearchException {
         final String trackUrl = youtubeTrack.getUrl();
         final String trackURLContent = trackUrlJSON(api.getForUrlWithParams(trackUrl, TRACK_PARAMS));
 

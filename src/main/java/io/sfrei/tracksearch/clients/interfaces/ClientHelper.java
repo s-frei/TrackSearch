@@ -56,7 +56,7 @@ public interface ClientHelper extends ClassLogger {
                 return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, tries);
             }
         } catch (TrackSearchException e) {
-            log().error("Error getting stream URL for {}", e, searchClient.getClass().getSimpleName());
+            log().error("Error getting stream URL for {}", searchClient.getClass().getSimpleName(), e);
             return Optional.empty();
         }
 
