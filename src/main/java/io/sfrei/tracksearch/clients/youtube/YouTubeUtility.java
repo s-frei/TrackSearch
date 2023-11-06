@@ -25,12 +25,13 @@ import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
-import io.sfrei.tracksearch.tracks.deserializer.YouTubeTrackDeserializer;
+import io.sfrei.tracksearch.tracks.deserializer.YouTubeListTrackDeserializer;
+import io.sfrei.tracksearch.tracks.deserializer.YouTubeURLTrackDeserializer;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.CacheMap;
-import io.sfrei.tracksearch.utils.DeserializerUtility;
+import io.sfrei.tracksearch.utils.ObjectMapperBuilder;
 import io.sfrei.tracksearch.utils.URLUtility;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.Value;
@@ -71,10 +72,26 @@ class YouTubeUtility {
 
     private final CacheMap<String, SignatureResolver> sigResolverCache = new CacheMap<>();
 
-    private static final ObjectMapper MAPPER = DeserializerUtility.mapperFor(YouTubeTrack.YouTubeTrackBuilder.class, new YouTubeTrackDeserializer());
+    private static final ObjectMapper MAPPER = ObjectMapperBuilder.create()
+            .addDeserializer(YouTubeTrack.ListYouTubeTrackBuilder.class, new YouTubeListTrackDeserializer())
+            .addDeserializer(YouTubeTrack.URLYouTubeTrackBuilder.class, new YouTubeURLTrackDeserializer())
+            .get();
 
     private static String wrap(String functionContent) {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
+    }
+
+    protected YouTubeTrack getYouTubeTrack(final String json, final StreamURLFunction<YouTubeTrack> streamUrlFunction)
+            throws YouTubeException {
+
+        final JsonElement jsonElement = JsonElement.readTreeCatching(MAPPER, json)
+                .orElseThrow(() -> new YouTubeException("Cannot parse YouTubeTrack JSON"));
+
+        final JsonElement playerResponse = jsonElement.elementAtIndex(2).path("playerResponse");
+
+        return playerResponse.mapCatching(MAPPER, YouTubeTrack.URLYouTubeTrackBuilder.class).getBuilder()
+                .streamUrlFunction(streamUrlFunction)
+                .build();
     }
 
     protected GenericTrackList<YouTubeTrack> getYouTubeTracks(final String json, final QueryType queryType, final String query,
@@ -120,8 +137,9 @@ class YouTubeUtility {
                 .filter(content -> content.path("promotedSparklesWebRenderer").isNull()) // Avoid ads
                 .map(content -> content.path("videoRenderer").orElse(content).path("searchPyvRenderer", "ads").firstElement().path("promotedVideoRenderer"))
                 .filter(renderer -> renderer.asUnresolved().path("lengthText").isPresent()) // Avoid live streams
-                .map(renderer -> renderer.mapCatching(MAPPER, YouTubeTrack.YouTubeTrackBuilder.class))
+                .map(renderer -> renderer.mapCatching(MAPPER, YouTubeTrack.ListYouTubeTrackBuilder.class))
                 .filter(Objects::nonNull)
+                .map(YouTubeTrack.ListYouTubeTrackBuilder::getBuilder)
                 .peek(youTubeTrackBuilder -> youTubeTrackBuilder.streamUrlFunction(streamUrlFunction))
                 .map(YouTubeTrack.YouTubeTrackBuilder::build)
                 .collect(Collectors.toList());
@@ -151,7 +169,7 @@ class YouTubeUtility {
                 .elementAtIndex(1)
                 .path("continuationItemRenderer", "continuationEndpoint", "continuationCommand")
                 .orElse(defaultElement)
-                .firstElementFor("continuationItemRenderer")
+                .findElement("continuationItemRenderer")
                 .path("continuationEndpoint", "continuationCommand")
                 .asString("token");
     }
@@ -164,7 +182,7 @@ class YouTubeUtility {
             if (jsonElement.isArray()) {
                 playerElement = jsonElement.elementAtIndex(2).path("player");
             } else {
-                playerElement = jsonElement.firstElementFor("player");
+                playerElement = jsonElement.findElement("player");
             }
 
             AtomicReference<String> scriptUrl = new AtomicReference<>(null);

@@ -48,6 +48,13 @@ public class TimeUtility {
         return Duration.ofMillis(milliseconds);
     }
 
+    public Duration getDurationForSeconds(final Long seconds) {
+        if (seconds == null)
+            return null;
+
+        return Duration.ofSeconds(seconds);
+    }
+
     public String formatSeconds(Duration duration) {
         final String mmss = String.format("%02d:%02d", duration.toMinutesPart(), duration.toSecondsPart());
 

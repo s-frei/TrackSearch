@@ -24,7 +24,7 @@ import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.deserializer.SoundCloudTrackDeserializer;
-import io.sfrei.tracksearch.utils.DeserializerUtility;
+import io.sfrei.tracksearch.utils.ObjectMapperBuilder;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -54,7 +54,8 @@ class SoundCloudUtility {
     private static final Pattern ALTERNATIVE_PROGRESSIVE_SOUNDCLOUD_STREAM_URL_PATTERN = Pattern.compile(ALTERNATIVE_PROGRESSIVE_SOUNDCLOUD_STREAM_REGEX);
     private static final Pattern ALTERNATIVE_SOUNDCLOUD_STREAM_URL_PATTERN = Pattern.compile(ALTERNATIVE_SOUNDCLOUD_STREAM_REGEX);
 
-    private static final ObjectMapper MAPPER = DeserializerUtility.mapperFor(SoundCloudTrack.SoundCloudTrackBuilder.class, new SoundCloudTrackDeserializer());
+    private static final ObjectMapper MAPPER = ObjectMapperBuilder.create()
+            .addDeserializer(SoundCloudTrack.SoundCloudTrackBuilder.class, new SoundCloudTrackDeserializer()).get();
 
     protected List<String> getCrossOriginScripts(final String html) {
         final Document doc = Jsoup.parse(html);

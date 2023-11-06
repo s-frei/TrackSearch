@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -68,20 +67,8 @@ public class JsonElement extends JsonNodeResolver {
                 .map(JsonElement::of);
     }
 
-    public JsonElement firstElementFor(final String path) {
+    public JsonElement findElement(final String path) {
         return nextElement(node -> node.findValues(path).stream().findFirst().orElse(null));
-    }
-
-    public JsonElement firstElementWhereNotFound(final String path, final String notPath) {
-        if (nodeIsNull(node()))
-            return this;
-
-        return nextElement(node ->
-                node.findValues(path).stream()
-                        .filter(pathNode -> Objects.isNull(pathNode.findValue(notPath)))
-                        .findFirst()
-                        .orElse(null)
-        );
     }
 
     public Stream<JsonElement> arrayElements() {

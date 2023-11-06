@@ -22,6 +22,7 @@ import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Duration;
@@ -54,6 +55,22 @@ public class YouTubeTrack extends BaseTrack implements Track {
     @Override
     public String getStreamUrl() {
         return streamUrlFunction.apply(this);
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class ListYouTubeTrackBuilder {
+
+        final YouTubeTrackBuilder builder = YouTubeTrack.builder();
+
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class URLYouTubeTrackBuilder {
+
+        final YouTubeTrackBuilder builder = YouTubeTrack.builder();
+
     }
 
 }

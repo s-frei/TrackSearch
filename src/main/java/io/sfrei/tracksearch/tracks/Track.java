@@ -45,7 +45,7 @@ public interface Track {
      * @return the clean track title.
      */
     default String getCleanTitle() {
-        return ReplaceUtility.cleanOutTitle(getTitle());
+        return ReplaceUtility.cleanTitle(getTitle());
     }
 
     /**
