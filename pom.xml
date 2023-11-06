@@ -42,7 +42,7 @@
     <java-version>11</java-version>
 
     <!-- deps -->
-    <lombok.version>1.18.26</lombok.version>
+    <lombok.version>1.18.30</lombok.version>
     <retrofit.version>2.9.0</retrofit.version>
     <okhttp.version>4.11.0</okhttp.version>
     <jackson-databind.version>2.15.3</jackson-databind.version>
