@@ -19,20 +19,19 @@ package io.sfrei.tracksearch.utils.json;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 public abstract class JsonNodeResolver {
 
 
     private final JsonNode node;
+
+    @Getter
     private final boolean resolved;
 
     public JsonNode node() {
         return node;
-    }
-
-    public boolean isResolved() {
-        return resolved;
     }
 
     protected boolean nodeIsNull(JsonNode node) {
@@ -47,16 +46,12 @@ public abstract class JsonNodeResolver {
         return node.isArray();
     }
 
-    protected ArrayNode arrayNode() {
+    protected ArrayNode toArrayNode() {
         return (ArrayNode) node;
     }
 
-    protected String getAsString(final JsonNode node) {
+    public String asString(final JsonNode node) {
         return nodeIsNull(node) ? null : node.asText();
-    }
-
-    protected String getAsString() {
-        return getAsString(node);
     }
 
     protected Long getAsLong(final JsonNode node) {

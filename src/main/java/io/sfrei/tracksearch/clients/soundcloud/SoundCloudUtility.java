@@ -83,12 +83,12 @@ class SoundCloudUtility {
                                                                     final StreamURLFunction<SoundCloudTrack> streamUrlFunction)
             throws SoundCloudException {
 
-        final JsonElement responseElement = JsonElement.readHandled(MAPPER, json)
+        final JsonElement responseElement = JsonElement.readTreeCatching(MAPPER, json)
                 .orElseThrow(() -> new SoundCloudException("Cannot parse SoundCloudTracks JSON"))
                 .path("collection");
 
         final List<SoundCloudTrack> scTracks = responseElement.elements()
-                .map(element -> element.mapToObjectHandled(MAPPER, SoundCloudTrack.SoundCloudTrackBuilder.class))
+                .map(element -> element.mapCatching(MAPPER, SoundCloudTrack.SoundCloudTrackBuilder.class))
                 .filter(Objects::nonNull)
                 .peek(soundCloudTrackBuilder -> soundCloudTrackBuilder.streamUrlFunction(streamUrlFunction))
                 .map(SoundCloudTrack.SoundCloudTrackBuilder::build)

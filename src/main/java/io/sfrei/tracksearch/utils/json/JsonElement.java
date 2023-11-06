@@ -38,13 +38,13 @@ public class JsonElement extends JsonNodeResolver {
         super(node, resolved);
     }
 
-    public static JsonElement read(final ObjectMapper mapper, final String json) throws JsonProcessingException {
+    public static JsonElement readTree(final ObjectMapper mapper, final String json) throws JsonProcessingException {
         return new JsonElement(mapper.readTree(json), false);
     }
 
-    public static Optional<JsonElement> readHandled(final ObjectMapper mapper, final  String json) {
+    public static Optional<JsonElement> readTreeCatching(final ObjectMapper mapper, final String json) {
         try {
-            return Optional.of(read(mapper, json));
+            return Optional.of(readTree(mapper, json));
         } catch (JsonProcessingException e) {
             log.error("Error occurred reading JSON: '{}'", json, e);
             return Optional.empty();
@@ -85,18 +85,14 @@ public class JsonElement extends JsonNodeResolver {
     }
 
     public Stream<JsonElement> arrayElements() {
-        return isArray() ? StreamSupport.stream(arrayNode().spliterator(), false).map(JsonElement::of) : Stream.empty();
+        return isArray() ? StreamSupport.stream(toArrayNode().spliterator(), false).map(JsonElement::of) : Stream.empty();
     }
 
-    public String fieldAsString(final String... paths) {
-        return getAsString(path(paths).node());
+    public String asString(final String... paths) {
+        return super.asString(path(paths).node());
     }
 
-    public String fieldAsString() {
-        return getAsString();
-    }
-
-    public Long fieldAsLong(final String... paths) {
+    public Long asLong(final String... paths) {
         return getAsLong(path(paths).node());
     }
 
@@ -105,6 +101,9 @@ public class JsonElement extends JsonNodeResolver {
     }
 
     private JsonNode nodeForPath(String... paths) {
+        if (paths.length == 0)
+            return node();
+
         final AtomicReference<JsonNode> tempNode = new AtomicReference<>(node());
 
         for (final String path : paths) {
@@ -116,25 +115,25 @@ public class JsonElement extends JsonNodeResolver {
         return tempNode.get();
     }
 
-    public JsonElement getFirstField() {
+    public JsonElement firstElement() {
         return nextElement(node -> atIndex(0));
     }
 
-    public JsonElement getAtIndex(final int index) {
+    public JsonElement elementAtIndex(final int index) {
         return nextElement(node -> atIndex(index));
     }
 
-    public JsonElement reRead(final ObjectMapper mapper) throws JsonProcessingException {
-        return read(mapper, getAsString(node()));
+    public JsonElement reReadTree(final ObjectMapper mapper) throws JsonProcessingException {
+        return readTree(mapper, asString(node()));
     }
 
-    public <T> T mapToObject(final ObjectMapper mapper, final Class<T> clazz) throws JsonProcessingException {
+    public <T> T map(final ObjectMapper mapper, final Class<T> clazz) throws JsonProcessingException {
         return mapper.treeToValue(node(), clazz);
     }
 
-    public <T> T mapToObjectHandled(final ObjectMapper mapper, final Class<T> clazz) {
+    public <T> T mapCatching(final ObjectMapper mapper, final Class<T> clazz) {
         try {
-            return mapToObject(mapper, clazz);
+            return map(mapper, clazz);
         } catch (JsonProcessingException e) {
             log.error("Error parsing JSON as {}: '{}'", clazz.getSimpleName(), node(), e);
         }
@@ -160,11 +159,11 @@ public class JsonElement extends JsonNodeResolver {
     }
 
     public boolean isPresent() {
-        return !isNull();
+        return !nodeIsNull();
     }
 
-    public boolean fieldPresent(String field) {
-        return JsonElement.of(nodeForPath(field)).isPresent();
+    public boolean nodePresent(String path) {
+        return JsonElement.of(nodeForPath(path)).isPresent();
     }
 
 }
