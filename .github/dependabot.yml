@@ -11,6 +11,6 @@ updates:
       timezone: "Europe/Berlin"
       time: "06:00"
     target-branch: "develop"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 25
     reviewers:
       - "s-frei"
