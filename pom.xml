@@ -46,7 +46,7 @@
     <retrofit.version>2.9.0</retrofit.version>
     <okhttp.version>4.11.0</okhttp.version>
     <jackson-databind.version>2.15.3</jackson-databind.version>
-    <jsoup.version>1.16.1</jsoup.version>
+    <jsoup.version>1.16.2</jsoup.version>
     <slf4j-api.version>2.0.7</slf4j-api.version>
     <junit.version>5.10.1</junit.version>
     <assertj-core.version>3.24.2</assertj-core.version>
