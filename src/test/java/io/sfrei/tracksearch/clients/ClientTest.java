@@ -74,7 +74,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     public ClientTest(C searchClient, boolean single) {
         super(CookiePolicy.ACCEPT_ALL, null);
         this.searchClient = searchClient;
-        this.searchKeys = single ? List.of("Marek Hemann") : SEARCH_KEYS;
+        this.searchKeys = single ? List.of(SINGLE_SEARCH_KEY) : SEARCH_KEYS;
         tracksForSearch = new ArrayList<>();
     }
 
@@ -195,7 +195,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
         String streamUrl = track.getStreamUrl();
 
         assertThat(streamUrl)
-                .as("Track '%s' should have stream for Track '%s'", track.getUrl())
+                .as("Track should have stream URL for Track '%s'", track.getUrl())
                 .isNotEmpty();
 
         final int code = requestAndGetCode(streamUrl);

@@ -25,6 +25,6 @@ public final class TrackSearchConfig {
     public static final String HEADER_YOUTUBE_CLIENT_VERSION = "x-youtube-client-version: 2.20211004.00.00";
 
     public static Integer playListOffset = 20;
-    public static Integer resolvingRetries = 2;
+    public static Integer resolvingRetries = 4;
 
 }

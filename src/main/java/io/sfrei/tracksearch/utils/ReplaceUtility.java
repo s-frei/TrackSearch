@@ -21,8 +21,8 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class ReplaceUtility {
 
-    public String cleanOutTitle(final String chars) {
-        return chars
+    public String cleanTitle(final String title) {
+        return title
                 .replaceAll("@", " at ")
                 .replaceAll("_", " ")
                 .replaceAll("\\s(\\[]\\(\\))", "")

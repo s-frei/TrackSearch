@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.tracks.deserializer;
+package io.sfrei.tracksearch.tracks.deserializer.soundcloud;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -40,9 +40,9 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
         // Track
 
         final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
-        final String title = rootElement.fieldAsString("title");
-        final Duration duration = TimeUtility.getDurationForMilliseconds(rootElement.fieldAsLong("duration"));
-        final String url = rootElement.fieldAsString("permalink_url");
+        final String title = rootElement.asString("title");
+        final Duration duration = TimeUtility.getDurationForMilliseconds(rootElement.asLong("duration"));
+        final String url = rootElement.asString("permalink_url");
 
         if (title == null || duration == null || url == null)
             return null;
@@ -56,17 +56,17 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
 
         final JsonElement owner = rootElement.path("user");
 
-        final String channelName = owner.fieldAsString("username");
+        final String channelName = owner.asString("username");
 
-        final String channelUrl = owner.fieldAsString("permalink_url");
+        final String channelUrl = owner.asString("permalink_url");
 
-        final Long playbackCount = rootElement.fieldAsLong("playback_count");
+        final Long playbackCount = rootElement.asLong("playback_count");
         final Long streamAmount = playbackCount == null ? 0L : playbackCount; // Apparently can be 'null' in the JSON
 
         final String thumbNailUrl = rootElement.path("artwork_url")
                 .orElse(rootElement)
                 .path("user", "avatar_url") // Fallback to channel thumbnail
-                .fieldAsString();
+                .asString();
 
         soundCloudTrackBuilder.trackMetadata(SoundCloudTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
 
@@ -84,12 +84,12 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
 
     private static SoundCloudTrackFormat transcodingToTrackFormat(JsonElement transcoding) {
 
-        final String formatUrl = transcoding.fieldAsString("url");
-        final String audioQuality = transcoding.fieldAsString("quality");
+        final String formatUrl = transcoding.asString("url");
+        final String audioQuality = transcoding.asString("quality");
 
         final JsonElement formatElement = transcoding.path("format");
-        final String mimeType = formatElement.fieldAsString("mime_type");
-        final String protocol = formatElement.fieldAsString("protocol");
+        final String mimeType = formatElement.asString("mime_type");
+        final String protocol = formatElement.asString("protocol");
 
         return SoundCloudTrackFormat.builder()
                 .mimeType(mimeType)

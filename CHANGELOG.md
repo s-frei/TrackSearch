@@ -1,6 +1,18 @@
 Changelog
 =========
 
+0.8.2
+-----
+
+**Features:**
+
+- Updated dependencies
+- First shot of getting YouTubeTrack by URL
+
+**Bugfix:**
+
+- Fix YouTube tracks parsing
+
 0.8.1
 -----
 

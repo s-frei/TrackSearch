@@ -19,18 +19,21 @@ package io.sfrei.tracksearch.utils;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import lombok.experimental.UtilityClass;
+import lombok.NoArgsConstructor;
 
-@UtilityClass
-public class DeserializerUtility {
+@NoArgsConstructor(staticName = "create")
+public class ObjectMapperBuilder {
 
-    public <T> ObjectMapper mapperFor(Class<T> type, JsonDeserializer<? extends T> deserializer) {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        final SimpleModule simpleModule = new SimpleModule();
+    final ObjectMapper objectMapper = new ObjectMapper();
+    private final SimpleModule simpleModule = new SimpleModule();
 
+    public <T> ObjectMapperBuilder addDeserializer(Class<T> type, JsonDeserializer<T> deserializer) {
         simpleModule.addDeserializer(type, deserializer);
-        objectMapper.registerModule(simpleModule);
+        return this;
+    }
 
+    public ObjectMapper get() {
+        objectMapper.registerModule(simpleModule);
         return objectMapper;
     }
 

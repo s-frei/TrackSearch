@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.tracks.deserializer;
+package io.sfrei.tracksearch.tracks.deserializer.youtube;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -34,17 +34,17 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Slf4j
-public class YouTubeTrackDeserializer extends JsonDeserializer<YouTubeTrackBuilder> {
+public class YouTubeListTrackDeserializer extends JsonDeserializer<YouTubeTrack.ListYouTubeTrackBuilder> {
 
-    public YouTubeTrackBuilder deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
+    public YouTubeTrack.ListYouTubeTrackBuilder deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
 
         final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
 
         // Track
 
-        final String ref = rootElement.fieldAsString("videoId");
-        final String title = rootElement.path("title", "runs").getFirstField().fieldAsString("text");
-        final String timeString = rootElement.path("lengthText").fieldAsString("simpleText");
+        final String ref = rootElement.asString("videoId");
+        final String title = rootElement.path("title", "runs").firstElement().asString("text");
+        final String timeString = rootElement.path("lengthText").asString("simpleText");
         final Duration duration = TimeUtility.getDurationForTimeString(timeString);
 
         if (title == null || duration == null || ref == null)
@@ -52,22 +52,23 @@ public class YouTubeTrackDeserializer extends JsonDeserializer<YouTubeTrackBuild
 
         final String url = YouTubeClient.HOSTNAME.concat("/watch?v=").concat(ref);
 
-        final YouTubeTrackBuilder youTubeTrackBuilder = YouTubeTrack.builder()
+        final YouTubeTrack.ListYouTubeTrackBuilder listYouTubeTrackBuilder = new YouTubeTrack.ListYouTubeTrackBuilder();
+        final YouTubeTrackBuilder youTubeTrackBuilder = listYouTubeTrackBuilder.getBuilder()
                 .title(title)
                 .duration(duration)
                 .url(url);
 
         // Metadata
 
-        final JsonElement owner = rootElement.path("ownerText", "runs").getFirstField();
+        final JsonElement owner = rootElement.path("ownerText", "runs").firstElement();
 
-        final String channelName = owner.fieldAsString("text");
+        final String channelName = owner.asString("text");
 
         final String channelUrlSuffix = owner.path("navigationEndpoint", "commandMetadata", "webCommandMetadata")
-                .fieldAsString("url");
+                .asString("url");
         final String channelUrl = YouTubeClient.HOSTNAME.concat(channelUrlSuffix);
 
-        final String streamAmountText = rootElement.path("viewCountText").fieldAsString("simpleText");
+        final String streamAmountText = rootElement.path("viewCountText").asString("simpleText");
         final String streamAmountDigits = streamAmountText == null || streamAmountText.isEmpty() ?
                 null : ReplaceUtility.replaceNonDigits(streamAmountText);
         final Long streamAmount = streamAmountDigits == null || streamAmountDigits.isEmpty() ?
@@ -75,11 +76,11 @@ public class YouTubeTrackDeserializer extends JsonDeserializer<YouTubeTrackBuild
 
         final Stream<JsonElement> thumbNailStream = rootElement.path("thumbnail", "thumbnails").elements();
         final Optional<JsonElement> lastThumbnail = thumbNailStream.findFirst();
-        final String thumbNailUrl = lastThumbnail.map(thumbNail -> thumbNail.fieldAsString("url")).orElse(null);
+        final String thumbNailUrl = lastThumbnail.map(thumbNail -> thumbNail.asString("url")).orElse(null);
 
         youTubeTrackBuilder.trackMetadata(YouTubeTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
 
-        return youTubeTrackBuilder;
+        return listYouTubeTrackBuilder;
     }
 
 }

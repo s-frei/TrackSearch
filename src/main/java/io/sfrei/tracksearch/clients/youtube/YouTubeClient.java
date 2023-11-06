@@ -55,7 +55,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     private static final String ADDITIONAL_PAGING_KEY = "continuation";
 
     private static final Map<String, String> VIDEO_SEARCH_PARAMS = Map.of("sp", "EgIQAQ%3D%3D");
-    private static final Map<String, String> TRACK_PARAMS = Map.of("pbj", "1", "hl", "en", "alt", "json");
+    public static final Map<String, String> TRACK_PARAMS = Map.of("pbj", "1", "hl", "en", "alt", "json");
 
     private static final Map<String, String> DEFAULT_SEARCH_PARAMS;
 
@@ -92,6 +92,14 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         return new HashMap<>(Map.of(TrackList.QUERY_KEY, query, PAGING_INFORMATION, pagingToken));
     }
 
+    public YouTubeTrack getTrack(@NonNull final String trackUrl) throws TrackSearchException {
+        final String trackUrlJSON = trackUrlJSON(api.getForUrlWithParams(trackUrl, TRACK_PARAMS));
+        final YouTubeTrack youTubeTrack = youTubeUtility.getYouTubeTrack(trackUrlJSON, this::provideStreamUrl);
+        final YouTubeTrackInfo trackInfo = youTubeUtility.getTrackInfo(trackUrlJSON, trackUrl, this::requestURL);
+        youTubeTrack.setTrackInfo(trackInfo);
+        return youTubeTrack;
+    }
+
     private GenericTrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search, @NonNull final Map<String, String> params, QueryType queryType)
             throws TrackSearchException {
 
@@ -124,13 +132,16 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         throw unsupportedQueryTypeException(YouTubeException::new, trackListQueryType);
     }
 
-    public YouTubeTrackInfo loadTrackInfo(final YouTubeTrack youtubeTrack) throws TrackSearchException {
-        final String trackUrl = youtubeTrack.getUrl();
-        final Call<ResponseWrapper> trackRequest = api.getForUrlWithParams(trackUrl, TRACK_PARAMS);
-        final ResponseWrapper trackResponse = Client.request(trackRequest);
+    private String trackUrlJSON(Call<ResponseWrapper> trackCall) throws TrackSearchException {
+        final ResponseWrapper trackResponse = Client.request(trackCall);
+        return trackResponse.getContentOrThrow();
+    }
 
-        final String trackContent = trackResponse.getContentOrThrow();
-        final YouTubeTrackInfo trackInfo = youTubeUtility.getTrackInfo(trackContent, trackUrl, this::requestURL);
+    private YouTubeTrackInfo loadTrackInfo(final YouTubeTrack youtubeTrack) throws TrackSearchException {
+        final String trackUrl = youtubeTrack.getUrl();
+        final String trackURLContent = trackUrlJSON(api.getForUrlWithParams(trackUrl, TRACK_PARAMS));
+
+        final YouTubeTrackInfo trackInfo = youTubeUtility.getTrackInfo(trackURLContent, trackUrl, this::requestURL);
         return youtubeTrack.setAndGetTrackInfo(trackInfo);
     }
 
