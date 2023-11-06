@@ -44,13 +44,13 @@
     <!-- deps -->
     <lombok.version>1.18.30</lombok.version>
     <retrofit.version>2.9.0</retrofit.version>
-    <okhttp.version>4.11.0</okhttp.version>
+    <okhttp.version>4.12.0</okhttp.version>
     <jackson-databind.version>2.15.3</jackson-databind.version>
-    <jsoup.version>1.16.1</jsoup.version>
+    <jsoup.version>1.16.2</jsoup.version>
     <slf4j-api.version>2.0.7</slf4j-api.version>
     <junit.version>5.10.1</junit.version>
     <assertj-core.version>3.24.2</assertj-core.version>
-    <logback-classic.version>1.4.8</logback-classic.version>
+    <logback-classic.version>1.4.11</logback-classic.version>
 
     <!-- test n report -->
     <maven-surefire.version>3.2.1</maven-surefire.version>
@@ -60,7 +60,7 @@
     <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-    <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
+    <maven-javadoc-plugin.version>3.6.0</maven-javadoc-plugin.version>
     <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
     <maven-scm-provider-gitexe.version>2.0.1</maven-scm-provider-gitexe.version>
     <maven-scm-api.version>2.0.1</maven-scm-api.version>
