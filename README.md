@@ -64,6 +64,9 @@ Maven dependency available on [Maven Central](https://search.maven.org/artifact/
 </dependency>
 ```
 
+or from [GitHub Packages](https://github.com/s-frei/TrackSearch/packages) or directly from 
+[GitHub Releases](https://github.com/s-frei/TrackSearch/releases).
+
 ### Getting started
 
 For more information check the related interface documentation.
