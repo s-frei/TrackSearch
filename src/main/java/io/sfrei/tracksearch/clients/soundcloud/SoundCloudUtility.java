@@ -23,7 +23,7 @@ import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
-import io.sfrei.tracksearch.tracks.deserializer.SoundCloudTrackDeserializer;
+import io.sfrei.tracksearch.tracks.deserializer.soundcloud.SoundCloudTrackDeserializer;
 import io.sfrei.tracksearch.utils.ObjectMapperBuilder;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;

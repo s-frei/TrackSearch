@@ -25,8 +25,8 @@ import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
-import io.sfrei.tracksearch.tracks.deserializer.YouTubeListTrackDeserializer;
-import io.sfrei.tracksearch.tracks.deserializer.YouTubeURLTrackDeserializer;
+import io.sfrei.tracksearch.tracks.deserializer.youtube.YouTubeListTrackDeserializer;
+import io.sfrei.tracksearch.tracks.deserializer.youtube.YouTubeURLTrackDeserializer;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
@@ -189,22 +189,19 @@ class YouTubeUtility {
 
             final JsonElement streamingData;
 
-            if (playerElement != null) {
+            final JsonElement playerArgs = playerElement.path("args");
+            if (playerElement.isPresent() && playerArgs.isPresent()) {
 
-                final JsonElement args = playerElement.path("args");
-                if (playerElement.isPresent() && args.isPresent()) {
                     scriptUrl.set(playerElement.path("assets").asString("js"));
 
-                    streamingData = args.path("player_response")
+                    streamingData = playerArgs.path("player_response")
                             .reReadTree(MAPPER)
                             .path("streamingData");
-                } else {
-                    streamingData = jsonElement.elementAtIndex(2)
-                            .path("playerResponse", "streamingData");
-                }
 
             } else {
-                streamingData = jsonElement.path("playerResponse", "streamingData");
+                streamingData = jsonElement.elementAtIndex(2)
+                            .path("playerResponse", "streamingData");
+//                streamingData = jsonElement.path("playerResponse", "streamingData");
             }
 
             final JsonElement formatsElement = streamingData.path("formats");

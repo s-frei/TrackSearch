@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.tracks.deserializer;
+package io.sfrei.tracksearch.tracks.deserializer.soundcloud;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
