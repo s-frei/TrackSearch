@@ -20,25 +20,35 @@ import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
 import java.time.Duration;
-import java.time.LocalTime;
 
 @UtilityClass
 public class TimeUtility {
 
-    private static final String TIME_STRING_DEFAULT = "00:00:00";
-
     public Duration getDurationForTimeString(@NonNull final String time) {
+        String[] parts = time.split(":");
 
-        final char[] defaultTimeStringArray = TIME_STRING_DEFAULT.toCharArray();
-        final char[] reverseTimeStringArray = new StringBuffer(time).reverse().toString().toCharArray();
+        long hours = 0;
+        long minutes = 0;
+        long seconds = 0;
 
-        for (int i = 0; i < reverseTimeStringArray.length; i++) {
-            defaultTimeStringArray[defaultTimeStringArray.length - 1 - i] = reverseTimeStringArray[i];
+        switch (parts.length) {
+            case 3:
+                hours = Long.parseLong(parts[0]);
+                minutes = Long.parseLong(parts[1]);
+                seconds = Long.parseLong(parts[2]);
+                break;
+            case 2:
+                minutes = Long.parseLong(parts[0]);
+                seconds = Long.parseLong(parts[1]);
+                break;
+            case 1:
+                seconds = Long.parseLong(parts[0]);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Cannot parse duration for '%s'", time));
         }
 
-        LocalTime localTime = LocalTime.parse(String.valueOf(defaultTimeStringArray));
-        LocalTime midnight = LocalTime.MIDNIGHT;
-        return Duration.between(midnight, localTime);
+        return Duration.ofSeconds(hours * 3600 + minutes * 60 + seconds);
     }
 
     public Duration getDurationForMilliseconds(final Long milliseconds) {
