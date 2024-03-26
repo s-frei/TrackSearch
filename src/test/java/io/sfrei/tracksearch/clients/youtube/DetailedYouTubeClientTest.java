@@ -20,11 +20,18 @@ import io.sfrei.tracksearch.clients.ClientTest;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import org.junit.jupiter.api.Tag;
 
+import java.util.List;
+
 @Tag("DetailedClientTest")
 public class DetailedYouTubeClientTest extends ClientTest<YouTubeClient, YouTubeTrack> {
 
     public DetailedYouTubeClientTest() {
         super(new YouTubeClient(), false);
+    }
+
+    @Override
+    public List<String> trackURLs() {
+        return YouTubeClientTest.TRACK_URLS;
     }
 
 }

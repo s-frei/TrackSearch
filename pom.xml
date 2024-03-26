@@ -6,7 +6,7 @@
 
   <groupId>io.sfrei</groupId>
   <artifactId>tracksearch</artifactId>
-  <version>0.8.2</version>
+  <version>0.9.0</version>
 
   <packaging>jar</packaging>
 
@@ -39,33 +39,33 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <java-version>11</java-version>
+    <java-version>17</java-version>
 
     <!-- deps -->
-    <lombok.version>1.18.30</lombok.version>
-    <retrofit.version>2.9.0</retrofit.version>
+    <lombok.version>1.18.32</lombok.version>
+    <retrofit.version>2.10.0</retrofit.version>
     <okhttp.version>4.12.0</okhttp.version>
-    <jackson-databind.version>2.15.3</jackson-databind.version>
-    <jsoup.version>1.16.2</jsoup.version>
-    <slf4j-api.version>2.0.9</slf4j-api.version>
-    <junit.version>5.10.1</junit.version>
-    <assertj-core.version>3.24.2</assertj-core.version>
-    <logback-classic.version>1.4.11</logback-classic.version>
+    <jackson-databind.version>2.16.1</jackson-databind.version>
+    <jsoup.version>1.17.2</jsoup.version>
+    <slf4j-api.version>2.0.12</slf4j-api.version>
+    <junit.version>5.10.2</junit.version>
+    <assertj-core.version>3.25.3</assertj-core.version>
+    <logback-classic.version>1.5.3</logback-classic.version>
 
     <!-- test n report -->
-    <maven-surefire.version>3.2.1</maven-surefire.version>
+    <maven-surefire.version>3.2.5</maven-surefire.version>
     <maven-surefire-tree-reporter.version>1.2.1</maven-surefire-tree-reporter.version>
 
     <!-- build n deploy -->
     <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
-    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
     <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
-    <maven-javadoc-plugin.version>3.6.0</maven-javadoc-plugin.version>
+    <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
     <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
     <maven-scm-provider-gitexe.version>2.0.1</maven-scm-provider-gitexe.version>
     <maven-scm-api.version>2.0.1</maven-scm-api.version>
     <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
-    <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
+    <maven-gpg-plugin.version>3.2.2</maven-gpg-plugin.version>
   </properties>
 
   <profiles>
@@ -182,7 +182,6 @@
             </dependencies>
             <configuration>
               <trimStackTrace>false</trimStackTrace>
-              <disableXmlReport>true</disableXmlReport>
               <reportFormat>plain</reportFormat>
               <consoleOutputReporter>
                 <disable>true</disable>

@@ -23,21 +23,21 @@ import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import org.jetbrains.annotations.Nullable;
 
-public interface Provider<T extends Track> extends TrackSearchClient<T>, ClassLogger {
+public interface Provider<T extends Track> extends TrackSearchClient<T>, ClientLogger {
 
     @Nullable
     default TrackList<T> provideNext(final TrackList<T> trackList) {
         try {
             return getNext(trackList);
         } catch (TrackSearchException e) {
-            log().error("Error occurred acquiring next tracklist", e);
+            log().error("Error occurred acquiring next track list", e);
         }
         return null;
     }
 
 
     @Nullable
-    default String provideStreamUrl(final T track) {
+    default String streamURLProvider(final T track) {
         try {
             return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
         } catch (TrackSearchException e) {

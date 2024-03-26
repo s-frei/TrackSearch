@@ -29,4 +29,11 @@ public class YouTubeTrackFormat extends TrackFormat {
     private final String sigParam;
     private final String sigValue;
 
+    @Getter
+    private final boolean streamReady;
+
+    public boolean isStreamNotReady() {
+        return !isStreamReady();
+    }
+
 }

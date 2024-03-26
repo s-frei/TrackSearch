@@ -21,14 +21,45 @@ import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import lombok.NonNull;
 
+import java.util.Set;
+
 /**
  * Main interface containing all functionality a client offers to the user.
+ *
  * @param <T> the track type the client implementing this is used for.
  */
 public interface TrackSearchClient<T extends Track> {
 
     /**
+     * Retrieve all valid URL prefixes used to check {@link #isApplicableForURL(String)}.
+     *
+     * @return the set of valid URL prefixes.
+     */
+    Set<String> validURLPrefixes();
+
+    /**
+     * Test if this client can handle the provided URL to make sure it can
+     * be used for {@link #getTrack(String)}.
+     *
+     * @param url the URL to check.
+     * @return true if this client is applicable and false if not.
+     */
+    default boolean isApplicableForURL(@NonNull String url) {
+        return validURLPrefixes().stream().anyMatch(url::startsWith);
+    }
+
+    /**
+     * Get a track for the given URL.
+     *
+     * @param url the URL to create track for.
+     * @return the track for the provided URL.
+     * @throws TrackSearchException when the track cannot ba created.
+     */
+    T getTrack(@NonNull String url) throws TrackSearchException;
+
+    /**
      * Search for tracks using a string containing keywords.
+     *
      * @param search keywords to search for.
      * @return a track list containing all found tracks.
      * @throws TrackSearchException when the client encountered a problem on searching.
@@ -37,6 +68,7 @@ public interface TrackSearchClient<T extends Track> {
 
     /**
      * Search for the next tracks for last result.
+     *
      * @param trackList a previous search result for that client.
      * @return a track list containing the next tracks available.
      * @throws TrackSearchException when the client encounters a problem on getting the next tracks.
@@ -45,6 +77,7 @@ public interface TrackSearchClient<T extends Track> {
 
     /**
      * Get the audio stream URL in the highest possible audio resolution.
+     *
      * @param track from this client.
      * @return the audio stream URL.
      * @throws TrackSearchException when the URL could not be exposed.
@@ -53,7 +86,8 @@ public interface TrackSearchClient<T extends Track> {
 
     /**
      * Get the audio stream URL in the highest possible audio resolution and retry when there was a failure.
-     * @param track from this client.
+     *
+     * @param track   from this client.
      * @param retries retry when stream URL resolving was not successful. This is determined with another request/s.
      * @return the audio stream URL.
      * @throws TrackSearchException when the URL could not be exposed.
@@ -62,6 +96,7 @@ public interface TrackSearchClient<T extends Track> {
 
     /**
      * Check the track list for this client if the paging values to get next are present.
+     *
      * @param trackList a previous search result for this client.
      * @return either the paging values are present or not.
      */

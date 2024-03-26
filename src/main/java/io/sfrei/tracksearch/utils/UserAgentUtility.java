@@ -21,7 +21,7 @@ import java.util.Random;
 public class UserAgentUtility {
 
     /**
-     * List obtained from <link>https://gist.github.com/fijimunkii/952acac988f2d25bef7e0284bc63c406</link>
+     * List obtained from <link><a href="https://gist.github.com/fijimunkii/952acac988f2d25bef7e0284bc63c406">...</a></link>
      */
     private static final String[] USER_AGENTS = {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",

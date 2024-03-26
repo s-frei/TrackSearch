@@ -16,6 +16,7 @@
 
 package io.sfrei.tracksearch.clients.setup;
 
+import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +33,6 @@ public class Client extends ClientProvider {
     public static final int OK = 200;
     public static final int PARTIAL_CONTENT = 206;
     public static final int UNAUTHORIZED = 401;
-    public static final int FORBIDDEN = 403;
 
     public Client(@Nullable CookiePolicy cookiePolicy, @Nullable Map<String, String> headers) {
         super(cookiePolicy, headers);
@@ -43,10 +43,17 @@ public class Client extends ClientProvider {
         log.trace("Requesting: {}", url);
         try {
             final Response<ResponseWrapper> response = call.execute();
-            return getBody(response);
+
+            if (response.isSuccessful() && response.body() != null && response.body().contentPresent()) {
+                return response.body();
+            }
+
+            return ResponseWrapper.empty(
+                    new TrackSearchException(String.format("No response body (%s) requesting: %s", response.code(), url))
+            );
+
         } catch (IOException e) {
-            logRequestException(url, e);
-            return ResponseWrapper.empty();
+            return ResponseWrapper.empty(requestException(url, e));
         }
     }
 
@@ -56,16 +63,15 @@ public class Client extends ClientProvider {
         try (final okhttp3.Response response = okHttpClient.newCall(request).execute()) {
             return ResponseProviderFactory.wrapResponse(response.body());
         } catch (IOException e) {
-            logRequestException(url, e);
+            return ResponseWrapper.empty(requestException(url, e));
         }
-        return ResponseWrapper.empty();
     }
 
-    public static boolean successResponseCode(int code) {
-        return code == OK || code == PARTIAL_CONTENT;
+    public static boolean successResponseCode(Integer code) {
+        return code != null && (code == OK || code == PARTIAL_CONTENT);
     }
 
-    protected int requestAndGetCode(String url) {
+    protected Integer requestAndGetCode(String url) {
         final Request request = new Request.Builder().url(url)
                 .header("connection", "close")
                 .header("range", "bytes=0-1")
@@ -73,16 +79,8 @@ public class Client extends ClientProvider {
         try (final okhttp3.Response response = okHttpClient.newCall(request).execute()) {
             return response.code();
         } catch (IOException e) {
-            logRequestException(url, e);
-            return 418;
+            return null;
         }
-    }
-
-    private static ResponseWrapper getBody(Response<ResponseWrapper> response) {
-        if (response.isSuccessful() && response.body() != null && response.body().hasContent()) {
-            return response.body();
-        }
-        return ResponseWrapper.of(response.raw().code(), null);
     }
 
 }

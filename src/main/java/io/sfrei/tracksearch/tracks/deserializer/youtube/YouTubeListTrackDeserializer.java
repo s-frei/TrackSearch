@@ -50,7 +50,7 @@ public class YouTubeListTrackDeserializer extends JsonDeserializer<YouTubeTrack.
         if (title == null || duration == null || ref == null)
             return null;
 
-        final String url = YouTubeClient.HOSTNAME.concat("/watch?v=").concat(ref);
+        final String url = YouTubeClient.URL.concat("/watch?v=").concat(ref);
 
         final YouTubeTrack.ListYouTubeTrackBuilder listYouTubeTrackBuilder = new YouTubeTrack.ListYouTubeTrackBuilder();
         final YouTubeTrackBuilder youTubeTrackBuilder = listYouTubeTrackBuilder.getBuilder()
@@ -66,7 +66,7 @@ public class YouTubeListTrackDeserializer extends JsonDeserializer<YouTubeTrack.
 
         final String channelUrlSuffix = owner.path("navigationEndpoint", "commandMetadata", "webCommandMetadata")
                 .asString("url");
-        final String channelUrl = YouTubeClient.HOSTNAME.concat(channelUrlSuffix);
+        final String channelUrl = YouTubeClient.URL.concat(channelUrlSuffix);
 
         final String streamAmountText = rootElement.path("viewCountText").asString("simpleText");
         final String streamAmountDigits = streamAmountText == null || streamAmountText.isEmpty() ?

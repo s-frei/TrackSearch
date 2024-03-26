@@ -20,6 +20,7 @@ import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.FormatType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
+import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -87,6 +88,7 @@ public class TrackFormatUtility {
         throw new TrackSearchException("Could not get applicable track format");
     }
 
+    @Getter
     private enum YoutubeAudioQualities {
         LOW("AUDIO_QUALITY_LOW"),
         MEDIUM("AUDIO_QUALITY_MEDIUM"),
@@ -96,10 +98,6 @@ public class TrackFormatUtility {
 
         YoutubeAudioQualities(String qualityId) {
             this.qualityId = qualityId;
-        }
-
-        public String getQualityId() {
-            return qualityId;
         }
 
         private static int getOrdinalForQuality(final String qualityId) {

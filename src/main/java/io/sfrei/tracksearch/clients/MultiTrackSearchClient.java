@@ -55,7 +55,7 @@ public interface MultiTrackSearchClient extends TrackSearchClient<Track>  {
     String getStreamUrl(@NotNull Track track) throws TrackSearchException;
 
     /**
-     * Search for tracks using a string containing keywords on pre selected track sources.
+     * Search for tracks using a string containing keywords on pre-selected track sources.
      * @param search keywords to search for.
      * @param sources available to search on.
      * @return a tracklist containing all found tracks for selected clients.

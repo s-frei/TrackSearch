@@ -36,21 +36,20 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 
 import java.net.CookiePolicy;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         implements ClientHelper, Provider<SoundCloudTrack>, UniformClientException {
 
-    public static final String HOSTNAME = "https://soundcloud.com";
+    public static final String URL = "https://soundcloud.com";
     private static final String INFORMATION_PREFIX = "sc";
     public static final String POSITION_KEY = INFORMATION_PREFIX + TrackSearchConfig.POSITION_KEY_SUFFIX;
     public static final String OFFSET_KEY = INFORMATION_PREFIX + TrackSearchConfig.OFFSET_KEY_SUFFIX;
     private static final String PAGING_OFFSET = "limit";
     private static final String PAGING_POSITION = "position";
+
+    private static final Set<String> VALID_URL_PREFIXES = Set.of(URL); // TODO: Extend
 
     private final SoundCloudAPI api;
     private final SoundCloudUtility soundCloudUtility;
@@ -62,7 +61,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         super(CookiePolicy.ACCEPT_ALL, null);
 
         final Retrofit base = new Retrofit.Builder()
-                .baseUrl(HOSTNAME)
+                .baseUrl(URL)
                 .client(okHttpClient)
                 .addConverterFactory(ResponseProviderFactory.create())
                 .build();
@@ -76,16 +75,30 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         return new HashMap<>(Map.of(TrackList.QUERY_KEY, query));
     }
 
+    @Override
+    public Set<String> validURLPrefixes() {
+        return VALID_URL_PREFIXES;
+    }
+
+    @Override
+    public SoundCloudTrack getTrack(@NonNull final String url) throws TrackSearchException {
+        if (!isApplicableForURL(url))
+            throw new SoundCloudException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
+
+        final String trackHTML = clientIDRequest(api.getForUrlWithClientID(url, clientID)).getContentOrThrow();
+        final String trackURL = soundCloudUtility.extractTrackURL(trackHTML);
+        final String trackJSON = clientIDRequest(api.getForUrlWithClientID(trackURL, clientID)).getContentOrThrow();
+        return soundCloudUtility.extractSoundCloudTrack(trackJSON, this::streamURLProvider);
+    }
+
     private GenericTrackList<SoundCloudTrack> getTracksForSearch(final String search, int position, int offset, QueryType queryType)
             throws TrackSearchException {
 
-        checkClientIDAvailableOrThrow();
-
         final Map<String, String> pagingParams = getPagingParams(position, offset);
-        final ResponseWrapper response = getSearch(search, true, pagingParams);
+        final String tracksJSON = clientIDRequest(api.getSearchForKeywords(search, clientID, pagingParams))
+                .getContentOrThrow();
 
-        final String content = response.getContentOrThrow();
-        return soundCloudUtility.getSoundCloudTracks(content, queryType, search, this::provideNext, this::provideStreamUrl);
+        return soundCloudUtility.extractSoundCloudTracks(tracksJSON, queryType, search, this::provideNext, this::streamURLProvider);
     }
 
     @Override
@@ -112,15 +125,11 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
 
     @Override
     public String getStreamUrl(@NonNull final SoundCloudTrack soundCloudTrack) throws TrackSearchException {
-        checkClientIDAvailableOrThrow();
-
-        final ResponseWrapper trackResponse = getForUrlWitClientId(soundCloudTrack.getUrl(), true);
-        final Optional<String> streamUrl = soundCloudUtility.getUrlForStream(trackResponse.getContentOrThrow());
-        if (streamUrl.isEmpty())
-            throw new TrackSearchException("Progressive stream URL not found");
-
-        final ResponseWrapper streamUrlResponse = getForUrlWitClientId(streamUrl.get(), true);
-        return soundCloudUtility.extractStreamUrl(streamUrlResponse.getContentOrThrow());
+        final String url = soundCloudTrack.getUrl();
+        final String trackHTML = clientIDRequest(api.getForUrlWithClientID(url, clientID)).getContentOrThrow();
+        final String intermediateURL = soundCloudUtility.extractURLForStream(trackHTML);
+        final String streamJSON = clientIDRequest(api.getForUrlWithClientID(intermediateURL, clientID)).getContentOrThrow();
+        return soundCloudUtility.extractStreamUrl(streamJSON);
     }
 
     @Override
@@ -129,43 +138,32 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
                 .orElseThrow(() -> noStreamUrlAfterRetriesException(SoundCloudException::new, retries));
     }
 
-    private ResponseWrapper getSearch(final String search, final boolean firstRequest, final Map<String, String> pagingParams) {
-        final Call<ResponseWrapper> request = api.getSearchForKeywords(search, clientID, pagingParams);
+    private ResponseWrapper clientIDRequest(final Call<ResponseWrapper> call) throws SoundCloudException {
+        return clientIDRequest(call, true);
+    }
 
-        final ResponseWrapper response = Client.request(request);
-        if (!firstRequest || response.hasContent() || (response.isHttpCode(Client.UNAUTHORIZED) && !refreshClientID())) {
+    private ResponseWrapper clientIDRequest(final Call<ResponseWrapper> call, final boolean firstRequest) throws SoundCloudException {
+
+        final ResponseWrapper response = Client.request(call);
+        if (response.contentPresent() && !response.isHttpCode(Client.UNAUTHORIZED)) {
             return response;
         }
 
-        return getSearch(search, false, pagingParams);
-    }
-
-    private ResponseWrapper getForUrlWitClientId(final String url, final boolean firstRequest) {
-        final Call<ResponseWrapper> request = api.getForUrlWithClientID(url, clientID);
-
-        final ResponseWrapper response = Client.request(request);
-        if (!firstRequest || response.hasContent() || (response.isHttpCode(Client.UNAUTHORIZED) && !refreshClientID())) {
-            return response;
+        if (firstRequest) {
+            refreshClientID();
+            return clientIDRequest(call, false);
         }
-        return getForUrlWitClientId(url, false);
+
+        throw new SoundCloudException("ClientID is not available and cannot be refreshed");
     }
 
-    private void checkClientIDAvailableOrThrow() throws TrackSearchException {
-        if (clientID == null && !refreshClientID())
-            throw new SoundCloudException("ClientID is not available and can not be found");
-    }
-
-    public final boolean refreshClientID() {
-        log.debug("Trying to get ClientID");
-        final String clientID;
+    public final void refreshClientID() {
+        log.trace("Trying to get ClientID...");
         try {
-            clientID = getClientID();
+            this.clientID = getClientID();
         } catch (TrackSearchException e) {
-            log.error("Cannot refresh client ID", e);
-            return false;
+            log.error("Cannot refresh ClientID", e);
         }
-        this.clientID = clientID;
-        return true;
     }
 
     private String getClientID() throws TrackSearchException {
@@ -174,14 +172,14 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         final List<String> crossOriginScripts = soundCloudUtility.getCrossOriginScripts(content);
         for (final String scriptUrl : crossOriginScripts) {
             final ResponseWrapper scriptResponse = requestURL(scriptUrl);
-            if (scriptResponse.hasContent()) {
+            if (scriptResponse.contentPresent()) {
                 final Optional<String> clientID = soundCloudUtility.getClientID(scriptResponse.getContent());
                 if (clientID.isPresent()) {
                     return clientID.get();
                 }
             }
         }
-        throw new SoundCloudException("ClientId can not be found");
+        throw new SoundCloudException("ClientID not found");
     }
 
     private Map<String, String> getPagingParams(final int position, final int offset) {

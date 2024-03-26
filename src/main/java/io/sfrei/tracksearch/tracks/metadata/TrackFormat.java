@@ -33,12 +33,6 @@ public class TrackFormat {
 
     private final String audioQuality;
 
-    private boolean streamReady;
-
     private final String url;
-
-    public boolean streamNotReady() {
-        return !streamReady;
-    }
 
 }
