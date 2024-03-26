@@ -17,12 +17,18 @@
 package io.sfrei.tracksearch.clients;
 
 import io.sfrei.tracksearch.clients.setup.TrackSource;
+import io.sfrei.tracksearch.clients.soundcloud.SoundCloudClientTest;
+import io.sfrei.tracksearch.clients.youtube.YouTubeClientTest;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.sfrei.tracksearch.clients.setup.TrackSource.Soundcloud;
 import static io.sfrei.tracksearch.clients.setup.TrackSource.Youtube;
@@ -51,8 +57,14 @@ public class MultiTrackSearchClientTest extends ClientTest<MultiTrackSearchClien
 
     private void testSource(TrackSource source) throws TrackSearchException {
         log.debug("MultiTrackSearchClient with explicit source ->  {}", source);
-        final TrackList<Track> trackList = searchClient.getTracksForSearch(SINGLE_SEARCH_KEY, TrackSource.setOf(source));
+        final TrackList<Track> trackList = trackSearchClient.getTracksForSearch(SINGLE_SEARCH_KEY, TrackSource.setOf(source));
         log.debug("Found '{}' tracks for {}", trackList.size(), source);
+    }
+
+    @Override
+    public List<String> trackURLs() {
+        return Stream.concat(YouTubeClientTest.TRACK_URLS.stream(), SoundCloudClientTest.TRACK_URLS.stream())
+                .collect(Collectors.toList());
     }
 
 }

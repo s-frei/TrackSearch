@@ -20,11 +20,18 @@ import io.sfrei.tracksearch.clients.ClientTest;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import org.junit.jupiter.api.Tag;
 
+import java.util.List;
+
 @Tag("DetailedClientTest")
 public class DetailedSoundCloudClientTest extends ClientTest<SoundCloudClient, SoundCloudTrack> {
 
     public DetailedSoundCloudClientTest() {
         super(new SoundCloudClient(), false);
+    }
+
+    @Override
+    public List<String> trackURLs() {
+        return SoundCloudClientTest.TRACK_URLS;
     }
 
 }

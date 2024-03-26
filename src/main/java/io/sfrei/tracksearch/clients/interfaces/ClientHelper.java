@@ -32,7 +32,7 @@ public interface ClientHelper extends ClientLogger {
     default <T extends Track> Optional<String> getStreamUrl(TrackSearchClient<T> searchClient, T track,
                                                             Function<String, Integer> requestForCodeFunction,
                                                             final int retries) {
-        log().trace("Get stream url for: {}", track);
+        log().trace("Get stream URL for: {}", track);
         return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, retries + INITIAL_TRY);
     }
 
