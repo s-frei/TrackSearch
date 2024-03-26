@@ -84,9 +84,10 @@ class YouTubeUtility {
     protected YouTubeTrack extractYouTubeTrack(final String json, final StreamURLFunction<YouTubeTrack> streamUrlFunction)
             throws YouTubeException {
 
-        return JsonElement.readTreeCatching(MAPPER, json)
-                .orElseThrow(() -> new YouTubeException("Cannot parse YouTubeTrack JSON"))
-                .elementAtIndex(2).path("playerResponse")
+        final JsonElement trackJsonElement = JsonElement.readTreeCatching(MAPPER, json)
+                .orElseThrow(() -> new YouTubeException("Cannot parse YouTubeTrack JSON"));
+
+        return playerResponseFromTrackJSON(trackJsonElement)
                 .mapCatching(MAPPER, YouTubeTrack.URLYouTubeTrackBuilder.class).getBuilder()
                 .streamUrlFunction(streamUrlFunction)
                 .build();
@@ -199,10 +200,7 @@ class YouTubeUtility {
                         .path("streamingData");
 
             } else {
-                final JsonElement playerResponse = jsonElement.elementAtIndex(2)
-                        .path("playerResponse")
-                        .orElse(jsonElement)
-                        .path("playerResponse");
+                final JsonElement playerResponse = playerResponseFromTrackJSON(jsonElement);
 
                 streamingData = playerResponse.asUnresolved().path("streamingData");
             }
@@ -234,6 +232,13 @@ class YouTubeUtility {
         } catch (JsonProcessingException e) {
             throw new YouTubeException("Failed parsing Youtube track JSON", e);
         }
+    }
+
+    private static JsonElement playerResponseFromTrackJSON(JsonElement jsonElement) {
+        return jsonElement.elementAtIndex(2)
+                .path("playerResponse")
+                .orElse(jsonElement)
+                .path("playerResponse");
     }
 
     private Stream<YouTubeTrackFormat> getFormatsFromStream(final Stream<JsonElement> formats) {
