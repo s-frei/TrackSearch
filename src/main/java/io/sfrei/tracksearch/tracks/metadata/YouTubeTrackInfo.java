@@ -16,6 +16,7 @@
 
 package io.sfrei.tracksearch.tracks.metadata;
 
+import io.sfrei.tracksearch.exceptions.YouTubeException;
 import lombok.Getter;
 
 import java.util.List;
@@ -28,6 +29,11 @@ public class YouTubeTrackInfo extends TrackInfo<YouTubeTrackFormat> {
     public YouTubeTrackInfo(List<YouTubeTrackFormat> formats, String scriptUrl) {
         super(formats);
         this.scriptUrl = scriptUrl;
+    }
+
+    public String getScriptUrlOrThrow() throws YouTubeException {
+        if (scriptUrl != null) return scriptUrl;
+        else throw new YouTubeException("ScriptURL was not resolved");
     }
 
 }

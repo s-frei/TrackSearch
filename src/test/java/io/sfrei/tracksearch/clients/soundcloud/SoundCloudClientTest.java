@@ -20,11 +20,24 @@ import io.sfrei.tracksearch.clients.ClientTest;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import org.junit.jupiter.api.Tag;
 
+import java.util.List;
+
 @Tag("ClientTest")
 public class SoundCloudClientTest extends ClientTest<SoundCloudClient, SoundCloudTrack> {
 
+    public static final List<String> TRACK_URLS = List.of(
+            "https://soundcloud.com/kalkbrennerpaul/paul-kalkbrenner-altes",
+            "https://soundcloud.com/hvob/torrid-soul",
+            "https://soundcloud.com/sweetmusicofc/premiere-township-rebellion-baud-stil-vor-talent"
+    );
+
     public SoundCloudClientTest() {
         super(new SoundCloudClient(), true);
+    }
+
+    @Override
+    public List<String> trackURLs() {
+        return TRACK_URLS;
     }
 
 }

@@ -19,8 +19,6 @@ package io.sfrei.tracksearch.clients;
 import io.sfrei.tracksearch.clients.interfaces.Provider;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.clients.setup.TrackSource;
-import io.sfrei.tracksearch.clients.soundcloud.SoundCloudClient;
-import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.*;
@@ -41,23 +39,40 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
     public static final String POSITION_KEY = "multi" + TrackSearchConfig.POSITION_KEY_SUFFIX;
     public static final String OFFSET_KEY = "multi" + TrackSearchConfig.OFFSET_KEY_SUFFIX;
 
-    private final TrackSearchClient<YouTubeTrack> youTubeClient;
-    private final TrackSearchClient<SoundCloudTrack> soundCloudClient;
-
-    private final Map<TrackSource, TrackSearchClient<? extends Track>> clientsForSource = new HashMap<>();
+    private final Map<TrackSource, TrackSearchClient<Track>> clientsBySource;
+    private final Set<String> validURLPrefixes;
 
     public MultiSearchClient() {
-        this.youTubeClient = new YouTubeClient();
-        this.soundCloudClient = new SoundCloudClient();
+        clientsBySource = Arrays.stream(TrackSource.values())
+                .collect(Collectors.toMap(source -> source, TrackSource::createClient));
 
-        clientsForSource.put(TrackSource.Youtube, youTubeClient);
-        clientsForSource.put(TrackSource.Soundcloud, soundCloudClient);
+        validURLPrefixes = clientsBySource.values()
+                .stream().map(TrackSearchClient::validURLPrefixes)
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
 
         log.info("TrackSearchClient created with {} clients", allClients().size());
     }
 
     private List<TrackSearchClient<? extends Track>> allClients() {
-        return new ArrayList<>(clientsForSource.values());
+        return new ArrayList<>(clientsBySource.values());
+    }
+
+    @Override
+    public Set<String> validURLPrefixes() {
+        return validURLPrefixes;
+    }
+
+    @Override
+    public Track getTrack(@NonNull String url) throws TrackSearchException {
+        final TrackSearchClient<Track> trackSearchClient = clientsBySource.values()
+                .stream()
+                .filter(client -> client.isApplicableForURL(url))
+                .findFirst()
+                .orElseThrow(() -> new TrackSearchException(String.format("No client found to handle URL: %s", url)));
+
+        log().debug("Using {} for URL: {}", trackSearchClient.getClass().getSimpleName(), url);
+        return trackSearchClient.getTrack(url);
     }
 
     @Override
@@ -79,9 +94,9 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
     public String getStreamUrl(@NonNull final Track track) throws TrackSearchException {
 
         if (track instanceof YouTubeTrack) {
-            return youTubeClient.getStreamUrl((YouTubeTrack) track);
+            return clientsBySource.get(TrackSource.Youtube).getStreamUrl(track);
         } else if (track instanceof SoundCloudTrack) {
-            return soundCloudClient.getStreamUrl((SoundCloudTrack) track);
+            return clientsBySource.get(TrackSource.Soundcloud).getStreamUrl(track);
         }
         throw new TrackSearchException("Track type is unknown");
     }
@@ -89,9 +104,9 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
     @Override
     public String getStreamUrl(@NonNull Track track, int retries) throws TrackSearchException {
         if (track instanceof YouTubeTrack) {
-            return youTubeClient.getStreamUrl((YouTubeTrack) track, retries);
+            return clientsBySource.get(TrackSource.Youtube).getStreamUrl(track, retries);
         } else if (track instanceof SoundCloudTrack) {
-            return soundCloudClient.getStreamUrl((SoundCloudTrack) track, retries);
+            return clientsBySource.get(TrackSource.Soundcloud).getStreamUrl(track, retries);
         }
         throw new TrackSearchException("Track type is unknown");
     }
@@ -104,8 +119,8 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
             throw new TrackSearchException("Provide at least one source");
 
         final List<TrackSearchClient<? extends Track>> callClients = sources.stream()
-                .filter(clientsForSource::containsKey)
-                .map(clientsForSource::get)
+                .filter(clientsBySource::containsKey)
+                .map(clientsBySource::get)
                 .collect(Collectors.toList());
 
         return getTracksForSearch(search, callClients);

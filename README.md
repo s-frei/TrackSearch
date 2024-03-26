@@ -60,9 +60,12 @@ Maven dependency available on [Maven Central](https://search.maven.org/artifact/
 <dependency>
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.8.2</version>
+    <version>0.9.0</version>
 </dependency>
 ```
+
+or from [GitHub Packages](https://github.com/s-frei/TrackSearch/packages) or directly from 
+[GitHub Releases](https://github.com/s-frei/TrackSearch/releases).
 
 ### Getting started
 
@@ -76,13 +79,19 @@ MultiTrackSearchClient searchClient = new MultiSearchClient();
 TrackSearchClient<SoundCloudTrack> explicitClient = new SoundCloudClient();
 
 // Search for tracks
-TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords")
+TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords");
 
 // Get the audio stream
 String streamUrl = tracksForSearch.get(anyPos).getStreamUrl();
 
 // Get next tracks page
 TrackList<Track> nextTracks = tracksForSearch.next();
+
+// Get a track for URL
+Track trackForURL = searchClient.getTrack("URL");
+
+// Get the audio stream (retrying on failure)
+searchClient.getStreamUrl(trackForURL, TrackSearchConfig.DEFAULT_RESOLVING_RETIRES);
 ```
 
 ## Why is this done ?
@@ -92,7 +101,7 @@ abused for this, or it wasn't written in Java.
 
 ## Develop :hammer:
 
-**Note:** **JDK 11** is required!
+**Note:** **JDK 17** is required! (`sdk env install`)
 
 Fire up following in your shell:
 

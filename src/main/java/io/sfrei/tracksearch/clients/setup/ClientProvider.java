@@ -16,6 +16,7 @@
 
 package io.sfrei.tracksearch.clients.setup;
 
+import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.utils.UserAgentUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,11 +50,12 @@ abstract class ClientProvider {
     }
 
     private static void logResponseCode(String url, int code) {
-        log.error("Code: {} for request not successful '{}' ", code, url);
+        log.debug("Code: {} for request not successful '{}' ", code, url);
     }
 
-    protected static void logRequestException(String url, IOException e) {
-        log.error("Failed to request '{}' cause: {}", url, e);
+    @NotNull
+    protected static TrackSearchException requestException(String url, IOException e) {
+        return new TrackSearchException(String.format("Failed requesting: %s", url), e);
     }
 
     @RequiredArgsConstructor
@@ -81,7 +83,7 @@ abstract class ClientProvider {
             try {
                 response = chain.proceed(modifiedRequest);
             } catch (IOException e) {
-                logRequestException(url, e);
+                log.error("Failed to requesting {}", url, e);
                 throw e;
             }
 

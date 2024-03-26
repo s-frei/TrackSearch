@@ -51,7 +51,7 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
         if (title == null || duration == null || ref == null)
             return null;
 
-        final String url = YouTubeClient.HOSTNAME.concat("/watch?v=").concat(ref);
+        final String url = YouTubeClient.URL.concat("/watch?v=").concat(ref);
 
         final YouTubeTrack.URLYouTubeTrackBuilder listYouTubeTrackBuilder = new YouTubeTrack.URLYouTubeTrackBuilder();
         final YouTubeTrackBuilder youTubeTrackBuilder = listYouTubeTrackBuilder.getBuilder()

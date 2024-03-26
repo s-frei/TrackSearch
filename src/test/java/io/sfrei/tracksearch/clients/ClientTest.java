@@ -34,8 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.as;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -59,7 +58,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
             "Christian Löffler"
     );
 
-    protected final C searchClient;
+    protected final C trackSearchClient;
 
     private final List<String> searchKeys;
 
@@ -73,133 +72,159 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
 
     public ClientTest(C searchClient, boolean single) {
         super(CookiePolicy.ACCEPT_ALL, null);
-        this.searchClient = searchClient;
+        this.trackSearchClient = searchClient;
         this.searchKeys = single ? List.of(SINGLE_SEARCH_KEY) : SEARCH_KEYS;
         tracksForSearch = new ArrayList<>();
     }
 
+    public abstract List<String> trackURLs();
+
     @Order(1)
+    @ParameterizedTest
+    @MethodSource("trackURLs")
+    public void clientApplicableForURL(String url) {
+        final boolean applicableForURL = trackSearchClient.isApplicableForURL(url);
+
+        assertThat(applicableForURL)
+                .as("Client is applicable for URL: %s", url)
+                .isTrue();
+
+    }
+
+    @Order(2)
+    @ParameterizedTest
+    @MethodSource("trackURLs")
+    public void trackForURL(String url) throws TrackSearchException {
+        final Track trackForURL = trackSearchClient.getTrack(url);
+        checkTrackAndMetadata(trackForURL);
+    }
+
+    @Order(3)
     @ParameterizedTest
     @MethodSource("getSearchKeys")
     public void tracksForSearch(String key) throws TrackSearchException {
-        TrackList<T> tracksForSearch = searchClient.getTracksForSearch(key);
+        TrackList<T> tracksForSearch = trackSearchClient.getTracksForSearch(key);
 
         assertThat(tracksForSearch.isEmpty())
-                .as("TrackList should contain tracks")
+                .as("TrackList should contain tracks for search: %s", key)
                 .isFalse();
 
         this.tracksForSearch.add(Named.of(tracksForSearch.getQueryValue(), tracksForSearch));
     }
 
-    @Order(2)
+    @Order(4)
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
     public void trackListGotPagingValues(TrackList<Track> trackList) {
-        final boolean hasPagingValues = searchClient.hasPagingValues(trackList);
+        final boolean hasPagingValues = trackSearchClient.hasPagingValues(trackList);
 
         assertThat(hasPagingValues)
                 .as("TrackList should be pageable")
                 .isTrue();
     }
 
-    @Order(3)
+    @Order(5)
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
     public void getNextTracks(TrackList<Track> trackList) throws TrackSearchException {
 
         log.trace("Get next: {}", trackList);
-        TrackList<T> nextTracksForSearch = searchClient.getNext(trackList);
+        TrackList<T> nextTracksForSearch = trackSearchClient.getNext(trackList);
 
         assertThat(nextTracksForSearch.isEmpty())
-                .as("Paged TrackList should contain tracks")
+                .as("Paged TrackList should contain tracks for: %s", trackList.getQueryInformation())
                 .isFalse();
 
         log.trace("Get next again: {}", nextTracksForSearch);
         TrackList<T> moreTracksForSearch = nextTracksForSearch.next();
 
         assertThat(moreTracksForSearch.isEmpty())
-                .as("Further paged TrackList should contain tracks")
+                .as("Further paged TrackList should contain tracks for: %s", trackList.getQueryInformation())
                 .isFalse();
     }
 
-    @Order(4)
+    @Order(6)
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
-    public void checkTrackAndMetadata(TrackList<Track> trackList) {
+    public void checkTracksAndMetadata(TrackList<Track> trackList) {
         for (Track track : trackList) {
-
-            log.trace("{}", track.pretty());
-
-            final SoftAssertions assertions = new SoftAssertions();
-
-            assertions.assertThat(track)
-                    .as("Track should not be null")
-                    .isNotNull();
-
-            assertions.assertThat(track)
-                    .extracting(Track::getUrl)
-                    .as("Track should have URL")
-                    .asString()
-                    .isNotEmpty();
-
-            assertions.assertThat(track)
-                    .extracting(Track::getTitle)
-                    .as("Track should have title for '%s'", track.getUrl())
-                    .asString()
-                    .isNotEmpty();
-
-            assertions.assertThat(track)
-                    .extracting(Track::getDuration)
-                    .as("Track should have duration for '%s'", track.getUrl())
-                    .isNotNull();
-
-            final TrackMetadata trackMetadata = track.getTrackMetadata();
-            assertNotNull(trackMetadata);
-
-            assertions.assertThat(trackMetadata)
-                    .as("TrackMetadata should not be null for Track '%s'", track.getUrl())
-                    .isNotNull();
-
-            assertions.assertThat(trackMetadata)
-                    .extracting(TrackMetadata::getChannelName)
-                    .as("TrackMetadata should have channel name for Track '%s'", track.getUrl())
-                    .asString()
-                    .isNotEmpty();
-
-            assertions.assertThat(trackMetadata)
-                    .extracting(TrackMetadata::getChannelUrl)
-                    .as("TrackMetadata should have channel URL for Track '%s'", track.getUrl())
-                    .asString()
-                    .isNotEmpty();
-
-            assertions.assertThat(trackMetadata)
-                    .extracting(TrackMetadata::getStreamAmount, as(InstanceOfAssertFactories.LONG))
-                    .as("TrackMetadata should have stream amount for Track '%s'", track.getUrl())
-                    .isNotNull()
-                    .isNotNegative();
-
-            assertions.assertThat(trackMetadata)
-                    .extracting(TrackMetadata::getThumbNailUrl)
-                    .as("TrackMetadata should have thumbnail URL for Track '%s'", track.getUrl())
-                    .asString()
-                    .isNotEmpty();
-
-            assertions.assertAll();
+            checkTrackAndMetadata(track);
         }
     }
 
-    @Order(5)
+    public static void checkTrackAndMetadata(Track track) {
+        log.trace("{}", track.pretty());
+
+        final SoftAssertions assertions = new SoftAssertions();
+
+        assertions.assertThat(track)
+                .as("Track should not be null")
+                .isNotNull();
+
+        assertions.assertThat(track)
+                .extracting(Track::getUrl)
+                .as("Track should have URL")
+                .asString()
+                .isNotEmpty();
+
+        assertions.assertThat(track)
+                .extracting(Track::getTitle)
+                .as("Track should have title for '%s'", track.getUrl())
+                .asString()
+                .isNotEmpty();
+
+        assertions.assertThat(track)
+                .extracting(Track::getDuration)
+                .as("Track should have duration for '%s'", track.getUrl())
+                .isNotNull();
+
+        final TrackMetadata trackMetadata = track.getTrackMetadata();
+        assertNotNull(trackMetadata);
+
+        assertions.assertThat(trackMetadata)
+                .as("TrackMetadata should not be null for Track '%s'", track.getUrl())
+                .isNotNull();
+
+        assertions.assertThat(trackMetadata)
+                .extracting(TrackMetadata::getChannelName)
+                .as("TrackMetadata should have channel name for Track '%s'", track.getUrl())
+                .asString()
+                .isNotEmpty();
+
+        assertions.assertThat(trackMetadata)
+                .extracting(TrackMetadata::getChannelUrl)
+                .as("TrackMetadata should have channel URL for Track '%s'", track.getUrl())
+                .asString()
+                .isNotEmpty();
+
+        assertions.assertThat(trackMetadata)
+                .extracting(TrackMetadata::getStreamAmount, as(InstanceOfAssertFactories.LONG))
+                .as("TrackMetadata should have stream amount for Track '%s'", track.getUrl())
+                .isNotNull()
+                .isNotNegative();
+
+        assertions.assertThat(trackMetadata)
+                .extracting(TrackMetadata::getThumbNailUrl)
+                .as("TrackMetadata should have thumbnail URL for Track '%s'", track.getUrl())
+                .asString()
+                .isNotEmpty();
+
+        assertions.assertAll();
+    }
+
+    @Order(7)
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void getStreamUrl(Track track) {
-        String streamUrl = track.getStreamUrl();
+        final String streamUrl = assertDoesNotThrow(track::getStreamUrl,
+                String.format("Stream URL resolving shpould not throw for: %s", track.getUrl()));
 
         assertThat(streamUrl)
                 .as("Track should have stream URL for Track '%s'", track.getUrl())
                 .isNotEmpty();
 
         final int code = requestAndGetCode(streamUrl);
-        assertNotEquals(FORBIDDEN, code);
+        assertTrue(Client.successResponseCode(code));
     }
 
 }

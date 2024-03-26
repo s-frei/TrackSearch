@@ -25,15 +25,14 @@ import java.util.Optional;
 import java.util.function.Function;
 
 
-public interface ClientHelper extends ClassLogger {
+public interface ClientHelper extends ClientLogger {
 
     int INITIAL_TRY = 1;
 
     default <T extends Track> Optional<String> getStreamUrl(TrackSearchClient<T> searchClient, T track,
                                                             Function<String, Integer> requestForCodeFunction,
                                                             final int retries) {
-
-        log().trace("Get stream url for: {}", track);
+        log().trace("Get stream URL for: {}", track);
         return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, retries + INITIAL_TRY);
     }
 
@@ -46,13 +45,14 @@ public interface ClientHelper extends ClassLogger {
 
         try {
             final String streamUrl = searchClient.getStreamUrl(track);
-            final int code = requestForCodeFunction.apply(streamUrl);
+            final Integer code = requestForCodeFunction.apply(streamUrl);
             if (Client.successResponseCode(code))
                 return Optional.ofNullable(streamUrl);
             else {
                 tries--;
-                log().warn("Not able getting stream URL for {} - {} retries left",
+                if (tries > 0) log().warn("Not able getting stream URL for {} - {} retries left",
                         searchClient.getClass().getSimpleName(), tries);
+
                 return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, tries);
             }
         } catch (TrackSearchException e) {

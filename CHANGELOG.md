@@ -1,6 +1,23 @@
 Changelog
 =========
 
+0.9.0
+-----
+
+**Breaking:**
+
+- Bump to JDK 17
+
+**Features:**
+
+- Get tracks by URL
+- Improved tests
+- Updated dependencies
+
+**Bugfix:**
+
+- Fix YouTube tracks parsing
+
 0.8.2
 -----
 
