@@ -36,7 +36,7 @@ jobs:
         run: mvn test -e -P fancy-report --color always
       
       - name: "Upload test report"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: test-report-${{ env.COMMIT_SHA_ABREV }}-${{ env.RUN_DATE }}
