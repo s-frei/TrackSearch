@@ -95,7 +95,7 @@ abused for this, or it wasn't written in Java.
 
 ## Develop :hammer:
 
-**Note:** **JDK 11** is required!
+**Note:** **JDK 17** is required! (`sdk env install`)
 
 Fire up following in your shell:
 

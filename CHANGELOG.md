@@ -4,6 +4,10 @@ Changelog
 0.8.3 - unreleased
 ------------------
 
+**Breaking:**
+
+- Bump to JDK 17
+
 **Bugfix:**
 
 - Fix YouTube tracks parsing

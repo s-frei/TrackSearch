@@ -39,7 +39,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <java-version>11</java-version>
+    <java-version>17</java-version>
 
     <!-- deps -->
     <lombok.version>1.18.32</lombok.version>
