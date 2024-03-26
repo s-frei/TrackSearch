@@ -40,4 +40,8 @@ jobs:
         if: failure()
         with:
           name: test-report-${{ env.COMMIT_SHA_ABREV }}-${{ env.RUN_DATE }}
-          path: library/target/surefire-reports/
+          path: target/surefire-reports/
+
+      - name: "Publish Test Report"
+        if: success() || failure()
+        uses: scacap/action-surefire-report@v1
