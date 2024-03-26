@@ -4,7 +4,9 @@ Changelog
 0.8.3 - unreleased
 ------------------
 
-Nothing changed yet...
+**Bugfix:**
+
+- Fix YouTube tracks parsing
 
 0.8.2
 -----

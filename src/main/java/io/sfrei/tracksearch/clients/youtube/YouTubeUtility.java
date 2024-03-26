@@ -199,9 +199,7 @@ class YouTubeUtility {
                             .path("streamingData");
 
             } else {
-                streamingData = jsonElement.elementAtIndex(2)
-                            .path("playerResponse", "streamingData");
-//                streamingData = jsonElement.path("playerResponse", "streamingData");
+                streamingData = jsonElement.path("playerResponse", "streamingData");
             }
 
             final JsonElement formatsElement = streamingData.path("formats");
