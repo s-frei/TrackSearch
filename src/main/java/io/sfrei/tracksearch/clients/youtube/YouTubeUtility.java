@@ -81,22 +81,20 @@ class YouTubeUtility {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
 
-    protected YouTubeTrack getYouTubeTrack(final String json, final StreamURLFunction<YouTubeTrack> streamUrlFunction)
+    protected YouTubeTrack extractYouTubeTrack(final String json, final StreamURLFunction<YouTubeTrack> streamUrlFunction)
             throws YouTubeException {
 
-        final JsonElement jsonElement = JsonElement.readTreeCatching(MAPPER, json)
-                .orElseThrow(() -> new YouTubeException("Cannot parse YouTubeTrack JSON"));
-
-        final JsonElement playerResponse = jsonElement.elementAtIndex(2).path("playerResponse");
-
-        return playerResponse.mapCatching(MAPPER, YouTubeTrack.URLYouTubeTrackBuilder.class).getBuilder()
+        return JsonElement.readTreeCatching(MAPPER, json)
+                .orElseThrow(() -> new YouTubeException("Cannot parse YouTubeTrack JSON"))
+                .elementAtIndex(2).path("playerResponse")
+                .mapCatching(MAPPER, YouTubeTrack.URLYouTubeTrackBuilder.class).getBuilder()
                 .streamUrlFunction(streamUrlFunction)
                 .build();
     }
 
-    protected GenericTrackList<YouTubeTrack> getYouTubeTracks(final String json, final QueryType queryType, final String query,
-                                                              final NextTrackListFunction<YouTubeTrack> nextTrackListFunction,
-                                                              final StreamURLFunction<YouTubeTrack> streamUrlFunction)
+    protected GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String json, final QueryType queryType, final String query,
+                                                                  final NextTrackListFunction<YouTubeTrack> nextTrackListFunction,
+                                                                  final StreamURLFunction<YouTubeTrack> streamUrlFunction)
             throws YouTubeException {
 
         final JsonElement rootElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -144,9 +142,9 @@ class YouTubeUtility {
                 .map(YouTubeTrack.YouTubeTrackBuilder::build)
                 .collect(Collectors.toList());
 
-
         final Map<String, String> queryInformation = YouTubeClient.makeQueryInformation(query, cToken);
-        final GenericTrackList<YouTubeTrack> trackList = GenericTrackList.using(queryType, queryInformation, nextTrackListFunction).withTracks(ytTracks);
+        final GenericTrackList<YouTubeTrack> trackList = GenericTrackList.using(queryType, queryInformation, nextTrackListFunction)
+                .withTracks(ytTracks);
 
         int tracksSize = ytTracks.size();
         trackList.addQueryInformationValue(YouTubeClient.OFFSET_KEY, tracksSize);
@@ -174,7 +172,9 @@ class YouTubeUtility {
                 .asString("token");
     }
 
-    protected YouTubeTrackInfo getTrackInfo(final String json, final String trackUrl, Function<String, ResponseWrapper> requester) {
+    protected YouTubeTrackInfo extractTrackInfo(final String json, final String trackUrl, Function<String, ResponseWrapper> requester)
+            throws YouTubeException {
+
         try {
             final JsonElement jsonElement = JsonElement.readTree(MAPPER, json);
 
@@ -192,11 +192,11 @@ class YouTubeUtility {
             final JsonElement playerArgs = playerElement.path("args");
             if (playerElement.isPresent() && playerArgs.isPresent()) {
 
-                    scriptUrl.set(playerElement.path("assets").asString("js"));
+                scriptUrl.set(playerElement.path("assets").asString("js"));
 
-                    streamingData = playerArgs.path("player_response")
-                            .reReadTree(MAPPER)
-                            .path("streamingData");
+                streamingData = playerArgs.path("player_response")
+                        .reReadTree(MAPPER)
+                        .path("streamingData");
 
             } else {
                 final JsonElement playerResponse = jsonElement.elementAtIndex(2)
@@ -208,7 +208,7 @@ class YouTubeUtility {
             }
 
             final JsonElement formatsElement = streamingData.path("formats");
-            final Stream<YouTubeTrackFormat> formats = streamingData.path("formats").isPresent() ?
+            final Stream<YouTubeTrackFormat> formats = formatsElement.isPresent() ?
                     getFormatsFromStream(formatsElement.arrayElements()) : Stream.empty();
 
             final Stream<JsonElement> adaptiveFormatsStream = streamingData.path("adaptiveFormats").arrayElements();
@@ -232,8 +232,7 @@ class YouTubeUtility {
             return new YouTubeTrackInfo(trackFormats, scriptUrl.get());
 
         } catch (JsonProcessingException e) {
-            log.error("Error parsing Youtube info JSON: {}", e.getMessage());
-            return null;
+            throw new YouTubeException("Failed parsing Youtube track JSON", e);
         }
     }
 
@@ -276,7 +275,7 @@ class YouTubeUtility {
     }
 
     private Map<String, SignaturePart.SignatureOccurrence> getObfuscateFunctionDefinitions(final String scriptPart) {
-        final HashMap<String, SignaturePart.SignatureOccurrence> obfuscateFunctionsDefinitios = new HashMap<>();
+        final HashMap<String, SignaturePart.SignatureOccurrence> obfuscateFunctionsDefinitions = new HashMap<>();
         final String[] functions = scriptPart.split("\n");
         for (final String function : functions) {
             final String functionName = getFunctionName(function);
@@ -293,9 +292,9 @@ class YouTubeUtility {
             else
                 occurrence = SignaturePart.SignatureOccurrence.SWAP;
 
-            obfuscateFunctionsDefinitios.put(functionName, occurrence);
+            obfuscateFunctionsDefinitions.put(functionName, occurrence);
         }
-        return obfuscateFunctionsDefinitios;
+        return obfuscateFunctionsDefinitions;
     }
 
     private String getFunctionName(final String wholeFunction) {

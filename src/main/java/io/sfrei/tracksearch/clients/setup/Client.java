@@ -33,7 +33,6 @@ public class Client extends ClientProvider {
     public static final int OK = 200;
     public static final int PARTIAL_CONTENT = 206;
     public static final int UNAUTHORIZED = 401;
-    public static final int FORBIDDEN = 403;
 
     public Client(@Nullable CookiePolicy cookiePolicy, @Nullable Map<String, String> headers) {
         super(cookiePolicy, headers);
@@ -45,7 +44,7 @@ public class Client extends ClientProvider {
         try {
             final Response<ResponseWrapper> response = call.execute();
 
-            if (response.isSuccessful() && response.body() != null && response.body().hasContent()) {
+            if (response.isSuccessful() && response.body() != null && response.body().contentPresent()) {
                 return response.body();
             }
 

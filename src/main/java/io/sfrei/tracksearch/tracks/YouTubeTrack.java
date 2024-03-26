@@ -47,11 +47,6 @@ public class YouTubeTrack extends BaseTrack implements Track {
         this.streamUrlFunction = streamUrlFunction;
     }
 
-    public YouTubeTrackInfo setAndGetTrackInfo(YouTubeTrackInfo trackInfo) {
-        this.trackInfo = trackInfo;
-        return this.trackInfo;
-    }
-
     @Override
     public String getStreamUrl() {
         return streamUrlFunction.apply(this);

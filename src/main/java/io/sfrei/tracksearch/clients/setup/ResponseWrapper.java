@@ -32,7 +32,7 @@ public class ResponseWrapper {
 
     private TrackSearchException exception;
 
-    public boolean hasContent() {
+    public boolean contentPresent() {
         return content != null;
     }
 
@@ -49,7 +49,7 @@ public class ResponseWrapper {
     }
 
     public String getContentOrThrow() throws TrackSearchException {
-        if (hasContent()) return content;
+        if (contentPresent()) return content;
         throw exception;
     }
 

@@ -50,8 +50,9 @@ public interface ClientHelper extends ClassLogger {
                 return Optional.ofNullable(streamUrl);
             else {
                 tries--;
-                log().warn("Not able getting stream URL for {} - {} retries left",
+                if (tries > 0) log().warn("Not able getting stream URL for {} - {} retries left",
                         searchClient.getClass().getSimpleName(), tries);
+
                 return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, tries);
             }
         } catch (TrackSearchException e) {

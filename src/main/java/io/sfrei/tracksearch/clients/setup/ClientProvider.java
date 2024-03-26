@@ -50,7 +50,7 @@ abstract class ClientProvider {
     }
 
     private static void logResponseCode(String url, int code) {
-        log.error("Code: {} for request not successful '{}' ", code, url);
+        log.debug("Code: {} for request not successful '{}' ", code, url);
     }
 
     @NotNull

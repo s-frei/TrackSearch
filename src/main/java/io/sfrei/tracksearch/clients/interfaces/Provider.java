@@ -30,14 +30,14 @@ public interface Provider<T extends Track> extends TrackSearchClient<T>, ClassLo
         try {
             return getNext(trackList);
         } catch (TrackSearchException e) {
-            log().error("Error occurred acquiring next tracklist", e);
+            log().error("Error occurred acquiring next track list", e);
         }
         return null;
     }
 
 
     @Nullable
-    default String provideStreamUrl(final T track) {
+    default String streamURLProvider(final T track) {
         try {
             return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
         } catch (TrackSearchException e) {
