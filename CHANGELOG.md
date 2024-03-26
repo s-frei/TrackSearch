@@ -8,6 +8,10 @@ Changelog
 
 - Bump to JDK 17
 
+**Features:**
+
+- Get tracks by URL
+
 **Bugfix:**
 
 - Fix YouTube tracks parsing

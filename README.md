@@ -79,13 +79,19 @@ MultiTrackSearchClient searchClient = new MultiSearchClient();
 TrackSearchClient<SoundCloudTrack> explicitClient = new SoundCloudClient();
 
 // Search for tracks
-TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords")
+TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords");
 
 // Get the audio stream
 String streamUrl = tracksForSearch.get(anyPos).getStreamUrl();
 
 // Get next tracks page
 TrackList<Track> nextTracks = tracksForSearch.next();
+
+// Get a track for URL
+Track trackForURL = searchClient.getTrack("URL");
+
+// Get the audio stream (retrying on failure)
+searchClient.getStreamUrl(trackForURL, TrackSearchConfig.DEFAULT_RESOLVING_RETIRES);
 ```
 
 ## Why is this done ?
