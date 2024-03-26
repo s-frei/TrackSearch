@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.8.3 - unreleased
+0.9.0 - unreleased
 ------------------
 
 **Breaking:**
@@ -11,6 +11,8 @@ Changelog
 **Features:**
 
 - Get tracks by URL
+- Improved tests
+- Updated dependencies
 
 **Bugfix:**
 

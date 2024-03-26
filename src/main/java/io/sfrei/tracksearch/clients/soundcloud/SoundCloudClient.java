@@ -126,8 +126,8 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
     @Override
     public String getStreamUrl(@NonNull final SoundCloudTrack soundCloudTrack) throws TrackSearchException {
         final String url = soundCloudTrack.getUrl();
-        final String trackJSON = clientIDRequest(api.getForUrlWithClientID(url, clientID)).getContentOrThrow();
-        final String intermediateURL = soundCloudUtility.extractURLForStream(trackJSON);
+        final String trackHTML = clientIDRequest(api.getForUrlWithClientID(url, clientID)).getContentOrThrow();
+        final String intermediateURL = soundCloudUtility.extractURLForStream(trackHTML);
         final String streamJSON = clientIDRequest(api.getForUrlWithClientID(intermediateURL, clientID)).getContentOrThrow();
         return soundCloudUtility.extractStreamUrl(streamJSON);
     }
