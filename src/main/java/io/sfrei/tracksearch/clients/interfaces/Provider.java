@@ -23,7 +23,7 @@ import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import org.jetbrains.annotations.Nullable;
 
-public interface Provider<T extends Track> extends TrackSearchClient<T>, ClassLogger {
+public interface Provider<T extends Track> extends TrackSearchClient<T>, ClientLogger {
 
     @Nullable
     default TrackList<T> provideNext(final TrackList<T> trackList) {

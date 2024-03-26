@@ -36,21 +36,20 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 
 import java.net.CookiePolicy;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         implements ClientHelper, Provider<SoundCloudTrack>, UniformClientException {
 
-    public static final String HOSTNAME = "https://soundcloud.com";
+    public static final String URL = "https://soundcloud.com";
     private static final String INFORMATION_PREFIX = "sc";
     public static final String POSITION_KEY = INFORMATION_PREFIX + TrackSearchConfig.POSITION_KEY_SUFFIX;
     public static final String OFFSET_KEY = INFORMATION_PREFIX + TrackSearchConfig.OFFSET_KEY_SUFFIX;
     private static final String PAGING_OFFSET = "limit";
     private static final String PAGING_POSITION = "position";
+
+    private static final Set<String> VALID_URL_PREFIXES = Set.of(URL); // TODO: Extend
 
     private final SoundCloudAPI api;
     private final SoundCloudUtility soundCloudUtility;
@@ -62,7 +61,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         super(CookiePolicy.ACCEPT_ALL, null);
 
         final Retrofit base = new Retrofit.Builder()
-                .baseUrl(HOSTNAME)
+                .baseUrl(URL)
                 .client(okHttpClient)
                 .addConverterFactory(ResponseProviderFactory.create())
                 .build();
@@ -76,7 +75,16 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         return new HashMap<>(Map.of(TrackList.QUERY_KEY, query));
     }
 
+    @Override
+    public Set<String> validURLPrefixes() {
+        return VALID_URL_PREFIXES;
+    }
+
+    @Override
     public SoundCloudTrack getTrack(@NonNull final String url) throws TrackSearchException {
+        if (!isApplicableForURL(url))
+            throw new SoundCloudException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
+
         final String trackHTML = requestRefreshingClientId(api.getForUrlWithClientID(url, clientID)).getContentOrThrow();
         final String trackURL = soundCloudUtility.extractTrackURL(trackHTML);
         final String trackJSON = requestRefreshingClientId(api.getForUrlWithClientID(trackURL, clientID)).getContentOrThrow();

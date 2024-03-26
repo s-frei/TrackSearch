@@ -41,12 +41,15 @@ import retrofit2.Retrofit;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         implements ClientHelper, Provider<YouTubeTrack>, UniformClientException {
 
-    public static final String HOSTNAME = "https://www.youtube.com";
+    public static final String URL = "https://www.youtube.com";
     public static final String PAGING_KEY = "ctoken";
     private static final String INFORMATION_PREFIX = "yt";
     public static final String POSITION_KEY = INFORMATION_PREFIX + TrackSearchConfig.POSITION_KEY_SUFFIX;
@@ -57,13 +60,11 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     private static final Map<String, String> VIDEO_SEARCH_PARAMS = Map.of("sp", "EgIQAQ%3D%3D");
     public static final Map<String, String> TRACK_PARAMS = Map.of("pbj", "1", "hl", "en", "alt", "json");
 
-    private static final Map<String, String> DEFAULT_SEARCH_PARAMS;
+    private static final Map<String, String> DEFAULT_SEARCH_PARAMS = Stream.of(VIDEO_SEARCH_PARAMS.entrySet(), TRACK_PARAMS.entrySet())
+          .flatMap(Set::stream)
+          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-    static {
-        DEFAULT_SEARCH_PARAMS = new HashMap<>();
-        DEFAULT_SEARCH_PARAMS.putAll(VIDEO_SEARCH_PARAMS);
-        DEFAULT_SEARCH_PARAMS.putAll(TRACK_PARAMS);
-    }
+    private static final Set<String> VALID_URL_PREFIXES = Set.of(URL); // TODO: Extend
 
     private final YouTubeAPI api;
     private final YouTubeUtility youTubeUtility;
@@ -78,7 +79,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         );
 
         final Retrofit base = new Retrofit.Builder()
-                .baseUrl(HOSTNAME)
+                .baseUrl(URL)
                 .client(okHttpClient)
                 .addConverterFactory(ResponseProviderFactory.create())
                 .build();
@@ -92,10 +93,19 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         return new HashMap<>(Map.of(TrackList.QUERY_KEY, query, PAGING_INFORMATION, pagingToken));
     }
 
-    public YouTubeTrack getTrack(@NonNull final String trackUrl) throws TrackSearchException {
-        final String trackJSON = requestTrackJSON(api.getForUrlWithParams(trackUrl, TRACK_PARAMS));
+    @Override
+    public Set<String> validURLPrefixes() {
+        return VALID_URL_PREFIXES;
+    }
+
+    @Override
+    public YouTubeTrack getTrack(@NonNull final String url) throws TrackSearchException {
+        if (!isApplicableForURL(url))
+            throw new YouTubeException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
+
+        final String trackJSON = requestTrackJSON(api.getForUrlWithParams(url, TRACK_PARAMS));
         final YouTubeTrack youTubeTrack = youTubeUtility.extractYouTubeTrack(trackJSON, this::streamURLProvider);
-        final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, trackUrl, this::requestURL);
+        final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, url, this::requestURL);
         youTubeTrack.setTrackInfo(trackInfo);
         return youTubeTrack;
     }
@@ -158,7 +168,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
             log.trace("Use cached script for: {}", scriptUrl);
             scriptContent = scriptCache.get(scriptUrl);
         } else {
-            scriptContent = requestURL(HOSTNAME + scriptUrl).getContentOrThrow();
+            scriptContent = requestURL(URL + scriptUrl).getContentOrThrow();
             scriptCache.put(scriptUrl, scriptContent);
         }
 

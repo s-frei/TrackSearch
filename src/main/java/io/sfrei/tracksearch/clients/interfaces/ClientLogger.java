@@ -18,7 +18,7 @@ package io.sfrei.tracksearch.clients.interfaces;
 
 import org.slf4j.Logger;
 
-public interface ClassLogger {
+public interface ClientLogger {
 
     /**
      * Obtain the logger from the implementing class.

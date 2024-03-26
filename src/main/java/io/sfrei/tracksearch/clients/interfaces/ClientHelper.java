@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 
-public interface ClientHelper extends ClassLogger {
+public interface ClientHelper extends ClientLogger {
 
     int INITIAL_TRY = 1;
 
