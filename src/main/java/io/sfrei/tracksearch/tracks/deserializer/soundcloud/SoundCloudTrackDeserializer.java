@@ -95,7 +95,6 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
                 .mimeType(mimeType)
                 .formatType(FormatType.Audio)
                 .audioQuality(audioQuality)
-                .streamReady(true)
                 .protocol(protocol)
                 .url(formatUrl)
                 .build();

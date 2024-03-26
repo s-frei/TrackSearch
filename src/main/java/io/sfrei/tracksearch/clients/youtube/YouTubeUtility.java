@@ -214,7 +214,7 @@ class YouTubeUtility {
 
             final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats).collect(Collectors.toList());
 
-            if (trackFormats.stream().anyMatch(YouTubeTrackFormat::streamNotReady) && scriptUrl.get() == null) {
+            if (trackFormats.stream().anyMatch(YouTubeTrackFormat::isStreamNotReady) && scriptUrl.get() == null) {
                 log.trace("Try to get player script trough embedded URL");
                 final String embeddedUrl = trackUrl.replace("youtube.com/", "youtube.com/embed/");
                 final String embeddedPageContent = requester.apply(embeddedUrl).getContent();
