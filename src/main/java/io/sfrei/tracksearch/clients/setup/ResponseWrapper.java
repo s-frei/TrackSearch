@@ -16,21 +16,21 @@
 
 package io.sfrei.tracksearch.clients.setup;
 
-import io.sfrei.tracksearch.exceptions.ResponseException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor(staticName = "of")
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResponseWrapper {
 
-    private int code;
+    private Integer code;
+
+    @Getter
     private String content;
+
+    private TrackSearchException exception;
 
     public boolean hasContent() {
         return content != null;
@@ -40,18 +40,17 @@ public class ResponseWrapper {
         return this.code == code;
     }
 
-    public static ResponseWrapper empty() {
-        return new ResponseWrapper();
+    public static ResponseWrapper content(Integer code, @NonNull String content) {
+        return new ResponseWrapper(code, content, null);
+    }
+
+    public static ResponseWrapper empty(TrackSearchException exception) {
+        return new ResponseWrapper(null, null, exception);
     }
 
     public String getContentOrThrow() throws TrackSearchException {
-        if (hasContent())
-            return content;
-        throw new ResponseException("No content - code: " + code);
-    }
-
-    public String getContent() {
-        return this.content;
+        if (hasContent()) return content;
+        throw exception;
     }
 
 }

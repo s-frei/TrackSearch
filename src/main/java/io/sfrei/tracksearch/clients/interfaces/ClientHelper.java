@@ -32,7 +32,6 @@ public interface ClientHelper extends ClassLogger {
     default <T extends Track> Optional<String> getStreamUrl(TrackSearchClient<T> searchClient, T track,
                                                             Function<String, Integer> requestForCodeFunction,
                                                             final int retries) {
-
         log().trace("Get stream url for: {}", track);
         return tryToGetStreamUrl(searchClient, track, requestForCodeFunction, retries + INITIAL_TRY);
     }
@@ -46,7 +45,7 @@ public interface ClientHelper extends ClassLogger {
 
         try {
             final String streamUrl = searchClient.getStreamUrl(track);
-            final int code = requestForCodeFunction.apply(streamUrl);
+            final Integer code = requestForCodeFunction.apply(streamUrl);
             if (Client.successResponseCode(code))
                 return Optional.ofNullable(streamUrl);
             else {

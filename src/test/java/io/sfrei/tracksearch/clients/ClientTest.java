@@ -199,7 +199,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .isNotEmpty();
 
         final int code = requestAndGetCode(streamUrl);
-        assertNotEquals(FORBIDDEN, code);
+        assertTrue(Client.successResponseCode(code));
     }
 
 }

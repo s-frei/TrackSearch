@@ -16,6 +16,7 @@
 
 package io.sfrei.tracksearch.clients.setup;
 
+import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
@@ -55,12 +56,12 @@ public class ResponseProviderFactory extends Converter.Factory {
         if (responseBody != null) {
             try {
                 String body = new String(responseBody.string().getBytes(StandardCharsets.UTF_8));
-                return ResponseWrapper.of(Client.OK, body);
+                return ResponseWrapper.content(Client.OK, body);
             } catch (IOException e) {
-                log.error("Cannot process response", e);
+                return ResponseWrapper.empty(new TrackSearchException("Cannot process response", e));
             }
         }
-        return ResponseWrapper.empty();
+        return ResponseWrapper.empty(new TrackSearchException("No response body"));
     }
 
 }
