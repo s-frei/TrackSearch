@@ -6,7 +6,7 @@
 
   <groupId>io.sfrei</groupId>
   <artifactId>tracksearch</artifactId>
-  <version>0.8.3</version>
+  <version>0.9.0</version>
 
   <packaging>jar</packaging>
 
