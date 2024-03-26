@@ -153,8 +153,10 @@ class SoundCloudUtility {
         throw new SoundCloudException("Progressive stream URL not found");
     }
 
-    protected String extractStreamUrl(final String body) {
-        return body.replace("\"url\":", "").replaceAll("[{}\"]", "");
+    protected String extractStreamUrl(final String json) throws SoundCloudException {
+        return JsonElement.readTreeCatching(MAPPER, json)
+                .orElseThrow(() -> new SoundCloudException("Cannot extract stream URL from JSON"))
+                .asString("url");
     }
 
 }

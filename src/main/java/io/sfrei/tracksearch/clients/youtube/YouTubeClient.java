@@ -18,7 +18,10 @@ package io.sfrei.tracksearch.clients.youtube;
 
 import io.sfrei.tracksearch.clients.interfaces.ClientHelper;
 import io.sfrei.tracksearch.clients.interfaces.Provider;
-import io.sfrei.tracksearch.clients.setup.*;
+import io.sfrei.tracksearch.clients.setup.Client;
+import io.sfrei.tracksearch.clients.setup.QueryType;
+import io.sfrei.tracksearch.clients.setup.ResponseProviderFactory;
+import io.sfrei.tracksearch.clients.setup.SingleSearchClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.exceptions.UniformClientException;
@@ -36,7 +39,6 @@ import io.sfrei.tracksearch.utils.URLUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
-import retrofit2.Call;
 import retrofit2.Retrofit;
 
 import java.util.HashMap;
@@ -103,7 +105,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         if (!isApplicableForURL(url))
             throw new YouTubeException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
 
-        final String trackJSON = requestTrackJSON(api.getForUrlWithParams(url, TRACK_PARAMS));
+        final String trackJSON = Client.request(api.getForUrlWithParams(url, TRACK_PARAMS)).getContentOrThrow();
         final YouTubeTrack youTubeTrack = youTubeUtility.extractYouTubeTrack(trackJSON, this::streamURLProvider);
         final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, url, this::requestURL);
         youTubeTrack.setTrackInfo(trackInfo);
@@ -113,10 +115,8 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     private GenericTrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search, @NonNull final Map<String, String> params, QueryType queryType)
             throws TrackSearchException {
 
-        final Call<ResponseWrapper> request = api.getSearchForKeywords(search, params);
-        final ResponseWrapper response = Client.request(request);
-        final String content = response.getContentOrThrow();
-        return youTubeUtility.extractYouTubeTracks(content, queryType, search, this::provideNext, this::streamURLProvider);
+        final String tracksJSON = Client.request(api.getSearchForKeywords(search, params)).getContentOrThrow();
+        return youTubeUtility.extractYouTubeTracks(tracksJSON, queryType, search, this::provideNext, this::streamURLProvider);
     }
 
     @Override
@@ -142,17 +142,12 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         throw unsupportedQueryTypeException(YouTubeException::new, trackListQueryType);
     }
 
-    private String requestTrackJSON(Call<ResponseWrapper> trackCall) throws TrackSearchException {
-        final ResponseWrapper trackResponse = Client.request(trackCall);
-        return trackResponse.getContentOrThrow();
-    }
-
     @Override
     public String getStreamUrl(@NonNull final YouTubeTrack youtubeTrack) throws TrackSearchException {
 
         // Always load new track info to make retries possible - TODO: Not required on first try
         final String trackUrl = youtubeTrack.getUrl();
-        final String trackJSON = requestTrackJSON(api.getForUrlWithParams(youtubeTrack.getUrl(), TRACK_PARAMS));
+        final String trackJSON = Client.request(api.getForUrlWithParams(trackUrl, TRACK_PARAMS)).getContentOrThrow();
         final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, trackUrl, this::requestURL);
         youtubeTrack.setTrackInfo(trackInfo);
 

@@ -85,9 +85,9 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         if (!isApplicableForURL(url))
             throw new SoundCloudException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
 
-        final String trackHTML = requestRefreshingClientId(api.getForUrlWithClientID(url, clientID)).getContentOrThrow();
+        final String trackHTML = clientIDRequest(api.getForUrlWithClientID(url, clientID)).getContentOrThrow();
         final String trackURL = soundCloudUtility.extractTrackURL(trackHTML);
-        final String trackJSON = requestRefreshingClientId(api.getForUrlWithClientID(trackURL, clientID)).getContentOrThrow();
+        final String trackJSON = clientIDRequest(api.getForUrlWithClientID(trackURL, clientID)).getContentOrThrow();
         return soundCloudUtility.extractSoundCloudTrack(trackJSON, this::streamURLProvider);
     }
 
@@ -95,10 +95,10 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
             throws TrackSearchException {
 
         final Map<String, String> pagingParams = getPagingParams(position, offset);
-        final ResponseWrapper response = requestRefreshingClientId(api.getSearchForKeywords(search, clientID, pagingParams));
+        final String tracksJSON = clientIDRequest(api.getSearchForKeywords(search, clientID, pagingParams))
+                .getContentOrThrow();
 
-        final String content = response.getContentOrThrow();
-        return soundCloudUtility.extractSoundCloudTracks(content, queryType, search, this::provideNext, this::streamURLProvider);
+        return soundCloudUtility.extractSoundCloudTracks(tracksJSON, queryType, search, this::provideNext, this::streamURLProvider);
     }
 
     @Override
@@ -126,10 +126,10 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
     @Override
     public String getStreamUrl(@NonNull final SoundCloudTrack soundCloudTrack) throws TrackSearchException {
         final String url = soundCloudTrack.getUrl();
-        final ResponseWrapper trackResponse = requestRefreshingClientId(api.getForUrlWithClientID(url, clientID));
-        final String streamUrl = soundCloudUtility.extractURLForStream(trackResponse.getContentOrThrow());
-        final ResponseWrapper streamUrlResponse = requestRefreshingClientId(api.getForUrlWithClientID(streamUrl, clientID));
-        return soundCloudUtility.extractStreamUrl(streamUrlResponse.getContentOrThrow());
+        final String trackJSON = clientIDRequest(api.getForUrlWithClientID(url, clientID)).getContentOrThrow();
+        final String intermediateURL = soundCloudUtility.extractURLForStream(trackJSON);
+        final String streamJSON = clientIDRequest(api.getForUrlWithClientID(intermediateURL, clientID)).getContentOrThrow();
+        return soundCloudUtility.extractStreamUrl(streamJSON);
     }
 
     @Override
@@ -138,11 +138,11 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
                 .orElseThrow(() -> noStreamUrlAfterRetriesException(SoundCloudException::new, retries));
     }
 
-    private ResponseWrapper requestRefreshingClientId(final Call<ResponseWrapper> call) throws SoundCloudException {
-        return requestRefreshingClientId(call, true);
+    private ResponseWrapper clientIDRequest(final Call<ResponseWrapper> call) throws SoundCloudException {
+        return clientIDRequest(call, true);
     }
 
-    private ResponseWrapper requestRefreshingClientId(final Call<ResponseWrapper> call, final boolean firstRequest) throws SoundCloudException {
+    private ResponseWrapper clientIDRequest(final Call<ResponseWrapper> call, final boolean firstRequest) throws SoundCloudException {
 
         final ResponseWrapper response = Client.request(call);
         if (response.contentPresent() && !response.isHttpCode(Client.UNAUTHORIZED)) {
@@ -151,7 +151,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
 
         if (firstRequest) {
             refreshClientID();
-            return requestRefreshingClientId(call, false);
+            return clientIDRequest(call, false);
         }
 
         throw new SoundCloudException("ClientID is not available and cannot be refreshed");

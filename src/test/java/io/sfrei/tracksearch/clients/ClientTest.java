@@ -34,10 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.as;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @Getter
@@ -218,7 +216,8 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void getStreamUrl(Track track) {
-        String streamUrl = track.getStreamUrl();
+        final String streamUrl = assertDoesNotThrow(track::getStreamUrl,
+                String.format("Stream URL resolving shpould not throw for: %s", track.getUrl()));
 
         assertThat(streamUrl)
                 .as("Track should have stream URL for Track '%s'", track.getUrl())
