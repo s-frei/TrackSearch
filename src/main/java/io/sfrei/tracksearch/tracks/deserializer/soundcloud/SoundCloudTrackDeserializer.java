@@ -54,7 +54,7 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
 
         // Metadata
 
-        final JsonElement owner = rootElement.path("user");
+        final JsonElement owner = rootElement.paths("user");
 
         final String channelName = owner.asString("username");
 
@@ -63,16 +63,16 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
         final Long playbackCount = rootElement.asLong("playback_count");
         final Long streamAmount = playbackCount == null ? 0L : playbackCount; // Apparently can be 'null' in the JSON
 
-        final String thumbNailUrl = rootElement.path("artwork_url")
+        final String thumbNailUrl = rootElement.paths("artwork_url")
                 .orElse(rootElement)
-                .path("user", "avatar_url") // Fallback to channel thumbnail
+                .paths("user", "avatar_url") // Fallback to channel thumbnail
                 .asString();
 
         soundCloudTrackBuilder.trackMetadata(SoundCloudTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
 
         // Formats
 
-        final List<SoundCloudTrackFormat> trackFormats = rootElement.path("media", "transcodings")
+        final List<SoundCloudTrackFormat> trackFormats = rootElement.paths("media", "transcodings")
                 .arrayElements()
                 .map(SoundCloudTrackDeserializer::transcodingToTrackFormat)
                 .collect(Collectors.toList());
@@ -87,7 +87,7 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
         final String formatUrl = transcoding.asString("url");
         final String audioQuality = transcoding.asString("quality");
 
-        final JsonElement formatElement = transcoding.path("format");
+        final JsonElement formatElement = transcoding.paths("format");
         final String mimeType = formatElement.asString("mime_type");
         final String protocol = formatElement.asString("protocol");
 

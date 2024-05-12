@@ -1,10 +1,16 @@
 Changelog
 =========
 
-0.9.1 - unrelesed
------------------
+0.9.1 - unreleased
+------------------
 
-Nothing to see here yet
+**Features:**
+
+- Updated dependencies
+
+**Bugfixes:**
+
+- Fix YouTube tracks parsing through avoiding sponsored
 
 0.9.0
 -----

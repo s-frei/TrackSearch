@@ -41,7 +41,7 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
 
         // Track
 
-        final JsonElement videoDetails = rootElement.path("videoDetails");
+        final JsonElement videoDetails = rootElement.paths("videoDetails");
 
         final String ref = videoDetails.asString("videoId");
         final String title = videoDetails.asString("title");
@@ -61,7 +61,7 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
 
         // Metadata
 
-        final JsonElement owner = rootElement.path("microformat", "playerMicroformatRenderer");
+        final JsonElement owner = rootElement.paths("microformat", "playerMicroformatRenderer");
 
         final String channelName = owner.asString("ownerChannelName");
 
@@ -69,7 +69,7 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
 
         final long streamAmount = Long.parseLong(owner.asString("viewCount"));
 
-        final Stream<JsonElement> thumbNailStream = owner.path("thumbnail", "thumbnails").elements();
+        final Stream<JsonElement> thumbNailStream = owner.paths("thumbnail", "thumbnails").elements();
         final Optional<JsonElement> firstThumbnail = thumbNailStream.findFirst();
         final String thumbNailUrl = firstThumbnail.map(thumbNail -> thumbNail.asString("url")).orElse(null);
 

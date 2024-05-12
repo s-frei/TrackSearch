@@ -113,7 +113,7 @@ class SoundCloudUtility {
 
         final JsonElement responseElement = JsonElement.readTreeCatching(MAPPER, json)
                 .orElseThrow(() -> new SoundCloudException("Cannot parse SoundCloudTracks JSON"))
-                .path("collection");
+                .paths("collection");
 
         final List<SoundCloudTrack> scTracks = responseElement.elements()
                 .map(element -> element.mapCatching(MAPPER, SoundCloudTrack.SoundCloudTrackBuilder.class))

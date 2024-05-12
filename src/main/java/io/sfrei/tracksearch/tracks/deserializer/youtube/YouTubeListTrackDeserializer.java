@@ -43,8 +43,8 @@ public class YouTubeListTrackDeserializer extends JsonDeserializer<YouTubeTrack.
         // Track
 
         final String ref = rootElement.asString("videoId");
-        final String title = rootElement.path("title", "runs").firstElement().asString("text");
-        final String timeString = rootElement.path("lengthText").asString("simpleText");
+        final String title = rootElement.paths("title", "runs").firstElement().asString("text");
+        final String timeString = rootElement.paths("lengthText").asString("simpleText");
         final Duration duration = TimeUtility.getDurationForTimeString(timeString);
 
         if (title == null || duration == null || ref == null)
@@ -60,21 +60,21 @@ public class YouTubeListTrackDeserializer extends JsonDeserializer<YouTubeTrack.
 
         // Metadata
 
-        final JsonElement owner = rootElement.path("ownerText", "runs").firstElement();
+        final JsonElement owner = rootElement.paths("ownerText", "runs").firstElement();
 
         final String channelName = owner.asString("text");
 
-        final String channelUrlSuffix = owner.path("navigationEndpoint", "commandMetadata", "webCommandMetadata")
+        final String channelUrlSuffix = owner.paths("navigationEndpoint", "commandMetadata", "webCommandMetadata")
                 .asString("url");
         final String channelUrl = YouTubeClient.URL.concat(channelUrlSuffix);
 
-        final String streamAmountText = rootElement.path("viewCountText").asString("simpleText");
+        final String streamAmountText = rootElement.paths("viewCountText").asString("simpleText");
         final String streamAmountDigits = streamAmountText == null || streamAmountText.isEmpty() ?
                 null : ReplaceUtility.replaceNonDigits(streamAmountText);
         final Long streamAmount = streamAmountDigits == null || streamAmountDigits.isEmpty() ?
                 0L : Long.parseLong(streamAmountDigits);
 
-        final Stream<JsonElement> thumbNailStream = rootElement.path("thumbnail", "thumbnails").elements();
+        final Stream<JsonElement> thumbNailStream = rootElement.paths("thumbnail", "thumbnails").elements();
         final Optional<JsonElement> lastThumbnail = thumbNailStream.findFirst();
         final String thumbNailUrl = lastThumbnail.map(thumbNail -> thumbNail.asString("url")).orElse(null);
 

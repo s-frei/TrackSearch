@@ -101,41 +101,40 @@ class YouTubeUtility {
         final JsonElement rootElement = JsonElement.readTreeCatching(MAPPER, json)
                 .orElseThrow(() -> new YouTubeException("Cannot parse YouTubeTracks JSON"));
 
-        final JsonElement responseElement = rootElement.path("response").orElse(rootElement).elementAtIndex(1).path("response");
+        final JsonElement responseElement = rootElement.paths("response").orElse(rootElement).elementAtIndex(1).paths("response");
 
         final JsonElement defaultElement = responseElement.asUnresolved()
-                .path("contents", "twoColumnSearchResultsRenderer", "primaryContents", "sectionListRenderer", "contents");
+                .paths("contents", "twoColumnSearchResultsRenderer", "primaryContents", "sectionListRenderer", "contents");
 
         final JsonElement contentHolder = defaultElement
-                .firstElement()
-                .path("itemSectionRenderer")
+                .lastForPath("itemSectionRenderer") // Avoid sponsored
                 .orElse(responseElement)
-                .path("onResponseReceivedCommands")
+                .paths("onResponseReceivedCommands")
                 .firstElement()
-                .path("appendContinuationItemsAction", "continuationItems")
+                .paths("appendContinuationItemsAction", "continuationItems")
                 .firstElement()
-                .path("itemSectionRenderer")
+                .paths("itemSectionRenderer")
                 .orElse(responseElement)
-                .path("onResponseReceivedCommands")
+                .paths("onResponseReceivedCommands")
                 .firstElement()
-                .path("appendContinuationItemsAction", "continuationItems")
+                .paths("appendContinuationItemsAction", "continuationItems")
                 .firstElement()
-                .path("itemSectionRenderer")
+                .paths("itemSectionRenderer")
                 .orElse(responseElement)
-                .path("continuationContents", "itemSectionContinuation", "itemSectionContinuation")
+                .paths("continuationContents", "itemSectionContinuation", "itemSectionContinuation")
                 .orElse(responseElement)
-                .path("continuationContents", "sectionListContinuation", "contents")
+                .paths("continuationContents", "sectionListContinuation", "contents")
                 .firstElement()
-                .path("itemSectionRenderer");
+                .paths("itemSectionRenderer");
 
         final String cToken = extractCToken(responseElement, defaultElement, contentHolder);
 
-        final JsonElement contents = contentHolder.asUnresolved().path("contents");
+        final JsonElement contents = contentHolder.asUnresolved().paths("contents");
         final List<YouTubeTrack> ytTracks = contents.elements()
-                .filter(content -> content.path("videoRenderer", "upcomingEventData").isNull()) // Avoid premieres
-                .filter(content -> content.path("promotedSparklesWebRenderer").isNull()) // Avoid ads
-                .map(content -> content.path("videoRenderer").orElse(content).path("searchPyvRenderer", "ads").firstElement().path("promotedVideoRenderer"))
-                .filter(renderer -> renderer.asUnresolved().path("lengthText").isPresent()) // Avoid live streams
+                .filter(content -> content.paths("videoRenderer", "upcomingEventData").isNull()) // Avoid premieres
+                .filter(content -> content.paths("promotedSparklesWebRenderer").isNull()) // Avoid ads
+                .map(content -> content.paths("videoRenderer").orElse(content).paths("searchPyvRenderer", "ads").firstElement().paths("promotedVideoRenderer"))
+                .filter(renderer -> renderer.asUnresolved().paths("lengthText").isPresent()) // Avoid live streams
                 .map(renderer -> renderer.mapCatching(MAPPER, YouTubeTrack.ListYouTubeTrackBuilder.class))
                 .filter(Objects::nonNull)
                 .map(YouTubeTrack.ListYouTubeTrackBuilder::getBuilder)
@@ -156,20 +155,20 @@ class YouTubeUtility {
     private static String extractCToken(JsonElement responseElement, JsonElement defaultElement, JsonElement contentHolder) {
         if (contentHolder.nodePresent("continuations")) {
             return contentHolder.asUnresolved()
-                    .path("continuations")
+                    .paths("continuations")
                     .firstElement()
-                    .path("nextContinuationData")
+                    .paths("nextContinuationData")
                     .asString("continuation");
         }
         return responseElement.asUnresolved()
-                .path("onResponseReceivedCommands")
+                .paths("onResponseReceivedCommands")
                 .firstElement()
-                .path("appendContinuationItemsAction", "continuationItems")
+                .paths("appendContinuationItemsAction", "continuationItems")
                 .elementAtIndex(1)
-                .path("continuationItemRenderer", "continuationEndpoint", "continuationCommand")
+                .paths("continuationItemRenderer", "continuationEndpoint", "continuationCommand")
                 .orElse(defaultElement)
                 .findElement("continuationItemRenderer")
-                .path("continuationEndpoint", "continuationCommand")
+                .paths("continuationEndpoint", "continuationCommand")
                 .asString("token");
     }
 
@@ -181,7 +180,7 @@ class YouTubeUtility {
 
             final JsonElement playerElement;
             if (jsonElement.isArray()) {
-                playerElement = jsonElement.elementAtIndex(2).path("player");
+                playerElement = jsonElement.elementAtIndex(2).paths("player");
             } else {
                 playerElement = jsonElement.findElement("player");
             }
@@ -190,26 +189,26 @@ class YouTubeUtility {
 
             final JsonElement streamingData;
 
-            final JsonElement playerArgs = playerElement.path("args");
+            final JsonElement playerArgs = playerElement.paths("args");
             if (playerElement.isPresent() && playerArgs.isPresent()) {
 
-                scriptUrl.set(playerElement.path("assets").asString("js"));
+                scriptUrl.set(playerElement.paths("assets").asString("js"));
 
-                streamingData = playerArgs.path("player_response")
+                streamingData = playerArgs.paths("player_response")
                         .reReadTree(MAPPER)
-                        .path("streamingData");
+                        .paths("streamingData");
 
             } else {
                 final JsonElement playerResponse = playerResponseFromTrackJSON(jsonElement);
 
-                streamingData = playerResponse.asUnresolved().path("streamingData");
+                streamingData = playerResponse.asUnresolved().paths("streamingData");
             }
 
-            final JsonElement formatsElement = streamingData.path("formats");
+            final JsonElement formatsElement = streamingData.paths("formats");
             final Stream<YouTubeTrackFormat> formats = formatsElement.isPresent() ?
                     getFormatsFromStream(formatsElement.arrayElements()) : Stream.empty();
 
-            final Stream<JsonElement> adaptiveFormatsStream = streamingData.path("adaptiveFormats").arrayElements();
+            final Stream<JsonElement> adaptiveFormatsStream = streamingData.paths("adaptiveFormats").arrayElements();
             final Stream<YouTubeTrackFormat> adaptiveFormats = getFormatsFromStream(adaptiveFormatsStream);
 
             final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats).collect(Collectors.toList());
@@ -236,9 +235,9 @@ class YouTubeUtility {
 
     private static JsonElement playerResponseFromTrackJSON(JsonElement jsonElement) {
         return jsonElement.elementAtIndex(2)
-                .path("playerResponse")
+                .paths("playerResponse")
                 .orElse(jsonElement)
-                .path("playerResponse");
+                .paths("playerResponse");
     }
 
     private Stream<YouTubeTrackFormat> getFormatsFromStream(final Stream<JsonElement> formats) {
@@ -248,9 +247,9 @@ class YouTubeUtility {
             final String audioQuality = format.asString("audioQuality");
             final String audioSampleRate = format.asString("audioSampleRate");
 
-            final JsonElement cipherElement = format.path("cipher")
+            final JsonElement cipherElement = format.paths("cipher")
                     .orElse(format)
-                    .path("signatureCipher");
+                    .paths("signatureCipher");
 
             if (cipherElement.isNull()) {
                 final String url = format.asString("url");

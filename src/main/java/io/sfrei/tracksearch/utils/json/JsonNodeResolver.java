@@ -34,12 +34,12 @@ public abstract class JsonNodeResolver {
         return node;
     }
 
-    protected boolean nodeIsNull(JsonNode node) {
+    protected boolean isNodeNull(JsonNode node) {
         return node == null || node.isNull();
     }
 
     protected boolean nodeIsNull() {
-        return nodeIsNull(node);
+        return isNodeNull(node);
     }
 
     public boolean isArray() {
@@ -51,11 +51,11 @@ public abstract class JsonNodeResolver {
     }
 
     public String asString(final JsonNode node) {
-        return nodeIsNull(node) ? null : node.asText();
+        return isNodeNull(node) ? null : node.asText();
     }
 
     protected Long getAsLong(final JsonNode node) {
-        return nodeIsNull(node) ? null : node.asLong();
+        return isNodeNull(node) ? null : node.asLong();
     }
 
     protected JsonNode atIndex(final int index) {

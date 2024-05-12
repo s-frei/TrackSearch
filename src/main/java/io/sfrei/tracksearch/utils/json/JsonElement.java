@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -76,18 +77,18 @@ public class JsonElement extends JsonNodeResolver {
     }
 
     public String asString(final String... paths) {
-        return super.asString(path(paths).node());
+        return super.asString(paths(paths).node());
     }
 
     public Long asLong(final String... paths) {
-        return getAsLong(path(paths).node());
+        return getAsLong(paths(paths).node());
     }
 
-    public JsonElement path(final String... paths) {
-        return nextElement(e -> nodeForPath(paths));
+    public JsonElement paths(final String... paths) {
+        return nextElement(e -> nodeForPaths(paths));
     }
 
-    private JsonNode nodeForPath(String... paths) {
+    private JsonNode nodeForPaths(String... paths) {
         if (paths.length == 0)
             return node();
 
@@ -104,6 +105,14 @@ public class JsonElement extends JsonNodeResolver {
 
     public JsonElement firstElement() {
         return nextElement(node -> atIndex(0));
+    }
+
+    public JsonElement lastForPath(final String path) {
+        return nextElement(node -> {
+            final List<JsonNode> nodes = node.findParents(path);
+            if (node.isEmpty()) return null;
+            return nodes.get(nodes.size() - 1).path(path);
+        });
     }
 
     public JsonElement elementAtIndex(final int index) {
@@ -150,7 +159,7 @@ public class JsonElement extends JsonNodeResolver {
     }
 
     public boolean nodePresent(String path) {
-        return JsonElement.of(nodeForPath(path)).isPresent();
+        return JsonElement.of(nodeForPaths(path)).isPresent();
     }
 
 }
