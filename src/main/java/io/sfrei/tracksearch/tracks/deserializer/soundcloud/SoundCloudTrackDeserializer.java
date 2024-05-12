@@ -19,10 +19,9 @@ package io.sfrei.tracksearch.tracks.deserializer.soundcloud;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import io.sfrei.tracksearch.clients.soundcloud.SoundCloudUtility;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack.SoundCloudTrackBuilder;
-import io.sfrei.tracksearch.tracks.metadata.FormatType;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
 import io.sfrei.tracksearch.utils.TimeUtility;
@@ -30,8 +29,6 @@ import io.sfrei.tracksearch.utils.json.JsonElement;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrackBuilder> {
 
@@ -72,32 +69,10 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
 
         // Formats
 
-        final List<SoundCloudTrackFormat> trackFormats = rootElement.paths("media", "transcodings")
-                .arrayElements()
-                .map(SoundCloudTrackDeserializer::transcodingToTrackFormat)
-                .collect(Collectors.toList());
-
-        soundCloudTrackBuilder.trackInfo(new SoundCloudTrackInfo(trackFormats));
+        final SoundCloudTrackInfo soundCloudTrackInfo = SoundCloudUtility.extractTrackInfo(rootElement);
+        soundCloudTrackBuilder.trackInfo(soundCloudTrackInfo);
 
         return soundCloudTrackBuilder;
-    }
-
-    private static SoundCloudTrackFormat transcodingToTrackFormat(JsonElement transcoding) {
-
-        final String formatUrl = transcoding.asString("url");
-        final String audioQuality = transcoding.asString("quality");
-
-        final JsonElement formatElement = transcoding.paths("format");
-        final String mimeType = formatElement.asString("mime_type");
-        final String protocol = formatElement.asString("protocol");
-
-        return SoundCloudTrackFormat.builder()
-                .mimeType(mimeType)
-                .formatType(FormatType.Audio)
-                .audioQuality(audioQuality)
-                .protocol(protocol)
-                .url(formatUrl)
-                .build();
     }
 
 }

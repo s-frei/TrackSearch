@@ -105,7 +105,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         if (!isApplicableForURL(url))
             throw new YouTubeException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
 
-        final String trackJSON = Client.request(api.getForUrlWithParams(url, TRACK_PARAMS)).getContentOrThrow();
+        final String trackJSON = Client.request(api.getForUrlWithParams(url, TRACK_PARAMS)).contentOrThrow();
         final YouTubeTrack youTubeTrack = youTubeUtility.extractYouTubeTrack(trackJSON, this::streamURLProvider);
         final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, url, this::requestURL);
         youTubeTrack.setTrackInfo(trackInfo);
@@ -115,7 +115,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     private GenericTrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search, @NonNull final Map<String, String> params, QueryType queryType)
             throws TrackSearchException {
 
-        final String tracksJSON = Client.request(api.getSearchForKeywords(search, params)).getContentOrThrow();
+        final String tracksJSON = Client.request(api.getSearchForKeywords(search, params)).contentOrThrow();
         return youTubeUtility.extractYouTubeTracks(tracksJSON, queryType, search, this::provideNext, this::streamURLProvider);
     }
 
@@ -146,12 +146,11 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     public String getStreamUrl(@NonNull final YouTubeTrack youtubeTrack) throws TrackSearchException {
 
         // Always load new track info to make retries possible - TODO: Not required on first try
-        final String trackUrl = youtubeTrack.getUrl();
-        final String trackJSON = Client.request(api.getForUrlWithParams(trackUrl, TRACK_PARAMS)).getContentOrThrow();
-        final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, trackUrl, this::requestURL);
+        final String trackJSON = Client.request(api.getForUrlWithParams(youtubeTrack.getUrl(), TRACK_PARAMS)).contentOrThrow();
+        final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, youtubeTrack.getUrl(), this::requestURL);
         youtubeTrack.setTrackInfo(trackInfo);
 
-        final YouTubeTrackFormat youtubeTrackFormat = TrackFormatUtility.getBestTrackFormat(youtubeTrack, false);
+        final YouTubeTrackFormat youtubeTrackFormat = TrackFormatUtility.getBestYouTubeTrackFormat(youtubeTrack, false);
 
         if (youtubeTrackFormat.isStreamReady())
             return URLUtility.decode(youtubeTrackFormat.getUrl());
@@ -163,7 +162,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
             log.trace("Use cached script for: {}", scriptUrl);
             scriptContent = scriptCache.get(scriptUrl);
         } else {
-            scriptContent = requestURL(URL + scriptUrl).getContentOrThrow();
+            scriptContent = requestURL(URL + scriptUrl).contentOrThrow();
             scriptCache.put(scriptUrl, scriptContent);
         }
 

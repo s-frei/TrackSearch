@@ -217,7 +217,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @MethodSource("getAllTracksFromTrackLists")
     public void getStreamUrl(Track track) {
         final String streamUrl = assertDoesNotThrow(track::getStreamUrl,
-                String.format("Stream URL resolving shpould not throw for: %s", track.getUrl()));
+                String.format("Stream URL resolving should not throw for: %s", track.getUrl()));
 
         assertThat(streamUrl)
                 .as("Track should have stream URL for Track '%s'", track.getUrl())

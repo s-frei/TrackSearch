@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-class YouTubeUtility {
+public final class YouTubeUtility {
 
     private static final String JS_SPLICE = ".splice";
     private static final String JS_SLICE = ".slice";
@@ -81,7 +81,7 @@ class YouTubeUtility {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
 
-    protected YouTubeTrack extractYouTubeTrack(final String json, final StreamURLFunction<YouTubeTrack> streamUrlFunction)
+    YouTubeTrack extractYouTubeTrack(final String json, final StreamURLFunction<YouTubeTrack> streamUrlFunction)
             throws YouTubeException {
 
         final JsonElement trackJsonElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -93,7 +93,7 @@ class YouTubeUtility {
                 .build();
     }
 
-    protected GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String json, final QueryType queryType, final String query,
+    GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String json, final QueryType queryType, final String query,
                                                                   final NextTrackListFunction<YouTubeTrack> nextTrackListFunction,
                                                                   final StreamURLFunction<YouTubeTrack> streamUrlFunction)
             throws YouTubeException {
@@ -172,7 +172,7 @@ class YouTubeUtility {
                 .asString("token");
     }
 
-    protected YouTubeTrackInfo extractTrackInfo(final String json, final String trackUrl, Function<String, ResponseWrapper> requester)
+    YouTubeTrackInfo extractTrackInfo(final String json, final String trackUrl, Function<String, ResponseWrapper> requester)
             throws YouTubeException {
 
         try {
@@ -306,7 +306,7 @@ class YouTubeUtility {
         return split.length > 0 ? split[0] : null;
     }
 
-    protected String getSignature(final YouTubeTrackFormat youtubeTrackFormat, String scriptUrl, final String scriptBody)
+    String getSignature(final YouTubeTrackFormat youtubeTrackFormat, String scriptUrl, final String scriptBody)
             throws YouTubeException {
 
         final String sigValue = youtubeTrackFormat.getSigValue();

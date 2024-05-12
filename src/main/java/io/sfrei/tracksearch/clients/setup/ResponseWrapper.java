@@ -48,7 +48,7 @@ public class ResponseWrapper {
         return new ResponseWrapper(null, null, exception);
     }
 
-    public String getContentOrThrow() throws TrackSearchException {
+    public String contentOrThrow() throws TrackSearchException {
         if (contentPresent()) return content;
         throw exception;
     }
