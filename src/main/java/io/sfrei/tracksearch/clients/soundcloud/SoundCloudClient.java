@@ -131,7 +131,7 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
 
     @Override
     public TrackStream getTrackStream(@NonNull SoundCloudTrack soundCloudTrack, final int retries) throws TrackSearchException {
-        return getTrackStream(this, soundCloudTrack, retries)
+        return tryResolveTrackStream(soundCloudTrack, retries)
                 .orElseThrow(() -> noTrackStreamAfterRetriesException(SoundCloudException::new, retries));
     }
 

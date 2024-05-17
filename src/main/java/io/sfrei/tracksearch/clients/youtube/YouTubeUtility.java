@@ -16,14 +16,13 @@
 
 package io.sfrei.tracksearch.clients.youtube;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.clients.common.SharedClient;
-import io.sfrei.tracksearch.tracks.TrackListProvider;
-import io.sfrei.tracksearch.tracks.TrackStreamProvider;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
+import io.sfrei.tracksearch.tracks.TrackListProvider;
+import io.sfrei.tracksearch.tracks.TrackStreamProvider;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.deserializer.youtube.YouTubeListTrackDeserializer;
 import io.sfrei.tracksearch.tracks.deserializer.youtube.YouTubeURLTrackDeserializer;
@@ -93,8 +92,8 @@ class YouTubeUtility {
     }
 
     GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String json, final QueryType queryType, final String query,
-                                                                  final TrackListProvider<YouTubeTrack> nextTrackListFunction,
-                                                                  final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
+                                                        final TrackListProvider<YouTubeTrack> nextTrackListFunction,
+                                                        final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
             throws YouTubeException {
 
         final JsonElement rootElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -174,62 +173,60 @@ class YouTubeUtility {
     YouTubeTrackInfo extractTrackInfo(final String json, final String trackUrl)
             throws YouTubeException {
 
-        try {
-            final JsonElement jsonElement = JsonElement.readTree(MAPPER, json);
+        final JsonElement jsonElement = JsonElement.readTreeCatching(MAPPER, json)
+                .orElseThrow(() -> new YouTubeException("Failed parsing Youtube track JSON"));
 
-            final JsonElement playerElement;
-            if (jsonElement.isArray()) {
-                playerElement = jsonElement.elementAtIndex(2).paths("player");
-            } else {
-                playerElement = jsonElement.findElement("player");
-            }
+        final JsonElement playerElement;
+        if (jsonElement.isArray()) {
+            playerElement = jsonElement.elementAtIndex(2).paths("player");
+        } else {
+            playerElement = jsonElement.findElement("player");
+        }
 
-            AtomicReference<String> scriptUrl = new AtomicReference<>(null);
+        AtomicReference<String> scriptUrl = new AtomicReference<>(null);
 
-            final JsonElement streamingData;
+        final JsonElement streamingData;
 
-            final JsonElement playerArgs = playerElement.paths("args");
-            if (playerElement.isPresent() && playerArgs.isPresent()) {
+        final JsonElement playerArgs = playerElement.paths("args");
+        if (playerElement.isPresent() && playerArgs.isPresent()) {
 
-                scriptUrl.set(playerElement.paths("assets").asString("js"));
+            scriptUrl.set(playerElement.paths("assets").asString("js"));
 
-                streamingData = playerArgs.paths("player_response")
-                        .reReadTree(MAPPER)
-                        .paths("streamingData");
+            streamingData = playerArgs.paths("player_response")
+                    .reReadTree(MAPPER)
+                    .orElseThrow(() -> new YouTubeException("Failed parsing player response JSON"))
+                    .paths("streamingData");
 
-            } else {
-                final JsonElement playerResponse = playerResponseFromTrackJSON(jsonElement);
+        } else {
+            final JsonElement playerResponse = playerResponseFromTrackJSON(jsonElement);
 
-                streamingData = playerResponse.asUnresolved().paths("streamingData");
-            }
+            streamingData = playerResponse.asUnresolved().paths("streamingData");
+        }
 
-            final JsonElement formatsElement = streamingData.paths("formats");
-            final Stream<YouTubeTrackFormat> formats = formatsElement.isPresent() ?
-                    getFormatsFromStream(formatsElement.arrayElements()) : Stream.empty();
+        final JsonElement formatsElement = streamingData.paths("formats");
+        final Stream<YouTubeTrackFormat> formats = formatsElement.isPresent() ?
+                getFormatsFromStream(formatsElement.arrayElements()) : Stream.empty();
 
-            final Stream<JsonElement> adaptiveFormatsStream = streamingData.paths("adaptiveFormats").arrayElements();
-            final Stream<YouTubeTrackFormat> adaptiveFormats = getFormatsFromStream(adaptiveFormatsStream);
+        final Stream<JsonElement> adaptiveFormatsStream = streamingData.paths("adaptiveFormats").arrayElements();
+        final Stream<YouTubeTrackFormat> adaptiveFormats = getFormatsFromStream(adaptiveFormatsStream);
 
-            final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats).collect(Collectors.toList());
+        final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats).collect(Collectors.toList());
 
-            if (trackFormats.stream().anyMatch(YouTubeTrackFormat::isStreamNotReady) && scriptUrl.get() == null) {
-                log.trace("Try to get player script trough embedded URL");
-                final String embeddedUrl = trackUrl.replace("youtube.com/", "youtube.com/embed/");
-                final String embeddedPageContent = SharedClient.request(embeddedUrl).getContent();
-                if (embeddedPageContent != null) {
-                    final Matcher matcher = EMBEDDED_PLAYER_SCRIPT_PATTERN.matcher(embeddedPageContent);
-                    if (matcher.find()) {
-                        log.trace("Found player script in embedded URL: '{}'", embeddedUrl);
-                        scriptUrl.set(matcher.group(1));
-                    }
+        if (trackFormats.stream().anyMatch(YouTubeTrackFormat::isStreamNotReady) && scriptUrl.get() == null) {
+            log.trace("Try to get player script trough embedded URL");
+            final String embeddedUrl = trackUrl.replace("youtube.com/", "youtube.com/embed/");
+            final String embeddedPageContent = SharedClient.request(embeddedUrl).getContent();
+            if (embeddedPageContent != null) {
+                final Matcher matcher = EMBEDDED_PLAYER_SCRIPT_PATTERN.matcher(embeddedPageContent);
+                if (matcher.find()) {
+                    log.trace("Found player script in embedded URL: '{}'", embeddedUrl);
+                    scriptUrl.set(matcher.group(1));
                 }
             }
-
-            return new YouTubeTrackInfo(trackFormats, scriptUrl.get());
-
-        } catch (JsonProcessingException e) {
-            throw new YouTubeException("Failed parsing Youtube track JSON", e);
         }
+
+        return new YouTubeTrackInfo(trackFormats, scriptUrl.get());
+
     }
 
     private static JsonElement playerResponseFromTrackJSON(JsonElement jsonElement) {

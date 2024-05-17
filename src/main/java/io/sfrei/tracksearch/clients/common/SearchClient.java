@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface SearchClient<T extends Track> extends TrackSearchClient<T>, ClientLogger {
-    int INITIAL_TRY = 1;
 
     default void throwIfPagingValueMissing(SearchClient<?> source, TrackList<? extends Track> trackList)
             throws TrackSearchException {
@@ -38,59 +37,40 @@ public interface SearchClient<T extends Track> extends TrackSearchClient<T>, Cli
 
     }
 
-    /**
-     * Exception with uniform message for failed stream URL resolving after several retries.
-     *
-     * @param exceptionConstructor the constructor for the exception to create.
-     * @param retries              the retries which were taken.
-     * @return the exception.
-     */
     default TrackSearchException noTrackStreamAfterRetriesException(Function<String, TrackSearchException> exceptionConstructor,
-                                                                    int retries) {
-        return exceptionConstructor.apply(String.format("Not able to get stream URL after %s tries", retries + INITIAL_TRY));
+                                                                    int tries) {
+        return exceptionConstructor.apply(String.format("Not able to get stream URL after %s tries", tries));
     }
 
-    /**
-     * Exception with uniform message when query type is not supported for some circumstances.
-     *
-     * @param exceptionConstructor the constructor for the exception to create.
-     * @param queryType            the unsupported query type.
-     * @return the exception.
-     */
     default TrackSearchException unsupportedQueryTypeException(Function<String, TrackSearchException> exceptionConstructor, QueryType queryType) {
         return exceptionConstructor.apply(String.format("Query type %s not supported", queryType));
     }
 
-    default Optional<TrackStream> getTrackStream(TrackSearchClient<T> searchClient, T track,
-                                                 final int retries) {
-        log().trace("Get stream URL for: {}", track);
-        return tryGetTrackStream(searchClient, track, retries + INITIAL_TRY);
-    }
+    default Optional<TrackStream> tryResolveTrackStream(T track, int retries) {
+        log().trace("Get track stream for: {}", track);
 
-    private Optional<TrackStream> tryGetTrackStream(TrackSearchClient<T> searchClient, T track,
-                                                    int tries) {
+        do {
 
-        if (tries <= 0)
-            return Optional.empty();
+            try {
+                final TrackStream trackStream = getTrackStream(track);
+                final Integer code = SharedClient.requestAndGetCode(trackStream.url());
 
-        try {
-            final TrackStream trackStream = searchClient.getTrackStream(track);
-            final Integer code = SharedClient.requestAndGetCode(trackStream.url());
-            if (SharedClient.successResponseCode(code))
-                return Optional.of(trackStream);
-            else {
-                tries--;
-                if (tries > 0) log().warn("Not able getting stream URL for {} - {} retries left",
-                        searchClient.getClass().getSimpleName(), tries);
+                if (SharedClient.successResponseCode(code)) return Optional.of(trackStream);
 
-                return tryGetTrackStream(searchClient, track, tries);
+                retries--;
+
+                if (retries > 0) log().warn("Not able getting stream for - {} tries left", retries);
+
+            } catch (TrackSearchException e) {
+                log().error("Error occurred getting stream for: {}", track, e);
+                return Optional.empty();
             }
-        } catch (TrackSearchException e) {
-            log().error("Error getting stream URL using {}", searchClient.getClass().getSimpleName(), e);
-            return Optional.empty();
-        }
 
+        } while (retries >= 0);
+
+        return Optional.empty();
     }
+
 
     @Nullable
     default TrackList<T> provideNext(final TrackList<T> trackList) {

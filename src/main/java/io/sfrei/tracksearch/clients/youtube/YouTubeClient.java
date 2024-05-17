@@ -172,7 +172,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
 
     @Override
     public TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
-        return getTrackStream(this, youtubeTrack, retries)
+        return tryResolveTrackStream(youtubeTrack, retries)
                 .orElseThrow(() -> noTrackStreamAfterRetriesException(YouTubeException::new, retries));
     }
 

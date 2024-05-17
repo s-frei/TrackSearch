@@ -38,7 +38,7 @@ public class JsonElement extends JsonNodeResolver {
         super(node, resolved);
     }
 
-    public static JsonElement readTree(final ObjectMapper mapper, final String json) throws JsonProcessingException {
+    private static JsonElement readTree(final ObjectMapper mapper, final String json) throws JsonProcessingException {
         return new JsonElement(mapper.readTree(json), false);
     }
 
@@ -49,6 +49,10 @@ public class JsonElement extends JsonNodeResolver {
             log.error("Error occurred reading JSON: '{}'", json, e);
             return Optional.empty();
         }
+    }
+
+    public Optional<JsonElement> reReadTree(final ObjectMapper mapper) {
+        return readTreeCatching(mapper, asString(node()));
     }
 
     public static JsonElement of(JsonNode node) {
@@ -117,10 +121,6 @@ public class JsonElement extends JsonNodeResolver {
 
     public JsonElement elementAtIndex(final int index) {
         return nextElement(node -> atIndex(index));
-    }
-
-    public JsonElement reReadTree(final ObjectMapper mapper) throws JsonProcessingException {
-        return readTree(mapper, asString(node()));
     }
 
     public <T> T map(final ObjectMapper mapper, final Class<T> clazz) throws JsonProcessingException {
