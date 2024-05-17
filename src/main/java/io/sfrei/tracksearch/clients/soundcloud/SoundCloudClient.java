@@ -28,6 +28,8 @@ import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
+import io.sfrei.tracksearch.utils.TrackFormatUtility;
 import io.sfrei.tracksearch.utils.TrackListUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -125,10 +127,9 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
 
     @Override
     public String getStreamUrl(@NonNull final SoundCloudTrack soundCloudTrack) throws TrackSearchException {
-        final String trackHTML = clientIDRequest(api.getForUrlWithClientID(soundCloudTrack.getUrl(), clientID)).contentOrThrow();
-        final String intermediateURL = soundCloudUtility.extractURLForStream(trackHTML);
-        final String streamJSON = clientIDRequest(api.getForUrlWithClientID(intermediateURL, clientID)).contentOrThrow();
-        return soundCloudUtility.extractStreamUrl(streamJSON);
+        final SoundCloudTrackFormat soundCloudTrackFormat = TrackFormatUtility.getBestSoundCloudTrackFormat(soundCloudTrack);
+        final String trackFormatJSON = clientIDRequest(api.getForUrlWithClientID(soundCloudTrackFormat.getUrl(), clientID)).contentOrThrow();
+        return soundCloudUtility.extractStreamUrl(trackFormatJSON);
     }
 
     @Override

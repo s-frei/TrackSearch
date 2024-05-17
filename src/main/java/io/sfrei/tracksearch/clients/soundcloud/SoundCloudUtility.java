@@ -49,17 +49,9 @@ import java.util.stream.Collectors;
 public final class SoundCloudUtility {
 
     private static final String SOUNDCLOUD_CLIENT_ID_PREFIX = "client_id:";
+    private static final String HYDRATABLE_SCRIPT_PREFIX = "window.__sc_hydration = ";
     private static final String SOUNDCLOUD_CLIENT_ID_REGEX = SOUNDCLOUD_CLIENT_ID_PREFIX + "\"[a-zA-Z0-9]+\"";
     private static final Pattern SOUNDCLOUD_CLIENT_ID_PATTERN = Pattern.compile(SOUNDCLOUD_CLIENT_ID_REGEX);
-
-    private static final String STREAM_URL_MAIM_PART = "https://api-v2.soundcloud.com/media/[a-zA-Z0-9:/-]+";
-    private static final String PROGRESSIVE_SOUNDCLOUD_STREAM_REGEX = STREAM_URL_MAIM_PART + "/stream/progressive"; // the stream to go for
-    private static final String ALTERNATIVE_PROGRESSIVE_SOUNDCLOUD_STREAM_REGEX = STREAM_URL_MAIM_PART + "/preview/progressive"; // non SC Go(+) membership
-    private static final String ALTERNATIVE_SOUNDCLOUD_STREAM_REGEX = STREAM_URL_MAIM_PART + "/stream/hls"; // .m3u8 - hls stream
-    private static final String HYDRATABLE_SCRIPT_PREFIX = "window.__sc_hydration = ";
-    private static final Pattern PROGRESSIVE_SOUNDCLOUD_STREAM_URL_PATTERN = Pattern.compile(PROGRESSIVE_SOUNDCLOUD_STREAM_REGEX);
-    private static final Pattern ALTERNATIVE_PROGRESSIVE_SOUNDCLOUD_STREAM_URL_PATTERN = Pattern.compile(ALTERNATIVE_PROGRESSIVE_SOUNDCLOUD_STREAM_REGEX);
-    private static final Pattern ALTERNATIVE_SOUNDCLOUD_STREAM_URL_PATTERN = Pattern.compile(ALTERNATIVE_SOUNDCLOUD_STREAM_REGEX);
 
     private static final ObjectMapper MAPPER = ObjectMapperBuilder.create()
             .addDeserializer(SoundCloudTrack.SoundCloudTrackBuilder.class, new SoundCloudTrackDeserializer()).get();
@@ -99,7 +91,7 @@ public final class SoundCloudUtility {
     }
 
     SoundCloudTrack extractSoundCloudTrack(final String json,
-                                                     final StreamURLFunction<SoundCloudTrack> streamUrlFunction)
+                                           final StreamURLFunction<SoundCloudTrack> streamUrlFunction)
             throws SoundCloudException {
 
         final JsonElement trackJsonElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -111,8 +103,8 @@ public final class SoundCloudUtility {
     }
 
     GenericTrackList<SoundCloudTrack> extractSoundCloudTracks(final String json, final QueryType queryType, final String query,
-                                                                        final NextTrackListFunction<SoundCloudTrack> nextTrackListFunction,
-                                                                        final StreamURLFunction<SoundCloudTrack> streamUrlFunction)
+                                                              final NextTrackListFunction<SoundCloudTrack> nextTrackListFunction,
+                                                              final StreamURLFunction<SoundCloudTrack> streamUrlFunction)
             throws SoundCloudException {
 
         final JsonElement responseElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -184,32 +176,10 @@ public final class SoundCloudUtility {
         return new SoundCloudTrackInfo(trackFormats);
     }
 
-    String extractURLForStream(final String html) throws SoundCloudException {
-        final Matcher progressiveStreamUrlMatcher = PROGRESSIVE_SOUNDCLOUD_STREAM_URL_PATTERN.matcher(html);
-        if (progressiveStreamUrlMatcher.find()) {
-            final String progressiveStreamUrl = progressiveStreamUrlMatcher.group();
-            log.trace("ProgressiveStreamURL was found: {}", progressiveStreamUrl);
-            return progressiveStreamUrl;
-        }
-        final Matcher alternativeProgressiveStreamUrlMatcher = ALTERNATIVE_PROGRESSIVE_SOUNDCLOUD_STREAM_URL_PATTERN.matcher(html);
-        if (alternativeProgressiveStreamUrlMatcher.find()) {
-            final String alternativeProgressiveStreamUrl = alternativeProgressiveStreamUrlMatcher.group();
-            log.trace("Alternative ProgressiveStreamURL was found: {}", alternativeProgressiveStreamUrl);
-            return alternativeProgressiveStreamUrl;
-        }
-        final Matcher alternativeStreamUrlMatcher = ALTERNATIVE_SOUNDCLOUD_STREAM_URL_PATTERN.matcher(html);
-        if (alternativeStreamUrlMatcher.find()) {
-            final String alternativeStreamUrl = alternativeStreamUrlMatcher.group();
-            log.trace("Alternative StreamURL was found: {}", alternativeStreamUrl);
-            return alternativeStreamUrl;
-        }
-        throw new SoundCloudException("Progressive stream URL not found");
-    }
-
     String extractStreamUrl(final String json) throws SoundCloudException {
         return JsonElement.readTreeCatching(MAPPER, json)
-                .orElseThrow(() -> new SoundCloudException("Cannot extract stream URL from JSON"))
-                .asString("url");
+                .map(element -> element.asString("url"))
+                .orElseThrow(() -> new SoundCloudException("Cannot extract stream URL from JSON"));
     }
 
 }

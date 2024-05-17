@@ -23,6 +23,7 @@ import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.*;
@@ -34,8 +35,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.as;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 @Getter
@@ -223,8 +226,11 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .as("Track should have stream URL for Track '%s'", track.getUrl())
                 .isNotEmpty();
 
+        log.trace("StreamURL: {}", streamUrl);
         final int code = requestAndGetCode(streamUrl);
-        assertTrue(Client.successResponseCode(code));
+
+        assertThat(code)
+                .is(new Condition<>(Client::successResponseCode, "Stream URL response is 2xx"));
     }
 
 }

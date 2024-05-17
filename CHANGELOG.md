@@ -6,6 +6,7 @@ Changelog
 
 **Features:**
 
+- Determine the best audio format for SoundCloudTrack
 - Updated dependencies
 
 **Bugfixes:**

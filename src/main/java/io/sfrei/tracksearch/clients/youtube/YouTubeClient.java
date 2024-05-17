@@ -167,9 +167,9 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         }
 
         final String signature = youTubeUtility.getSignature(youtubeTrackFormat, scriptUrl, scriptContent);
-        final String unauthorizedStreamUrl = youtubeTrackFormat.getUrl();
+        final String trackFormatUrl = youtubeTrackFormat.getUrl();
 
-        return URLUtility.addRequestParam(unauthorizedStreamUrl, youtubeTrackFormat.getSigParam(), signature);
+        return URLUtility.addRequestParam(trackFormatUrl, youtubeTrackFormat.getSigParam(), signature);
     }
 
     @Override
