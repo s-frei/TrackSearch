@@ -16,10 +16,11 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.clients.interfaces.functional.StreamURLFunction;
+import io.sfrei.tracksearch.clients.interfaces.functional.TrackStreamProvider;
 import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -34,20 +35,20 @@ public class SoundCloudTrack extends BaseTrack implements Track {
     @Getter
     private final SoundCloudTrackMetadata trackMetadata;
 
-    private final StreamURLFunction<SoundCloudTrack> streamUrlFunction;
+    private final TrackStreamProvider<SoundCloudTrack> trackStreamProvider;
 
     @Builder
     public SoundCloudTrack(String title, Duration duration, String url, SoundCloudTrackInfo trackInfo,
-                           SoundCloudTrackMetadata trackMetadata, StreamURLFunction<SoundCloudTrack> streamUrlFunction) {
+                           SoundCloudTrackMetadata trackMetadata, TrackStreamProvider<SoundCloudTrack> trackStreamProvider) {
         super(TrackSource.Soundcloud, title, duration, url);
         this.trackInfo = trackInfo;
         this.trackMetadata = trackMetadata;
-        this.streamUrlFunction = streamUrlFunction;
+        this.trackStreamProvider = trackStreamProvider;
     }
 
     @Override
-    public String getStreamUrl() {
-        return streamUrlFunction.apply(this);
+    public TrackStream getStream() {
+        return trackStreamProvider.apply(this);
     }
 
 }

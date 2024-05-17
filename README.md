@@ -69,8 +69,6 @@ or from [GitHub Packages](https://github.com/s-frei/TrackSearch/packages) or dir
 
 ### Getting started
 
-For more information check the related interface documentation.
-
 ```java
 // Client to search on all available sources asynchronous
 MultiTrackSearchClient searchClient = new MultiSearchClient();
@@ -78,21 +76,28 @@ MultiTrackSearchClient searchClient = new MultiSearchClient();
 // Client for explicit source
 TrackSearchClient<SoundCloudTrack> explicitClient = new SoundCloudClient();
 
-// Search for tracks
-TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords");
+try {
+    // Search for tracks
+    TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords");
+    TrackStream stream = tracksForSearch.get(0).getStream();
 
-// Get the audio stream
-String streamUrl = tracksForSearch.get(anyPos).getStreamUrl();
+    // Stream URL with format
+    final String streamUrl = stream.url();
+    final TrackFormat format = stream.format();
 
-// Get next tracks page
-TrackList<Track> nextTracks = tracksForSearch.next();
+    // Get next tracks page
+    TrackList<Track> nextTracks = tracksForSearch.next();
 
-// Get a track for URL
-Track trackForURL = searchClient.getTrack("URL");
+    // Get a track for URL
+    Track trackForURL = explicitClient.getTrack("<soundcloud-url>");
 
-// Get the audio stream (retrying on failure)
-searchClient.getStreamUrl(trackForURL, TrackSearchConfig.DEFAULT_RESOLVING_RETIRES);
+} catch (TrackSearchException e) {
+    // Damn
+}
 ```
+
+For more information check the related interface documentation or have a look into the 
+[tests](https://github.com/s-frei/TrackSearch/blob/develop/src/test/java/io/sfrei/tracksearch/clients/ClientTest.java).
 
 ## Why is this done ?
 
@@ -120,7 +125,7 @@ working. Test it on your own:
 $ ./mvnw test
 ```
 
-For detailed test (about 120 tracks for each client):
+For detailed test (about ~250 tracks for each client):
 
 ```sh
 $ ./mvnw test -P detailed-client-test

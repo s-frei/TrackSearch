@@ -19,7 +19,7 @@ package io.sfrei.tracksearch.clients.youtube;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sfrei.tracksearch.clients.interfaces.functional.NextTrackListFunction;
-import io.sfrei.tracksearch.clients.interfaces.functional.StreamURLFunction;
+import io.sfrei.tracksearch.clients.interfaces.functional.TrackStreamProvider;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
@@ -81,7 +81,7 @@ public final class YouTubeUtility {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
 
-    YouTubeTrack extractYouTubeTrack(final String json, final StreamURLFunction<YouTubeTrack> streamUrlFunction)
+    YouTubeTrack extractYouTubeTrack(final String json, final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
             throws YouTubeException {
 
         final JsonElement trackJsonElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -89,13 +89,13 @@ public final class YouTubeUtility {
 
         return playerResponseFromTrackJSON(trackJsonElement)
                 .mapCatching(MAPPER, YouTubeTrack.URLYouTubeTrackBuilder.class).getBuilder()
-                .streamUrlFunction(streamUrlFunction)
+                .trackStreamProvider(trackStreamProvider)
                 .build();
     }
 
     GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String json, final QueryType queryType, final String query,
                                                                   final NextTrackListFunction<YouTubeTrack> nextTrackListFunction,
-                                                                  final StreamURLFunction<YouTubeTrack> streamUrlFunction)
+                                                                  final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
             throws YouTubeException {
 
         final JsonElement rootElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -138,7 +138,7 @@ public final class YouTubeUtility {
                 .map(renderer -> renderer.mapCatching(MAPPER, YouTubeTrack.ListYouTubeTrackBuilder.class))
                 .filter(Objects::nonNull)
                 .map(YouTubeTrack.ListYouTubeTrackBuilder::getBuilder)
-                .peek(youTubeTrackBuilder -> youTubeTrackBuilder.streamUrlFunction(streamUrlFunction))
+                .peek(youTubeTrackBuilder -> youTubeTrackBuilder.trackStreamProvider(trackStreamProvider))
                 .map(YouTubeTrack.YouTubeTrackBuilder::build)
                 .collect(Collectors.toList());
 
@@ -243,7 +243,7 @@ public final class YouTubeUtility {
     private Stream<YouTubeTrackFormat> getFormatsFromStream(final Stream<JsonElement> formats) {
         return formats.map(format -> {
             final String mimeType = format.asString("mimeType");
-            final FormatType formatType = FormatType.getFormatType(mimeType);
+            final FormatType formatType = FormatType.fromMimeType(mimeType);
             final String audioQuality = format.asString("audioQuality");
             final String audioSampleRate = format.asString("audioSampleRate");
 
@@ -255,7 +255,7 @@ public final class YouTubeUtility {
                 final String url = format.asString("url");
                 return YouTubeTrackFormat.builder()
                         .mimeType(mimeType)
-                        .formatType(formatType)
+                        .type(formatType)
                         .audioQuality(audioQuality)
                         .audioSampleRate(audioSampleRate)
                         .streamReady(true)
@@ -266,7 +266,7 @@ public final class YouTubeUtility {
                 final Map<String, String> params = URLUtility.splitParamsAndDecode(cipher);
                 return YouTubeTrackFormat.builder()
                         .mimeType(mimeType)
-                        .formatType(formatType)
+                        .type(formatType)
                         .audioQuality(audioQuality)
                         .audioSampleRate(audioSampleRate)
                         .streamReady(false)

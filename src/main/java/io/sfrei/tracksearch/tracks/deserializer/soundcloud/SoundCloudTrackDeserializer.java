@@ -65,7 +65,7 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
                 .paths("user", "avatar_url") // Fallback to channel thumbnail
                 .asString();
 
-        soundCloudTrackBuilder.trackMetadata(SoundCloudTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
+        soundCloudTrackBuilder.trackMetadata(new SoundCloudTrackMetadata(channelName, channelUrl, streamAmount, thumbNailUrl));
 
         // Formats
 

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.sfrei.tracksearch.clients.TestSuite.SINGLE_SEARCH_KEY;
 import static io.sfrei.tracksearch.clients.setup.TrackSource.Soundcloud;
 import static io.sfrei.tracksearch.clients.setup.TrackSource.Youtube;
 

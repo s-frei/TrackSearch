@@ -73,7 +73,7 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
         final Optional<JsonElement> firstThumbnail = thumbNailStream.findFirst();
         final String thumbNailUrl = firstThumbnail.map(thumbNail -> thumbNail.asString("url")).orElse(null);
 
-        youTubeTrackBuilder.trackMetadata(YouTubeTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
+        youTubeTrackBuilder.trackMetadata(new YouTubeTrackMetadata(channelName, channelUrl, streamAmount, thumbNailUrl));
 
         return listYouTubeTrackBuilder;
     }

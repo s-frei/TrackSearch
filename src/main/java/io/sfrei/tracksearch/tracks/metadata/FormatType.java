@@ -24,7 +24,7 @@ import java.util.Locale;
 public enum FormatType {
     Unknown("unknown"),
     Audio("audio"),  //Default
-    Video("video");  //Fallback
+    Video("video");  //Fallback (only YouTube)
 
     private final String typeDef;
 
@@ -32,14 +32,15 @@ public enum FormatType {
         this.typeDef = typeDef;
     }
 
-    public static FormatType getFormatType(String mimeTypeDef) {
+    public static FormatType fromMimeType(String mimeTypeDef) {
         String typeDef = mimeTypeDef.toLowerCase(Locale.ROOT);
         if (typeDef.contains(Audio.getTypeDef())) {
             return Audio;
         } else if (typeDef.contains(Video.getTypeDef())) {
             return Video;
-        } else
+        } else {
             return Unknown;
+        }
     }
 
 }

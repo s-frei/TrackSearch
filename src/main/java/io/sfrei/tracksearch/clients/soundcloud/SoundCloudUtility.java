@@ -18,7 +18,7 @@ package io.sfrei.tracksearch.clients.soundcloud;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sfrei.tracksearch.clients.interfaces.functional.NextTrackListFunction;
-import io.sfrei.tracksearch.clients.interfaces.functional.StreamURLFunction;
+import io.sfrei.tracksearch.clients.interfaces.functional.TrackStreamProvider;
 import io.sfrei.tracksearch.clients.setup.QueryType;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
@@ -91,20 +91,20 @@ public final class SoundCloudUtility {
     }
 
     SoundCloudTrack extractSoundCloudTrack(final String json,
-                                           final StreamURLFunction<SoundCloudTrack> streamUrlFunction)
+                                           final TrackStreamProvider<SoundCloudTrack> trackStreamProvider)
             throws SoundCloudException {
 
         final JsonElement trackJsonElement = JsonElement.readTreeCatching(MAPPER, json)
                 .orElseThrow(() -> new SoundCloudException("Cannot parse SoundCloud track JSON"));
 
         return trackJsonElement.mapCatching(MAPPER, SoundCloudTrack.SoundCloudTrackBuilder.class)
-                .streamUrlFunction(streamUrlFunction)
+                .trackStreamProvider(trackStreamProvider)
                 .build();
     }
 
     GenericTrackList<SoundCloudTrack> extractSoundCloudTracks(final String json, final QueryType queryType, final String query,
                                                               final NextTrackListFunction<SoundCloudTrack> nextTrackListFunction,
-                                                              final StreamURLFunction<SoundCloudTrack> streamUrlFunction)
+                                                              final TrackStreamProvider<SoundCloudTrack> trackStreamProvider)
             throws SoundCloudException {
 
         final JsonElement responseElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -114,7 +114,7 @@ public final class SoundCloudUtility {
         final List<SoundCloudTrack> scTracks = responseElement.elements()
                 .map(element -> element.mapCatching(MAPPER, SoundCloudTrack.SoundCloudTrackBuilder.class))
                 .filter(Objects::nonNull)
-                .peek(soundCloudTrackBuilder -> soundCloudTrackBuilder.streamUrlFunction(streamUrlFunction))
+                .peek(soundCloudTrackBuilder -> soundCloudTrackBuilder.trackStreamProvider(trackStreamProvider))
                 .map(SoundCloudTrack.SoundCloudTrackBuilder::build)
                 .collect(Collectors.toList());
 
@@ -165,7 +165,7 @@ public final class SoundCloudUtility {
 
                     return SoundCloudTrackFormat.builder()
                             .mimeType(mimeType)
-                            .formatType(FormatType.Audio)
+                            .type(FormatType.Audio)
                             .audioQuality(audioQuality)
                             .protocol(protocol)
                             .url(formatUrl)

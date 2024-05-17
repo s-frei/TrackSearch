@@ -19,6 +19,7 @@ package io.sfrei.tracksearch.clients;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.NonNull;
 
 import java.util.Set;
@@ -76,23 +77,23 @@ public interface TrackSearchClient<T extends Track> {
     TrackList<T> getNext(@NonNull TrackList<? extends Track> trackList) throws TrackSearchException;
 
     /**
-     * Get the audio stream URL in the highest possible audio resolution.
+     * Get the audio stream with the highest possible audio resolution.
      *
      * @param track from this client.
      * @return the audio stream URL.
      * @throws TrackSearchException when the URL could not be exposed.
      */
-    String getStreamUrl(@NonNull T track) throws TrackSearchException;
+    TrackStream getTrackStream(@NonNull T track) throws TrackSearchException;
 
     /**
-     * Get the audio stream URL in the highest possible audio resolution and retry when there was a failure.
+     * Get the audio stream with the highest possible audio resolution and retry when there was a failure.
      *
      * @param track   from this client.
      * @param retries retry when stream URL resolving was not successful. This is determined with another request/s.
      * @return the audio stream URL.
      * @throws TrackSearchException when the URL could not be exposed.
      */
-    String getStreamUrl(@NonNull T track, int retries) throws TrackSearchException;
+    TrackStream getTrackStream(@NonNull T track, int retries) throws TrackSearchException;
 
     /**
      * Check the track list for this client if the paging values to get next are present.

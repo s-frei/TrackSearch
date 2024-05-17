@@ -18,6 +18,7 @@ package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import io.sfrei.tracksearch.utils.ReplaceUtility;
 import io.sfrei.tracksearch.utils.TimeUtility;
 
@@ -73,14 +74,14 @@ public interface Track {
     String getUrl();
 
     /**
-     * Get the audio stream URL in the highest possible quality. The resulting URL will be
+     * Get the audio stream in the highest possible quality. The resulting stream is
      * checked if it can be successfully accessed, if under some circumstances this fails,
      * the resolver will start some more attempts.
      * To override default {@link io.sfrei.tracksearch.config.TrackSearchConfig#resolvingRetries}
      *
      * @return the audio stream URL or null when resolving fails.
      */
-    String getStreamUrl();
+    TrackStream getStream();
 
     /**
      * Get metadata like, channel, views and so on.

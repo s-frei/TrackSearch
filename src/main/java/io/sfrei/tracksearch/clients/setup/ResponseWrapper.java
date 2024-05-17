@@ -25,10 +25,10 @@ import lombok.NonNull;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResponseWrapper {
 
-    private Integer code;
+    private final Integer code;
 
     @Getter
-    private String content;
+    private final String content;
 
     private TrackSearchException exception;
 

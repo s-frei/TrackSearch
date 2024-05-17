@@ -32,8 +32,8 @@ public interface TrackList<T extends Track> extends List<T> {
     QueryType getQueryType();
 
     /**
-     * Return the next tracklist for query.
-     * @return the next tracklist.
+     * Return the next track list for query.
+     * @return the next track list.
      */
     TrackList<T> next();
 

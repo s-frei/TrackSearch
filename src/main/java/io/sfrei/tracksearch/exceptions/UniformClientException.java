@@ -30,8 +30,8 @@ public interface UniformClientException {
      * @param retries              the retries which were taken.
      * @return the exception.
      */
-    default TrackSearchException noStreamUrlAfterRetriesException(Function<String, TrackSearchException> exceptionConstructor,
-                                                                  int retries) {
+    default TrackSearchException noTrackStreamAfterRetriesException(Function<String, TrackSearchException> exceptionConstructor,
+                                                                    int retries) {
         return exceptionConstructor.apply(String.format("Not able to get stream URL after %s tries", retries + ClientHelper.INITIAL_TRY));
     }
 

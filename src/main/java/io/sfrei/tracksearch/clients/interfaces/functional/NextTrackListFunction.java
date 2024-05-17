@@ -26,9 +26,9 @@ import java.util.function.Function;
 public interface NextTrackListFunction<T extends Track> extends Function<TrackList<T>, TrackList<T>> {
 
     /**
-     * Function to return the next tracks for given tracklist.
-     * @param trackList the tracklist holding the paging information to get next for.
-     * @return the next tracklist or null when any exception occurred.
+     * Function to return the next tracks for given track list.
+     * @param trackList the track list holding the paging information to get next for.
+     * @return the next track list or null when any exception occurred.
      */
     @Nullable
     @Override

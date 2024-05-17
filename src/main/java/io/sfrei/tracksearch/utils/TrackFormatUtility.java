@@ -47,7 +47,7 @@ public class TrackFormatUtility {
 
         for (YouTubeTrackFormat trackFormat : formats) {
 
-            final FormatType formatType = trackFormat.getFormatType();
+            final FormatType formatType = trackFormat.getType();
 
             if (formatType == null || formatType.equals(FormatType.Unknown))
                 continue;

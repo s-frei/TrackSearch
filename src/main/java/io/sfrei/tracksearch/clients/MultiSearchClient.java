@@ -22,6 +22,7 @@ import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.*;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import io.sfrei.tracksearch.utils.TrackListUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -91,22 +92,22 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
     }
 
     @Override
-    public String getStreamUrl(@NonNull final Track track) throws TrackSearchException {
+    public TrackStream getTrackStream(@NonNull final Track track) throws TrackSearchException {
 
         if (track instanceof YouTubeTrack) {
-            return clientsBySource.get(TrackSource.Youtube).getStreamUrl(track);
+            return clientsBySource.get(TrackSource.Youtube).getTrackStream(track);
         } else if (track instanceof SoundCloudTrack) {
-            return clientsBySource.get(TrackSource.Soundcloud).getStreamUrl(track);
+            return clientsBySource.get(TrackSource.Soundcloud).getTrackStream(track);
         }
         throw new TrackSearchException("Track type is unknown");
     }
 
     @Override
-    public String getStreamUrl(@NonNull Track track, int retries) throws TrackSearchException {
+    public TrackStream getTrackStream(@NonNull Track track, int retries) throws TrackSearchException {
         if (track instanceof YouTubeTrack) {
-            return clientsBySource.get(TrackSource.Youtube).getStreamUrl(track, retries);
+            return clientsBySource.get(TrackSource.Youtube).getTrackStream(track, retries);
         } else if (track instanceof SoundCloudTrack) {
-            return clientsBySource.get(TrackSource.Soundcloud).getStreamUrl(track, retries);
+            return clientsBySource.get(TrackSource.Soundcloud).getTrackStream(track, retries);
         }
         throw new TrackSearchException("Track type is unknown");
     }
@@ -167,7 +168,7 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
         } catch (InterruptedException e) {
             throw new TrackSearchException(e);
         } catch (ExecutionException e) {
-            throw new TrackSearchException("An error occurred acquiring a tracklist", e);
+            throw new TrackSearchException("An error occurred acquiring a track list", e);
         }
 
         TrackListUtility.mergePositionValues(list, POSITION_KEY, OFFSET_KEY);

@@ -29,7 +29,7 @@ public class TrackFormat {
 
     private final String mimeType;
 
-    private final FormatType formatType;
+    private final FormatType type;
 
     private final String audioQuality;
 

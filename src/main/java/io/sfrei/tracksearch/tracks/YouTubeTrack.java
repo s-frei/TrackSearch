@@ -16,8 +16,9 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.clients.interfaces.functional.StreamURLFunction;
+import io.sfrei.tracksearch.clients.interfaces.functional.TrackStreamProvider;
 import io.sfrei.tracksearch.clients.setup.TrackSource;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import lombok.Builder;
@@ -36,20 +37,20 @@ public class YouTubeTrack extends BaseTrack implements Track {
     @Getter
     private final YouTubeTrackMetadata trackMetadata;
 
-    private final StreamURLFunction<YouTubeTrack> streamUrlFunction;
+    private final TrackStreamProvider<YouTubeTrack> trackStreamProvider;
 
     @Builder
     public YouTubeTrack(String title, Duration duration, String url, YouTubeTrackInfo trackInfo,
-                        YouTubeTrackMetadata trackMetadata, StreamURLFunction<YouTubeTrack> streamUrlFunction) {
+                        YouTubeTrackMetadata trackMetadata, TrackStreamProvider<YouTubeTrack> trackStreamProvider) {
         super(TrackSource.Youtube, title, duration, url);
         this.trackInfo = trackInfo;
         this.trackMetadata = trackMetadata;
-        this.streamUrlFunction = streamUrlFunction;
+        this.trackStreamProvider = trackStreamProvider;
     }
 
     @Override
-    public String getStreamUrl() {
-        return streamUrlFunction.apply(this);
+    public TrackStream getStream() {
+        return trackStreamProvider.apply(this);
     }
 
     @Getter

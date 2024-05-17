@@ -30,6 +30,7 @@ import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.CacheMap;
@@ -106,7 +107,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
             throw new YouTubeException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
 
         final String trackJSON = Client.request(api.getForUrlWithParams(url, TRACK_PARAMS)).contentOrThrow();
-        final YouTubeTrack youTubeTrack = youTubeUtility.extractYouTubeTrack(trackJSON, this::streamURLProvider);
+        final YouTubeTrack youTubeTrack = youTubeUtility.extractYouTubeTrack(trackJSON, this::trackStreamProvider);
         final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, url, this::requestURL);
         youTubeTrack.setTrackInfo(trackInfo);
         return youTubeTrack;
@@ -116,7 +117,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
             throws TrackSearchException {
 
         final String tracksJSON = Client.request(api.getSearchForKeywords(search, params)).contentOrThrow();
-        return youTubeUtility.extractYouTubeTracks(tracksJSON, queryType, search, this::provideNext, this::streamURLProvider);
+        return youTubeUtility.extractYouTubeTracks(tracksJSON, queryType, search, this::provideNext, this::trackStreamProvider);
     }
 
     @Override
@@ -143,17 +144,19 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     }
 
     @Override
-    public String getStreamUrl(@NonNull final YouTubeTrack youtubeTrack) throws TrackSearchException {
+    public TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack) throws TrackSearchException {
 
         // Always load new track info to make retries possible - TODO: Not required on first try
         final String trackJSON = Client.request(api.getForUrlWithParams(youtubeTrack.getUrl(), TRACK_PARAMS)).contentOrThrow();
         final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, youtubeTrack.getUrl(), this::requestURL);
         youtubeTrack.setTrackInfo(trackInfo);
 
-        final YouTubeTrackFormat youtubeTrackFormat = TrackFormatUtility.getBestYouTubeTrackFormat(youtubeTrack, false);
+        final YouTubeTrackFormat trackFormat = TrackFormatUtility.getBestYouTubeTrackFormat(youtubeTrack, false);
 
-        if (youtubeTrackFormat.isStreamReady())
-            return URLUtility.decode(youtubeTrackFormat.getUrl());
+        if (trackFormat.isStreamReady()) {
+            final String streamUrl = URLUtility.decode(trackFormat.getUrl());
+            return new TrackStream(streamUrl, trackFormat);
+        }
 
         final String scriptUrl = youtubeTrack.getTrackInfo().getScriptUrlOrThrow();
 
@@ -166,16 +169,17 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
             scriptCache.put(scriptUrl, scriptContent);
         }
 
-        final String signature = youTubeUtility.getSignature(youtubeTrackFormat, scriptUrl, scriptContent);
-        final String trackFormatUrl = youtubeTrackFormat.getUrl();
+        final String signature = youTubeUtility.getSignature(trackFormat, scriptUrl, scriptContent);
+        final String trackFormatUrl = trackFormat.getUrl();
 
-        return URLUtility.addRequestParam(trackFormatUrl, youtubeTrackFormat.getSigParam(), signature);
+        final String streamUrl = URLUtility.addRequestParam(trackFormatUrl, trackFormat.getSigParam(), signature);
+        return new TrackStream(streamUrl, trackFormat);
     }
 
     @Override
-    public String getStreamUrl(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
-        return getStreamUrl(this, youtubeTrack, this::requestAndGetCode, retries)
-                .orElseThrow(() -> noStreamUrlAfterRetriesException(YouTubeException::new, retries));
+    public TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
+        return getTrackStream(this, youtubeTrack, this::requestAndGetCode, retries)
+                .orElseThrow(() -> noTrackStreamAfterRetriesException(YouTubeException::new, retries));
     }
 
     private Map<String, String> getPagingParams(final Map<String, String> queryInformation) {

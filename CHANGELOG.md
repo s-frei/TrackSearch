@@ -4,6 +4,13 @@ Changelog
 0.9.1 - unreleased
 ------------------
 
+**Breaking:**
+
+- Stream URLs are now wrapped in `TrackStream` to also have related data like `TrackFormat` available
+  and can be now accessed with `TrackStream.url()`
+    - `Track.getStreamURL()` changed to `Track.getStream()`
+    - `TrackSearchClient.getStreamURL()` changed to `TrackSearchClient.getTrackStream()`
+
 **Features:**
 
 - Determine the best audio format for SoundCloudTrack

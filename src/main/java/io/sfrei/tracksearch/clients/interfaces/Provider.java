@@ -21,6 +21,7 @@ import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import org.jetbrains.annotations.Nullable;
 
 public interface Provider<T extends Track> extends TrackSearchClient<T>, ClientLogger {
@@ -37,9 +38,9 @@ public interface Provider<T extends Track> extends TrackSearchClient<T>, ClientL
 
 
     @Nullable
-    default String streamURLProvider(final T track) {
+    default TrackStream trackStreamProvider(final T track) {
         try {
-            return getStreamUrl(track, TrackSearchConfig.resolvingRetries);
+            return getTrackStream(track, TrackSearchConfig.resolvingRetries);
         } catch (TrackSearchException e) {
             log().error("Error occurred acquiring stream URL", e);
         }

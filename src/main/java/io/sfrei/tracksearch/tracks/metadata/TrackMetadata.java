@@ -23,27 +23,27 @@ public interface TrackMetadata {
      *
      * @return the channel name.
      */
-    String getChannelName();
+    String channelName();
 
     /**
      * Get the URL of the publishers channel.
      *
      * @return the channel URL.
      */
-    String getChannelUrl();
+    String channelUrl();
 
     /**
      * Get the amount of streams.
      *
      * @return the stream amount.
      */
-    Long getStreamAmount();
+    Long streamAmount();
 
     /**
      * Get the URL of the media thumbnail (small).
      *
      * @return the thumbnail URL.
      */
-    String getThumbNailUrl();
+    String thumbNailUrl();
 
 }

@@ -16,19 +16,6 @@
 
 package io.sfrei.tracksearch.tracks.metadata;
 
-import lombok.ToString;
-import lombok.Value;
-
-@Value(staticConstructor = "of")
-@ToString
-public class YouTubeTrackMetadata implements TrackMetadata {
-
-    String channelName;
-
-    String channelUrl;
-
-    Long streamAmount;
-
-    String thumbNailUrl;
-
+public record YouTubeTrackMetadata(String channelName, String channelUrl, Long streamAmount,
+                                   String thumbNailUrl) implements TrackMetadata {
 }

@@ -47,7 +47,7 @@ public class ResponseProviderFactory extends Converter.Factory {
         static final StringProvider INSTANCE = new StringProvider();
 
         @Override
-        public ResponseWrapper convert(ResponseBody responseBody) {
+        public ResponseWrapper convert(@NotNull ResponseBody responseBody) {
             return wrapResponse(responseBody);
         }
     }

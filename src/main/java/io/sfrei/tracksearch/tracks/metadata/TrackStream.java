@@ -16,7 +16,4 @@
 
 package io.sfrei.tracksearch.tracks.metadata;
 
-public record SoundCloudTrackMetadata(String channelName, String channelUrl, Long streamAmount,
-                                      String thumbNailUrl) implements TrackMetadata {
-
-}
+public record TrackStream(String url, TrackFormat format) {}

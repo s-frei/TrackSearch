@@ -21,6 +21,7 @@ import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Condition;
@@ -35,6 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static io.sfrei.tracksearch.clients.TestSuite.SEARCH_KEYS;
+import static io.sfrei.tracksearch.clients.TestSuite.SINGLE_SEARCH_KEY;
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -45,21 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track> extends Client {
-
-    protected static final String SINGLE_SEARCH_KEY = "Ben Böhmer";
-
-    private static final List<String> SEARCH_KEYS = List.of(
-            SINGLE_SEARCH_KEY,
-            "Tale Of Us",
-            "Hans Zimmer",
-            "Paul Kalkbrenner",
-            "Einmusik",
-            "Mind Against",
-            "Adriatique",
-            "Fideles",
-            "Marek Hemmann",
-            "Christian Löffler"
-    );
 
     protected final C trackSearchClient;
 
@@ -189,25 +177,25 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .isNotNull();
 
         assertions.assertThat(trackMetadata)
-                .extracting(TrackMetadata::getChannelName)
+                .extracting(TrackMetadata::channelName)
                 .as("TrackMetadata should have channel name for Track '%s'", track.getUrl())
                 .asString()
                 .isNotEmpty();
 
         assertions.assertThat(trackMetadata)
-                .extracting(TrackMetadata::getChannelUrl)
+                .extracting(TrackMetadata::channelUrl)
                 .as("TrackMetadata should have channel URL for Track '%s'", track.getUrl())
                 .asString()
                 .isNotEmpty();
 
         assertions.assertThat(trackMetadata)
-                .extracting(TrackMetadata::getStreamAmount, as(InstanceOfAssertFactories.LONG))
+                .extracting(TrackMetadata::streamAmount, as(InstanceOfAssertFactories.LONG))
                 .as("TrackMetadata should have stream amount for Track '%s'", track.getUrl())
                 .isNotNull()
                 .isNotNegative();
 
         assertions.assertThat(trackMetadata)
-                .extracting(TrackMetadata::getThumbNailUrl)
+                .extracting(TrackMetadata::thumbNailUrl)
                 .as("TrackMetadata should have thumbnail URL for Track '%s'", track.getUrl())
                 .asString()
                 .isNotEmpty();
@@ -218,16 +206,20 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(7)
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
-    public void getStreamUrl(Track track) {
-        final String streamUrl = assertDoesNotThrow(track::getStreamUrl,
-                String.format("Stream URL resolving should not throw for: %s", track.getUrl()));
+    public void getTrackStream(Track track) {
+        final TrackStream trackStream = assertDoesNotThrow(track::getStream,
+                String.format("Track stream resolving should not throw for: %s", track.getUrl()));
 
-        assertThat(streamUrl)
-                .as("Track should have stream URL for Track '%s'", track.getUrl())
+        assertThat(trackStream.url())
+                .as("Track stream should have stream URL for Track '%s'", track.getUrl())
                 .isNotEmpty();
 
-        log.trace("StreamURL: {}", streamUrl);
-        final int code = requestAndGetCode(streamUrl);
+        assertThat(trackStream.format())
+                .as("Track stream should have format for Track '%s'", track.getUrl())
+                .isNotNull();
+
+        log.trace("StreamURL: {}", trackStream.url());
+        final int code = requestAndGetCode(trackStream.url());
 
         assertThat(code)
                 .is(new Condition<>(Client::successResponseCode, "Stream URL response is 2xx"));
