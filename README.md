@@ -64,12 +64,12 @@ There could be more added if there are interesting sources to go for.
 <dependency>
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.9.0</version>
+    <version>0.10.0</version>
 </dependency>
 ```
 
 ```kotlin
-implementation("io.sfrei:tracksearch:0.9.0")
+implementation("io.sfrei:tracksearch:0.10.0")
 ```
 
 on [GitHub Packages](https://github.com/s-frei/TrackSearch/packages) or directly from 
