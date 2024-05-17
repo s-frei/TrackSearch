@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.interfaces.functional;
+package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.tracks.Track;
-import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
 @FunctionalInterface
-public interface TrackStreamProvider<T extends Track> extends Function<T, TrackStream> {
+public interface TrackListProvider<T extends Track> extends Function<TrackList<T>, TrackList<T>> {
 
-    /**
-     * Function to return the stream URL for given track.
-     * @param t the track to get the stream URL for.
-     * @return the stream URL or null when any exception occurred.
-     */
     @Nullable
     @Override
-    TrackStream apply(T t);
+    TrackList<T> apply(TrackList<T> trackList);
 
 }

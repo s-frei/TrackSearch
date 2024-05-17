@@ -16,15 +16,12 @@
 
 package io.sfrei.tracksearch.clients.youtube;
 
-import io.sfrei.tracksearch.clients.interfaces.ClientHelper;
-import io.sfrei.tracksearch.clients.interfaces.Provider;
-import io.sfrei.tracksearch.clients.setup.Client;
-import io.sfrei.tracksearch.clients.setup.QueryType;
-import io.sfrei.tracksearch.clients.setup.ResponseProviderFactory;
-import io.sfrei.tracksearch.clients.setup.SingleSearchClient;
+import io.sfrei.tracksearch.clients.common.QueryType;
+import io.sfrei.tracksearch.clients.common.ResponseProviderFactory;
+import io.sfrei.tracksearch.clients.common.SearchClient;
+import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
-import io.sfrei.tracksearch.exceptions.UniformClientException;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.Track;
@@ -48,9 +45,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.sfrei.tracksearch.clients.common.SharedClient.OK_HTTP_CLIENT;
+import static io.sfrei.tracksearch.clients.common.SharedClient.request;
+
 @Slf4j
-public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
-        implements ClientHelper, Provider<YouTubeTrack>, UniformClientException {
+public class YouTubeClient implements SearchClient<YouTubeTrack> {
 
     public static final String URL = "https://www.youtube.com";
     public static final String PAGING_KEY = "ctoken";
@@ -76,14 +75,9 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
 
     public YouTubeClient() {
 
-        super(
-                (uri, cookie) -> cookie.getName().equals("YSC") || cookie.getName().equals("VISITOR_INFO1_LIVE") || cookie.getName().equals("GPS"),
-                Map.of("Cookie", "CONSENT=YES+cb.20210328-17-p0.en+FX+478")
-        );
-
         final Retrofit base = new Retrofit.Builder()
                 .baseUrl(URL)
-                .client(okHttpClient)
+                .client(OK_HTTP_CLIENT)
                 .addConverterFactory(ResponseProviderFactory.create())
                 .build();
 
@@ -106,9 +100,9 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
         if (!isApplicableForURL(url))
             throw new YouTubeException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
 
-        final String trackJSON = Client.request(api.getForUrlWithParams(url, TRACK_PARAMS)).contentOrThrow();
+        final String trackJSON = request(api.getForUrlWithParams(url, TRACK_PARAMS)).contentOrThrow();
         final YouTubeTrack youTubeTrack = youTubeUtility.extractYouTubeTrack(trackJSON, this::trackStreamProvider);
-        final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, url, this::requestURL);
+        final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, url);
         youTubeTrack.setTrackInfo(trackInfo);
         return youTubeTrack;
     }
@@ -116,7 +110,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     private GenericTrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search, @NonNull final Map<String, String> params, QueryType queryType)
             throws TrackSearchException {
 
-        final String tracksJSON = Client.request(api.getSearchForKeywords(search, params)).contentOrThrow();
+        final String tracksJSON = request(api.getSearchForKeywords(search, params)).contentOrThrow();
         return youTubeUtility.extractYouTubeTracks(tracksJSON, queryType, search, this::provideNext, this::trackStreamProvider);
     }
 
@@ -147,8 +141,8 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
     public TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack) throws TrackSearchException {
 
         // Always load new track info to make retries possible - TODO: Not required on first try
-        final String trackJSON = Client.request(api.getForUrlWithParams(youtubeTrack.getUrl(), TRACK_PARAMS)).contentOrThrow();
-        final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, youtubeTrack.getUrl(), this::requestURL);
+        final String trackJSON = request(api.getForUrlWithParams(youtubeTrack.getUrl(), TRACK_PARAMS)).contentOrThrow();
+        final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, youtubeTrack.getUrl());
         youtubeTrack.setTrackInfo(trackInfo);
 
         final YouTubeTrackFormat trackFormat = TrackFormatUtility.getBestYouTubeTrackFormat(youtubeTrack, false);
@@ -165,7 +159,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
             log.trace("Use cached script for: {}", scriptUrl);
             scriptContent = scriptCache.get(scriptUrl);
         } else {
-            scriptContent = requestURL(URL + scriptUrl).contentOrThrow();
+            scriptContent = SharedClient.request(URL + scriptUrl).contentOrThrow();
             scriptCache.put(scriptUrl, scriptContent);
         }
 
@@ -178,7 +172,7 @@ public class YouTubeClient extends SingleSearchClient<YouTubeTrack>
 
     @Override
     public TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
-        return getTrackStream(this, youtubeTrack, this::requestAndGetCode, retries)
+        return getTrackStream(this, youtubeTrack, retries)
                 .orElseThrow(() -> noTrackStreamAfterRetriesException(YouTubeException::new, retries));
     }
 

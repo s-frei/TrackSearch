@@ -17,9 +17,9 @@
 package io.sfrei.tracksearch.clients.soundcloud;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.sfrei.tracksearch.clients.interfaces.functional.NextTrackListFunction;
-import io.sfrei.tracksearch.clients.interfaces.functional.TrackStreamProvider;
-import io.sfrei.tracksearch.clients.setup.QueryType;
+import io.sfrei.tracksearch.tracks.TrackListProvider;
+import io.sfrei.tracksearch.tracks.TrackStreamProvider;
+import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
@@ -103,7 +103,7 @@ public final class SoundCloudUtility {
     }
 
     GenericTrackList<SoundCloudTrack> extractSoundCloudTracks(final String json, final QueryType queryType, final String query,
-                                                              final NextTrackListFunction<SoundCloudTrack> nextTrackListFunction,
+                                                              final TrackListProvider<SoundCloudTrack> nextTrackListFunction,
                                                               final TrackStreamProvider<SoundCloudTrack> trackStreamProvider)
             throws SoundCloudException {
 

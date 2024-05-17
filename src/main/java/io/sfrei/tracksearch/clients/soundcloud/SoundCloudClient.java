@@ -17,13 +17,10 @@
 package io.sfrei.tracksearch.clients.soundcloud;
 
 
-import io.sfrei.tracksearch.clients.interfaces.ClientHelper;
-import io.sfrei.tracksearch.clients.interfaces.Provider;
-import io.sfrei.tracksearch.clients.setup.*;
+import io.sfrei.tracksearch.clients.common.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
-import io.sfrei.tracksearch.exceptions.UniformClientException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.Track;
@@ -38,12 +35,12 @@ import org.slf4j.Logger;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
-import java.net.CookiePolicy;
 import java.util.*;
 
+import static io.sfrei.tracksearch.clients.common.SharedClient.*;
+
 @Slf4j
-public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
-        implements ClientHelper, Provider<SoundCloudTrack>, UniformClientException {
+public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
 
     public static final String URL = "https://soundcloud.com";
     private static final String INFORMATION_PREFIX = "sc";
@@ -61,11 +58,9 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
 
     public SoundCloudClient() {
 
-        super(CookiePolicy.ACCEPT_ALL, null);
-
         final Retrofit base = new Retrofit.Builder()
                 .baseUrl(URL)
-                .client(okHttpClient)
+                .client(OK_HTTP_CLIENT)
                 .addConverterFactory(ResponseProviderFactory.create())
                 .build();
 
@@ -136,7 +131,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
 
     @Override
     public TrackStream getTrackStream(@NonNull SoundCloudTrack soundCloudTrack, final int retries) throws TrackSearchException {
-        return getTrackStream(this, soundCloudTrack, this::requestAndGetCode, retries)
+        return getTrackStream(this, soundCloudTrack, retries)
                 .orElseThrow(() -> noTrackStreamAfterRetriesException(SoundCloudException::new, retries));
     }
 
@@ -146,8 +141,8 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
 
     private ResponseWrapper clientIDRequest(final Call<ResponseWrapper> call, final boolean firstRequest) throws SoundCloudException {
 
-        final ResponseWrapper response = Client.request(call);
-        if (response.contentPresent() && !response.isHttpCode(Client.UNAUTHORIZED)) {
+        final ResponseWrapper response = request(call);
+        if (response.contentPresent() && !response.isHttpCode(UNAUTHORIZED)) {
             return response;
         }
 
@@ -169,11 +164,11 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
     }
 
     private String getClientID() throws TrackSearchException {
-        final ResponseWrapper response = Client.request(api.getStartPage());
+        final ResponseWrapper response = request(api.getStartPage());
         final String content = response.contentOrThrow();
         final List<String> crossOriginScripts = soundCloudUtility.getCrossOriginScripts(content);
         for (final String scriptUrl : crossOriginScripts) {
-            final ResponseWrapper scriptResponse = requestURL(scriptUrl);
+            final ResponseWrapper scriptResponse = SharedClient.request(scriptUrl);
             if (scriptResponse.contentPresent()) {
                 final Optional<String> clientID = soundCloudUtility.getClientID(scriptResponse.getContent());
                 if (clientID.isPresent()) {

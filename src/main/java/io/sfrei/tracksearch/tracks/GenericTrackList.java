@@ -16,8 +16,7 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.clients.interfaces.functional.NextTrackListFunction;
-import io.sfrei.tracksearch.clients.setup.QueryType;
+import io.sfrei.tracksearch.clients.common.QueryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,7 +40,7 @@ public class GenericTrackList<T extends Track> extends ArrayList<T> implements T
     private final Map<String, String> queryInformation = new HashMap<>();
 
     @ToString.Exclude
-    private final NextTrackListFunction<T> nextTrackListFunction;
+    private final TrackListProvider<T> nextTrackListFunction;
 
     public GenericTrackList<T> withTracks(Collection<T> tracks) {
         super.addAll(tracks);

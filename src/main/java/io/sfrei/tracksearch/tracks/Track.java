@@ -16,7 +16,7 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.clients.setup.TrackSource;
+import io.sfrei.tracksearch.clients.common.TrackSource;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
 import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import io.sfrei.tracksearch.utils.ReplaceUtility;

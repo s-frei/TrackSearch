@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.interfaces;
+package io.sfrei.tracksearch.clients.common;
 
-import org.slf4j.Logger;
-
-public interface ClientLogger {
-
-    /**
-     * Obtain the logger from the implementing class.
-     * @return the logger.
-     */
-    Logger log();
-
+public enum QueryType {
+    UNKNOWN, SEARCH, PAGING, PLAYLIST, USER
 }

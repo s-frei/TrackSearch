@@ -16,7 +16,7 @@
 
 package io.sfrei.tracksearch.clients;
 
-import io.sfrei.tracksearch.clients.setup.TrackSource;
+import io.sfrei.tracksearch.clients.common.TrackSource;
 import io.sfrei.tracksearch.clients.soundcloud.SoundCloudClientTest;
 import io.sfrei.tracksearch.clients.youtube.YouTubeClientTest;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
@@ -31,8 +31,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.sfrei.tracksearch.clients.TestSuite.SINGLE_SEARCH_KEY;
-import static io.sfrei.tracksearch.clients.setup.TrackSource.Soundcloud;
-import static io.sfrei.tracksearch.clients.setup.TrackSource.Youtube;
+import static io.sfrei.tracksearch.clients.common.TrackSource.Soundcloud;
+import static io.sfrei.tracksearch.clients.common.TrackSource.Youtube;
 
 /**
  * Even tho the clients are already tested separately

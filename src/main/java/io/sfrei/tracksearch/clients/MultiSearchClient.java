@@ -16,9 +16,9 @@
 
 package io.sfrei.tracksearch.clients;
 
-import io.sfrei.tracksearch.clients.interfaces.Provider;
-import io.sfrei.tracksearch.clients.setup.QueryType;
-import io.sfrei.tracksearch.clients.setup.TrackSource;
+import io.sfrei.tracksearch.clients.common.QueryType;
+import io.sfrei.tracksearch.clients.common.SearchClient;
+import io.sfrei.tracksearch.clients.common.TrackSource;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.*;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @SuppressWarnings({"FieldCanBeLocal", "unchecked"})
-public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track> {
+public class MultiSearchClient implements MultiTrackSearchClient, SearchClient<Track> {
 
     public static final String POSITION_KEY = "multi" + TrackSearchConfig.POSITION_KEY_SUFFIX;
     public static final String OFFSET_KEY = "multi" + TrackSearchConfig.OFFSET_KEY_SUFFIX;

@@ -16,7 +16,7 @@
 
 package io.sfrei.tracksearch.clients.soundcloud;
 
-import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
+import io.sfrei.tracksearch.clients.common.ResponseWrapper;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;

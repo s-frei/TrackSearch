@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.setup;
+package io.sfrei.tracksearch.clients.common;
 
-public enum QueryType {
-    UNKNOWN, SEARCH, PAGING, PLAYLIST, USER
+import org.slf4j.Logger;
+
+public interface ClientLogger {
+
+    /**
+     * Obtain the logger from the implementing class.
+     * @return the logger.
+     */
+    Logger log();
+
 }

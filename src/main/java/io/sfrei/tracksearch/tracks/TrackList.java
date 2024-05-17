@@ -16,7 +16,7 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.clients.setup.QueryType;
+import io.sfrei.tracksearch.clients.common.QueryType;
 
 import java.util.List;
 import java.util.Map;

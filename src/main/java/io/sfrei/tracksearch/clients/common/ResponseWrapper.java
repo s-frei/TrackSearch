@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.setup;
+package io.sfrei.tracksearch.clients.common;
 
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import lombok.AccessLevel;

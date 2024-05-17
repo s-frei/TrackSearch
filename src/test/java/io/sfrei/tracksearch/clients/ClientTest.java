@@ -16,7 +16,7 @@
 
 package io.sfrei.tracksearch.clients;
 
-import io.sfrei.tracksearch.clients.setup.Client;
+import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
@@ -31,7 +31,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -47,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Getter
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track> extends Client {
+public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track> extends SharedClient {
 
     protected final C trackSearchClient;
 
@@ -62,7 +61,6 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     }
 
     public ClientTest(C searchClient, boolean single) {
-        super(CookiePolicy.ACCEPT_ALL, null);
         this.trackSearchClient = searchClient;
         this.searchKeys = single ? List.of(SINGLE_SEARCH_KEY) : SEARCH_KEYS;
         tracksForSearch = new ArrayList<>();
@@ -222,7 +220,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
         final int code = requestAndGetCode(trackStream.url());
 
         assertThat(code)
-                .is(new Condition<>(Client::successResponseCode, "Stream URL response is 2xx"));
+                .is(new Condition<>(SharedClient::successResponseCode, "Stream URL response is 2xx"));
     }
 
 }

@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.interfaces.functional;
+package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.tracks.Track;
-import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
 @FunctionalInterface
-public interface NextTrackListFunction<T extends Track> extends Function<TrackList<T>, TrackList<T>> {
+public interface TrackStreamProvider<T extends Track> extends Function<T, TrackStream> {
 
-    /**
-     * Function to return the next tracks for given track list.
-     * @param trackList the track list holding the paging information to get next for.
-     * @return the next track list or null when any exception occurred.
-     */
     @Nullable
     @Override
-    TrackList<T> apply(TrackList<T> trackList);
+    TrackStream apply(T t);
 
 }

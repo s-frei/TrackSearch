@@ -16,7 +16,7 @@
 
 package io.sfrei.tracksearch.clients.youtube;
 
-import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
+import io.sfrei.tracksearch.clients.common.ResponseWrapper;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import retrofit2.Call;
 import retrofit2.http.*;

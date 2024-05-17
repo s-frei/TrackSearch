@@ -18,10 +18,10 @@ package io.sfrei.tracksearch.clients.youtube;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.sfrei.tracksearch.clients.interfaces.functional.NextTrackListFunction;
-import io.sfrei.tracksearch.clients.interfaces.functional.TrackStreamProvider;
-import io.sfrei.tracksearch.clients.setup.QueryType;
-import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
+import io.sfrei.tracksearch.clients.common.QueryType;
+import io.sfrei.tracksearch.clients.common.SharedClient;
+import io.sfrei.tracksearch.tracks.TrackListProvider;
+import io.sfrei.tracksearch.tracks.TrackStreamProvider;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
@@ -39,14 +39,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-public final class YouTubeUtility {
+class YouTubeUtility {
 
     private static final String JS_SPLICE = ".splice";
     private static final String JS_SLICE = ".slice";
@@ -94,7 +93,7 @@ public final class YouTubeUtility {
     }
 
     GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String json, final QueryType queryType, final String query,
-                                                                  final NextTrackListFunction<YouTubeTrack> nextTrackListFunction,
+                                                                  final TrackListProvider<YouTubeTrack> nextTrackListFunction,
                                                                   final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
             throws YouTubeException {
 
@@ -172,7 +171,7 @@ public final class YouTubeUtility {
                 .asString("token");
     }
 
-    YouTubeTrackInfo extractTrackInfo(final String json, final String trackUrl, Function<String, ResponseWrapper> requester)
+    YouTubeTrackInfo extractTrackInfo(final String json, final String trackUrl)
             throws YouTubeException {
 
         try {
@@ -216,7 +215,7 @@ public final class YouTubeUtility {
             if (trackFormats.stream().anyMatch(YouTubeTrackFormat::isStreamNotReady) && scriptUrl.get() == null) {
                 log.trace("Try to get player script trough embedded URL");
                 final String embeddedUrl = trackUrl.replace("youtube.com/", "youtube.com/embed/");
-                final String embeddedPageContent = requester.apply(embeddedUrl).getContent();
+                final String embeddedPageContent = SharedClient.request(embeddedUrl).getContent();
                 if (embeddedPageContent != null) {
                     final Matcher matcher = EMBEDDED_PLAYER_SCRIPT_PATTERN.matcher(embeddedPageContent);
                     if (matcher.find()) {
