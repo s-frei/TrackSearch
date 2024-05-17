@@ -90,8 +90,17 @@ public class MultiSearchClient implements MultiTrackSearchClient, SearchClient<T
     }
 
     @Override
-    public TrackStream getTrackStream(@NonNull final Track track) throws TrackSearchException {
+    public void refreshTrackInfo(Track track) throws TrackSearchException {
+        if (track instanceof YouTubeTrack) {
+            clientsBySource.get(TrackSource.Youtube).refreshTrackInfo(track);
+        } else if (track instanceof SoundCloudTrack) {
+            clientsBySource.get(TrackSource.Soundcloud).refreshTrackInfo(track);
+        }
+        throw new TrackSearchException("Track type is unknown");
+    }
 
+    @Override
+    public TrackStream getTrackStream(@NonNull final Track track) throws TrackSearchException {
         if (track instanceof YouTubeTrack) {
             return clientsBySource.get(TrackSource.Youtube).getTrackStream(track);
         } else if (track instanceof SoundCloudTrack) {

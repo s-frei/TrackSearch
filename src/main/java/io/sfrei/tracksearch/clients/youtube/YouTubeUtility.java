@@ -67,7 +67,7 @@ class YouTubeUtility {
     );
     private static final Pattern EMBEDDED_PLAYER_SCRIPT_PATTERN = Pattern.compile("src=\"(/[a-zA-Z0-9/-_.]+base.js)\"");
 
-    private final CacheMap<String, SignatureResolver> sigResolverCache = new CacheMap<>();
+    private static final CacheMap<String, SignatureResolver> sigResolverCache = new CacheMap<>();
 
     private static final ObjectMapper MAPPER = ObjectMapperBuilder.create()
             .addDeserializer(YouTubeTrack.ListYouTubeTrackBuilder.class, new YouTubeListTrackDeserializer())
@@ -78,7 +78,7 @@ class YouTubeUtility {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
 
-    YouTubeTrack extractYouTubeTrack(final String json, final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
+    static YouTubeTrack extractYouTubeTrack(final String json, final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
             throws YouTubeException {
 
         final JsonElement trackJsonElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -90,7 +90,7 @@ class YouTubeUtility {
                 .build();
     }
 
-    GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String json, final QueryType queryType, final String query,
+    static GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String json, final QueryType queryType, final String query,
                                                         final TrackListProvider<YouTubeTrack> nextTrackListFunction,
                                                         final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
             throws YouTubeException {
@@ -169,7 +169,7 @@ class YouTubeUtility {
                 .asString("token");
     }
 
-    YouTubeTrackInfo extractTrackInfo(final String json, final String trackUrl)
+    static YouTubeTrackInfo extractTrackInfo(final String json, final String trackUrl)
             throws YouTubeException {
 
         final JsonElement jsonElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -235,7 +235,7 @@ class YouTubeUtility {
                 .paths("playerResponse");
     }
 
-    private Stream<YouTubeTrackFormat> getFormatsFromStream(final Stream<JsonElement> formats) {
+    private static Stream<YouTubeTrackFormat> getFormatsFromStream(final Stream<JsonElement> formats) {
         return formats.map(format -> {
             final String mimeType = format.asString("mimeType");
             final String audioQuality = format.asString("audioQuality");
@@ -270,7 +270,7 @@ class YouTubeUtility {
         });
     }
 
-    private Map<String, SignaturePart.SignatureOccurrence> getObfuscateFunctionDefinitions(final String scriptPart) {
+    private static Map<String, SignaturePart.SignatureOccurrence> getObfuscateFunctionDefinitions(final String scriptPart) {
         final HashMap<String, SignaturePart.SignatureOccurrence> obfuscateFunctionsDefinitions = new HashMap<>();
         final String[] functions = scriptPart.split("\n");
         for (final String function : functions) {
@@ -293,12 +293,12 @@ class YouTubeUtility {
         return obfuscateFunctionsDefinitions;
     }
 
-    private String getFunctionName(final String wholeFunction) {
+    private static String getFunctionName(final String wholeFunction) {
         final String[] split = wholeFunction.split(":function");
         return split.length > 0 ? split[0] : null;
     }
 
-    String getSignature(final YouTubeTrackFormat youtubeTrackFormat, String scriptUrl, final String scriptBody)
+    static String getSignature(final YouTubeTrackFormat youtubeTrackFormat, String scriptUrl, final String scriptBody)
             throws YouTubeException {
 
         final String sigValue = youtubeTrackFormat.getSigValue();

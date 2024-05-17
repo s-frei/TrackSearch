@@ -63,7 +63,15 @@ public interface SearchClient<T extends Track> extends TrackSearchClient<T>, Cli
 
             } catch (TrackSearchException e) {
                 retries--;
-                if (retries > 0) log().warn("Not able getting stream for - {} tries left: {}", retries, e.getMessage());
+                if (retries > 0) {
+                    log().warn("Not able getting stream for - {} tries left: {}", retries, e.getMessage());
+                    try {
+                        log().trace("Refreshing track information...");
+                        refreshTrackInfo(track);
+                    } catch (TrackSearchException ex) {
+                        log().error("Failed refreshing track information", e);
+                    }
+                }
             }
 
         } while (retries >= 0);
@@ -88,7 +96,7 @@ public interface SearchClient<T extends Track> extends TrackSearchClient<T>, Cli
         try {
             return getTrackStream(track, TrackSearchConfig.resolvingRetries);
         } catch (TrackSearchException e) {
-            log().error("Error occurred acquiring stream URL", e);
+            log().error("Error occurred acquiring stream URL for: {}", track.getUrl(), e);
         }
         return null;
     }

@@ -77,6 +77,14 @@ interface TrackSearchClient<T extends Track> {
     TrackList<T> getNext(@NonNull TrackList<? extends Track> trackList) throws TrackSearchException;
 
     /**
+     * Reload the track information. This comes handy when the stream URL resolving fails.
+     *
+     * @param track the track to reload the information for.
+     * @throws TrackSearchException if information cannot be updated.
+     */
+    void refreshTrackInfo(T track) throws TrackSearchException;
+
+    /**
      * Get the audio stream with the highest possible audio resolution.
      *
      * @param track from this client.

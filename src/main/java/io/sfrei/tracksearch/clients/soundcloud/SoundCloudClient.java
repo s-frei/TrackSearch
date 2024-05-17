@@ -30,6 +30,7 @@ import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
+import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import io.sfrei.tracksearch.utils.TrackFormatComparator;
 import lombok.NonNull;
@@ -55,7 +56,6 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
     private static final Set<String> VALID_URL_PREFIXES = Set.of(URL); // TODO: Extend
 
     private final SoundCloudAPI api;
-    private final SoundCloudUtility soundCloudUtility;
 
     private String clientID;
 
@@ -68,7 +68,6 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
                 .build();
 
         api = base.create(SoundCloudAPI.class);
-        soundCloudUtility = new SoundCloudUtility();
         refreshClientID();
     }
 
@@ -87,9 +86,9 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
             throw new SoundCloudException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
 
         final String trackHTML = clientIDRequest(api.getForUrlWithClientID(url, clientID)).contentOrThrow();
-        final String trackURL = soundCloudUtility.extractTrackURL(trackHTML);
+        final String trackURL = SoundCloudUtility.extractTrackURL(trackHTML);
         final String trackJSON = clientIDRequest(api.getForUrlWithClientID(trackURL, clientID)).contentOrThrow();
-        return soundCloudUtility.extractSoundCloudTrack(trackJSON, this::trackStreamProvider);
+        return SoundCloudUtility.extractSoundCloudTrack(trackJSON, this::trackStreamProvider);
     }
 
     private GenericTrackList<SoundCloudTrack> getTracksForSearch(final String search, int position, int offset, QueryType queryType)
@@ -99,7 +98,7 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
         final String tracksJSON = clientIDRequest(api.getSearchForKeywords(search, clientID, pagingParams))
                 .contentOrThrow();
 
-        return soundCloudUtility.extractSoundCloudTracks(tracksJSON, queryType, search, this::provideNext, this::trackStreamProvider);
+        return SoundCloudUtility.extractSoundCloudTracks(tracksJSON, queryType, search, this::provideNext, this::trackStreamProvider);
     }
 
     @Override
@@ -125,10 +124,17 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
     }
 
     @Override
+    public void refreshTrackInfo(SoundCloudTrack track) throws TrackSearchException {
+        final String trackHTML = clientIDRequest(api.getForUrlWithClientID(track.getUrl(), clientID)).contentOrThrow();
+        final SoundCloudTrackInfo trackInfo = SoundCloudUtility.extractTrackInfoFromHTML(trackHTML);
+        track.setTrackInfo(trackInfo);
+    }
+
+    @Override
     public TrackStream getTrackStream(@NonNull final SoundCloudTrack soundCloudTrack) throws TrackSearchException {
         final SoundCloudTrackFormat trackFormat = TrackFormatComparator.getBestSoundCloudTrackFormat(soundCloudTrack);
         final String trackFormatJSON = clientIDRequest(api.getForUrlWithClientID(trackFormat.getUrl(), clientID)).contentOrThrow();
-        final String streamUrl = soundCloudUtility.extractStreamUrl(trackFormatJSON);
+        final String streamUrl = SoundCloudUtility.extractStreamUrl(trackFormatJSON);
         return new TrackStream(streamUrl, trackFormat);
     }
 
@@ -169,11 +175,11 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
     private String getClientID() throws TrackSearchException {
         final ResponseWrapper response = request(api.getStartPage());
         final String content = response.contentOrThrow();
-        final List<String> crossOriginScripts = soundCloudUtility.getCrossOriginScripts(content);
+        final List<String> crossOriginScripts = SoundCloudUtility.getCrossOriginScripts(content);
         for (final String scriptUrl : crossOriginScripts) {
             final ResponseWrapper scriptResponse = SharedClient.request(scriptUrl);
             if (scriptResponse.contentPresent()) {
-                final Optional<String> clientID = soundCloudUtility.getClientID(scriptResponse.getContent());
+                final Optional<String> clientID = SoundCloudUtility.getClientID(scriptResponse.getContent());
                 if (clientID.isPresent()) {
                     return clientID.get();
                 }

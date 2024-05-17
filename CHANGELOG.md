@@ -14,6 +14,7 @@ Changelog
 **Features:**
 
 - Determine the best audio format for SoundCloudTrack
+- Various code and performance improvements
 - Updated dependencies
 
 **Bugfixes:**

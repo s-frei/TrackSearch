@@ -56,7 +56,7 @@ public final class SoundCloudUtility {
     private static final ObjectMapper MAPPER = ObjectMapperBuilder.create()
             .addDeserializer(SoundCloudTrack.SoundCloudTrackBuilder.class, new SoundCloudTrackDeserializer()).get();
 
-    List<String> getCrossOriginScripts(final String html) {
+    static List<String> getCrossOriginScripts(final String html) {
         final Document doc = Jsoup.parse(html);
         final Elements scriptsDom = doc.getElementsByTag("script");
         return scriptsDom.stream()
@@ -66,7 +66,7 @@ public final class SoundCloudUtility {
                 .collect(Collectors.toList());
     }
 
-    Optional<String> getClientID(final String script) {
+    static Optional<String> getClientID(final String script) {
         final Matcher clientIdMatcher = SOUNDCLOUD_CLIENT_ID_PATTERN.matcher(script);
         if (clientIdMatcher.find()) {
             final String clientID = clientIdMatcher.group()
@@ -78,7 +78,7 @@ public final class SoundCloudUtility {
         return Optional.empty();
     }
 
-    String extractTrackURL(final String html) throws TrackSearchException {
+    static String extractTrackURL(final String html) throws TrackSearchException {
         Document document = Jsoup.parse(html);
         Element embedUrlMeta = document.select("meta[itemprop=embedUrl]").first();
 
@@ -90,7 +90,7 @@ public final class SoundCloudUtility {
                 .orElseThrow(() -> new TrackSearchException("Failed extracting track URL"));
     }
 
-    SoundCloudTrack extractSoundCloudTrack(final String json,
+    static SoundCloudTrack extractSoundCloudTrack(final String json,
                                            final TrackStreamProvider<SoundCloudTrack> trackStreamProvider)
             throws SoundCloudException {
 
@@ -102,7 +102,7 @@ public final class SoundCloudUtility {
                 .build();
     }
 
-    GenericTrackList<SoundCloudTrack> extractSoundCloudTracks(final String json, final QueryType queryType, final String query,
+    static GenericTrackList<SoundCloudTrack> extractSoundCloudTracks(final String json, final QueryType queryType, final String query,
                                                               final TrackListProvider<SoundCloudTrack> nextTrackListFunction,
                                                               final TrackStreamProvider<SoundCloudTrack> trackStreamProvider)
             throws SoundCloudException {
@@ -127,7 +127,7 @@ public final class SoundCloudUtility {
         return trackList;
     }
 
-    SoundCloudTrackInfo extractTrackInfoFromHTML(final String html) throws SoundCloudException {
+    static SoundCloudTrackInfo extractTrackInfoFromHTML(final String html) throws SoundCloudException {
 
         Document document = Jsoup.parse(html);
 
@@ -173,7 +173,7 @@ public final class SoundCloudUtility {
         return new SoundCloudTrackInfo(trackFormats);
     }
 
-    String extractStreamUrl(final String json) throws SoundCloudException {
+    static String extractStreamUrl(final String json) throws SoundCloudException {
         return JsonElement.readTreeCatching(MAPPER, json)
                 .map(element -> element.asString("url"))
                 .orElseThrow(() -> new SoundCloudException("Cannot extract stream URL from JSON"));

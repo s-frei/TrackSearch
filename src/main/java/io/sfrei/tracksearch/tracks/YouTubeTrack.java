@@ -17,7 +17,10 @@
 package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.TrackSource;
-import io.sfrei.tracksearch.tracks.metadata.*;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
+import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
+import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
+import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

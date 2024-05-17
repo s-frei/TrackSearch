@@ -62,13 +62,12 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
     public static final Map<String, String> TRACK_PARAMS = Map.of("pbj", "1", "hl", "en", "alt", "json");
 
     private static final Map<String, String> DEFAULT_SEARCH_PARAMS = Stream.of(VIDEO_SEARCH_PARAMS.entrySet(), TRACK_PARAMS.entrySet())
-          .flatMap(Set::stream)
-          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            .flatMap(Set::stream)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private static final Set<String> VALID_URL_PREFIXES = Set.of(URL); // TODO: Extend
 
     private final YouTubeAPI api;
-    private final YouTubeUtility youTubeUtility;
 
     private final CacheMap<String, String> scriptCache;
 
@@ -81,7 +80,6 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
                 .build();
 
         api = base.create(YouTubeAPI.class);
-        youTubeUtility = new YouTubeUtility();
         scriptCache = new CacheMap<>();
     }
 
@@ -100,8 +98,8 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
             throw new YouTubeException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
 
         final String trackJSON = request(api.getForUrlWithParams(url, TRACK_PARAMS)).contentOrThrow();
-        final YouTubeTrack youTubeTrack = youTubeUtility.extractYouTubeTrack(trackJSON, this::trackStreamProvider);
-        final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, url);
+        final YouTubeTrack youTubeTrack = YouTubeUtility.extractYouTubeTrack(trackJSON, this::trackStreamProvider);
+        final YouTubeTrackInfo trackInfo = YouTubeUtility.extractTrackInfo(trackJSON, url);
         youTubeTrack.setTrackInfo(trackInfo);
         return youTubeTrack;
     }
@@ -110,7 +108,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
             throws TrackSearchException {
 
         final String tracksJSON = request(api.getSearchForKeywords(search, params)).contentOrThrow();
-        return youTubeUtility.extractYouTubeTracks(tracksJSON, queryType, search, this::provideNext, this::trackStreamProvider);
+        return YouTubeUtility.extractYouTubeTracks(tracksJSON, queryType, search, this::provideNext, this::trackStreamProvider);
     }
 
     @Override
@@ -137,13 +135,14 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
     }
 
     @Override
+    public void refreshTrackInfo(YouTubeTrack youTubeTrack) throws TrackSearchException {
+        final String trackJSON = request(api.getForUrlWithParams(youTubeTrack.getUrl(), TRACK_PARAMS)).contentOrThrow();
+        final YouTubeTrackInfo trackInfo = YouTubeUtility.extractTrackInfo(trackJSON, youTubeTrack.getUrl());
+        youTubeTrack.setTrackInfo(trackInfo);
+    }
+
+    @Override
     public TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack) throws TrackSearchException {
-
-        // Always load new track info to make retries possible - TODO: Not required on first try
-        final String trackJSON = request(api.getForUrlWithParams(youtubeTrack.getUrl(), TRACK_PARAMS)).contentOrThrow();
-        final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, youtubeTrack.getUrl());
-        youtubeTrack.setTrackInfo(trackInfo);
-
         final YouTubeTrackFormat trackFormat = TrackFormatComparator.getBestYouTubeTrackFormat(youtubeTrack, false);
 
         if (trackFormat.isStreamReady()) {
@@ -162,7 +161,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
             scriptCache.put(scriptUrl, scriptContent);
         }
 
-        final String signature = youTubeUtility.getSignature(trackFormat, scriptUrl, scriptContent);
+        final String signature = YouTubeUtility.getSignature(trackFormat, scriptUrl, scriptContent);
         final String trackFormatUrl = trackFormat.getUrl();
 
         final String streamUrl = URLModifier.addRequestParam(trackFormatUrl, trackFormat.getSigParam(), signature);

@@ -55,7 +55,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
 
     private final List<Named<TrackList<T>>> tracksForSearch;
 
-    private Stream<Named<Track>> getAllTracksFromTrackLists() {
+    private Stream<Named<T>> getAllTracksFromTrackLists() {
         return tracksForSearch.stream()
                 .flatMap(trackList -> trackList.getPayload().stream())
                 .map(track -> Named.of(String.format("%s - %s", track.getTitle(), track.getUrl()), track));
@@ -105,7 +105,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(4)
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
-    public void trackListGotPagingValues(TrackList<Track> trackList) {
+    public void trackListGotPagingValues(TrackList<T> trackList) {
         final boolean hasPagingValues = trackSearchClient.hasPagingValues(trackList);
 
         assertThat(hasPagingValues)
@@ -116,7 +116,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(5)
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
-    public void getNextTracks(TrackList<Track> trackList) throws TrackSearchException {
+    public void getNextTracks(TrackList<T> trackList) throws TrackSearchException {
 
         log.trace("Get next: {}", trackList);
         TrackList<T> nextTracksForSearch = trackSearchClient.getNext(trackList);
@@ -136,7 +136,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(6)
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
-    public static void checkTrack(Track track) {
+    public void checkTrack(T track) {
         log.trace("{}", track.pretty());
 
         final SoftAssertions assertions = new SoftAssertions();
@@ -168,7 +168,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(7)
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
-    public static void checkTrackInfo(Track track) {
+    public void checkTrackInfo(T track) {
         log.trace("{}", track.pretty());
 
         final SoftAssertions assertions = new SoftAssertions();
@@ -203,12 +203,15 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .isNotEmpty();
 
         assertions.assertAll();
+
+        assertDoesNotThrow(() -> trackSearchClient.refreshTrackInfo(track),
+                String.format("Track info refresh should not throw for: %s", track.getUrl()));
     }
 
     @Order(8)
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
-    public static void checkTrackMetadata(Track track) {
+    public void checkTrackMetadata(Track track) {
         log.trace("{}", track.pretty());
 
         final SoftAssertions assertions = new SoftAssertions();
