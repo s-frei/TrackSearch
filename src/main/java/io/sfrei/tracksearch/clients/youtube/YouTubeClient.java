@@ -18,7 +18,7 @@ package io.sfrei.tracksearch.clients.youtube;
 
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.clients.common.ResponseProviderFactory;
-import io.sfrei.tracksearch.clients.common.SearchClient;
+import io.sfrei.tracksearch.clients.SearchClient;
 import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
@@ -31,7 +31,7 @@ import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.CacheMap;
-import io.sfrei.tracksearch.utils.TrackFormatUtility;
+import io.sfrei.tracksearch.utils.TrackFormatComparator;
 import io.sfrei.tracksearch.utils.TrackListUtility;
 import io.sfrei.tracksearch.utils.URLUtility;
 import lombok.NonNull;
@@ -145,7 +145,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
         final YouTubeTrackInfo trackInfo = youTubeUtility.extractTrackInfo(trackJSON, youtubeTrack.getUrl());
         youtubeTrack.setTrackInfo(trackInfo);
 
-        final YouTubeTrackFormat trackFormat = TrackFormatUtility.getBestYouTubeTrackFormat(youtubeTrack, false);
+        final YouTubeTrackFormat trackFormat = TrackFormatComparator.getBestYouTubeTrackFormat(youtubeTrack, false);
 
         if (trackFormat.isStreamReady()) {
             final String streamUrl = URLUtility.decode(trackFormat.getUrl());

@@ -23,7 +23,11 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @ToString(callSuper = true)
-public class YouTubeTrackFormat extends TrackFormat {
+public class YouTubeTrackFormat implements TrackFormat {
+
+    private final MimeType mimeType;
+    private final String audioQuality;
+    private final String url;
 
     private final String audioSampleRate;
     private final String sigParam;

@@ -16,23 +16,10 @@
 
 package io.sfrei.tracksearch.tracks.metadata;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
+public interface TrackFormat {
 
-@Getter
-@ToString
-@SuperBuilder
-@AllArgsConstructor
-public class TrackFormat {
+    MimeType getMimeType();
 
-    private final String mimeType;
-
-    private final FormatType type;
-
-    private final String audioQuality;
-
-    private final String url;
+    String getUrl();
 
 }

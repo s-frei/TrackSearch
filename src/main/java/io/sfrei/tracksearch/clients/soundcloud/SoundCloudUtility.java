@@ -17,15 +17,15 @@
 package io.sfrei.tracksearch.clients.soundcloud;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.sfrei.tracksearch.tracks.TrackListProvider;
-import io.sfrei.tracksearch.tracks.TrackStreamProvider;
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
+import io.sfrei.tracksearch.tracks.TrackListProvider;
+import io.sfrei.tracksearch.tracks.TrackStreamProvider;
 import io.sfrei.tracksearch.tracks.deserializer.soundcloud.SoundCloudTrackDeserializer;
-import io.sfrei.tracksearch.tracks.metadata.FormatType;
+import io.sfrei.tracksearch.tracks.metadata.MimeType;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.utils.ObjectMapperBuilder;
@@ -156,19 +156,16 @@ public final class SoundCloudUtility {
         final List<SoundCloudTrackFormat> trackFormats = jsonElement.paths("media", "transcodings")
                 .arrayElements()
                 .map(transcoding -> {
-                    final String formatUrl = transcoding.asString("url");
-                    final String audioQuality = transcoding.asString("quality");
-
                     final JsonElement formatElement = transcoding.paths("format");
                     final String mimeType = formatElement.asString("mime_type");
                     final String protocol = formatElement.asString("protocol");
 
+                    final String url = transcoding.asString("url");
+
                     return SoundCloudTrackFormat.builder()
-                            .mimeType(mimeType)
-                            .type(FormatType.Audio)
-                            .audioQuality(audioQuality)
+                            .mimeType(MimeType.byIdentifier(mimeType))
                             .protocol(protocol)
-                            .url(formatUrl)
+                            .url(url)
                             .build();
                 })
                 .collect(Collectors.toList());

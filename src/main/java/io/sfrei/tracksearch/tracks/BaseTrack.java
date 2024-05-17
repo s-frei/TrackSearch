@@ -16,7 +16,7 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.clients.common.TrackSource;
+import io.sfrei.tracksearch.clients.TrackSource;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

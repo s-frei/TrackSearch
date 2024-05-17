@@ -16,7 +16,6 @@
 
 package io.sfrei.tracksearch.clients;
 
-import io.sfrei.tracksearch.clients.common.TrackSource;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;

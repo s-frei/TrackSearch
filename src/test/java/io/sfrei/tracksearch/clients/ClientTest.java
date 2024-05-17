@@ -221,8 +221,6 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
 
         for (TrackFormat format : formats) {
 
-            log.trace("MIME-TYPE - {}: {}", track.getSource(), format.getMimeType());
-
             assertions.assertThat(format)
                     .extracting(TrackFormat::getMimeType)
                     .as("TrackFormat should have a mime type Track '%s'", track.getUrl())

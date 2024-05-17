@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.common;
+package io.sfrei.tracksearch.clients;
 
-import io.sfrei.tracksearch.clients.TrackSearchClient;
+import io.sfrei.tracksearch.clients.common.ClientLogger;
+import io.sfrei.tracksearch.clients.common.QueryType;
+import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
@@ -57,13 +59,11 @@ public interface SearchClient<T extends Track> extends TrackSearchClient<T>, Cli
 
                 if (SharedClient.successResponseCode(code)) return Optional.of(trackStream);
 
-                retries--;
-
-                if (retries > 0) log().warn("Not able getting stream for - {} tries left", retries);
+                throw new TrackSearchException(String.format("Failed getting stream URL - response %s", code));
 
             } catch (TrackSearchException e) {
-                log().error("Error occurred getting stream for: {}", track, e);
-                return Optional.empty();
+                retries--;
+                if (retries > 0) log().warn("Not able getting stream for - {} tries left: {}", retries, e.getMessage());
             }
 
         } while (retries >= 0);

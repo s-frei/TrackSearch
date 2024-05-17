@@ -23,7 +23,10 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @ToString(callSuper = true)
 @SuperBuilder
-public class SoundCloudTrackFormat extends TrackFormat {
+public class SoundCloudTrackFormat implements TrackFormat {
+
+    private final MimeType mimeType;
+    private final String url;
 
     private final String protocol;
 

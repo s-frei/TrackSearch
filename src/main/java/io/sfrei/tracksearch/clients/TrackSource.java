@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.common;
+package io.sfrei.tracksearch.clients;
 
-import io.sfrei.tracksearch.clients.TrackSearchClient;
 import io.sfrei.tracksearch.clients.soundcloud.SoundCloudClient;
 import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
 import io.sfrei.tracksearch.tracks.Track;
-
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public enum TrackSource {
 
     Youtube, Soundcloud;
 
-    public static Set<TrackSource> setOf(TrackSource... sources) {
-        return Arrays.stream(sources).collect(Collectors.toSet());
-    }
-
-    public <T extends Track> TrackSearchClient<T> createClient() {
+    @SuppressWarnings({"unchecked", "ClassEscapesDefinedScope"})
+    <T extends Track> TrackSearchClient<T> createClient() {
         return (TrackSearchClient<T>) switch (this) {
             case Youtube -> new YouTubeClient();
             case Soundcloud -> new SoundCloudClient();

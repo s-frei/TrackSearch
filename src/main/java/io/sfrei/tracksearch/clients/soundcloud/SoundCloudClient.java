@@ -17,6 +17,7 @@
 package io.sfrei.tracksearch.clients.soundcloud;
 
 
+import io.sfrei.tracksearch.clients.SearchClient;
 import io.sfrei.tracksearch.clients.common.*;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
@@ -27,7 +28,7 @@ import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.TrackStream;
-import io.sfrei.tracksearch.utils.TrackFormatUtility;
+import io.sfrei.tracksearch.utils.TrackFormatComparator;
 import io.sfrei.tracksearch.utils.TrackListUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -123,7 +124,7 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
 
     @Override
     public TrackStream getTrackStream(@NonNull final SoundCloudTrack soundCloudTrack) throws TrackSearchException {
-        final SoundCloudTrackFormat trackFormat = TrackFormatUtility.getBestSoundCloudTrackFormat(soundCloudTrack);
+        final SoundCloudTrackFormat trackFormat = TrackFormatComparator.getBestSoundCloudTrackFormat(soundCloudTrack);
         final String trackFormatJSON = clientIDRequest(api.getForUrlWithClientID(trackFormat.getUrl(), clientID)).contentOrThrow();
         final String streamUrl = soundCloudUtility.extractStreamUrl(trackFormatJSON);
         return new TrackStream(streamUrl, trackFormat);

@@ -29,7 +29,7 @@ import java.util.Set;
  *
  * @param <T> the track type the client implementing this is used for.
  */
-public interface TrackSearchClient<T extends Track> {
+interface TrackSearchClient<T extends Track> {
 
     /**
      * Retrieve all valid URL prefixes used to check {@link #isApplicableForURL(String)}.

@@ -26,7 +26,7 @@ import io.sfrei.tracksearch.tracks.TrackStreamProvider;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.deserializer.youtube.YouTubeListTrackDeserializer;
 import io.sfrei.tracksearch.tracks.deserializer.youtube.YouTubeURLTrackDeserializer;
-import io.sfrei.tracksearch.tracks.metadata.FormatType;
+import io.sfrei.tracksearch.tracks.metadata.MimeType;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.CacheMap;
@@ -239,7 +239,6 @@ class YouTubeUtility {
     private Stream<YouTubeTrackFormat> getFormatsFromStream(final Stream<JsonElement> formats) {
         return formats.map(format -> {
             final String mimeType = format.asString("mimeType");
-            final FormatType formatType = FormatType.fromMimeType(mimeType);
             final String audioQuality = format.asString("audioQuality");
             final String audioSampleRate = format.asString("audioSampleRate");
 
@@ -250,8 +249,7 @@ class YouTubeUtility {
             if (cipherElement.isNull()) {
                 final String url = format.asString("url");
                 return YouTubeTrackFormat.builder()
-                        .mimeType(mimeType)
-                        .type(formatType)
+                        .mimeType(MimeType.byIdentifier(mimeType))
                         .audioQuality(audioQuality)
                         .audioSampleRate(audioSampleRate)
                         .streamReady(true)
@@ -261,8 +259,7 @@ class YouTubeUtility {
                 final String cipher = cipherElement.asString();
                 final Map<String, String> params = URLUtility.splitParamsAndDecode(cipher);
                 return YouTubeTrackFormat.builder()
-                        .mimeType(mimeType)
-                        .type(formatType)
+                        .mimeType(MimeType.byIdentifier(mimeType))
                         .audioQuality(audioQuality)
                         .audioSampleRate(audioSampleRate)
                         .streamReady(false)

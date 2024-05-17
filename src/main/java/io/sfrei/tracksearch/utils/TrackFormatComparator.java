@@ -21,7 +21,7 @@ import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
-import io.sfrei.tracksearch.tracks.metadata.FormatType;
+import io.sfrei.tracksearch.tracks.metadata.MimeType;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import lombok.Getter;
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @UtilityClass
-public class TrackFormatUtility {
+public class TrackFormatComparator {
 
     private static final String EXCEPTION_MESSAGE = "Could not determine applicable track format";
 
@@ -47,12 +47,13 @@ public class TrackFormatUtility {
 
         for (YouTubeTrackFormat trackFormat : formats) {
 
-            final FormatType formatType = trackFormat.getType();
+            final MimeType mimeType = trackFormat.getMimeType();
 
-            if (formatType == null || formatType.equals(FormatType.Unknown))
+            if (mimeType == null || mimeType.equals(MimeType.UNKNOWN)) {
                 continue;
+            }
 
-            if (!formatType.equals(FormatType.Audio) && !includeVideo)
+            if (mimeType.isVideo() && !includeVideo)
                 continue;
 
             if (trackFormat.getAudioQuality() == null && !includeVideo) {
@@ -65,21 +66,26 @@ public class TrackFormatUtility {
             }
 
             final String currentAudioQuality = bestFormat.get().getAudioQuality();
-            final String anotherAudioQuality = trackFormat.getAudioQuality();
+            final String audioQuality = trackFormat.getAudioQuality();
 
-            final boolean sameQuality = YouTubeAudioQuality.audioQualitySame(currentAudioQuality, anotherAudioQuality);
+            final boolean sameQuality = YouTubeAudioQuality.audioQualitySame(currentAudioQuality, audioQuality);
 
-            if (!sameQuality && YouTubeAudioQuality.audioQualityBetter(currentAudioQuality, anotherAudioQuality)) {
+            if (!sameQuality && YouTubeAudioQuality.audioQualityBetter(currentAudioQuality, audioQuality)) {
                 bestFormat.set(trackFormat);
                 continue;
+            }
+
+            if (!includeVideo && trackFormat.getMimeType().equals(MimeType.AUDIO_WEBM) && !bestFormat.get().getMimeType().equals(MimeType.AUDIO_WEBM) && sameQuality) {
+                bestFormat.set(trackFormat);
             }
 
             if (trackFormat.getAudioSampleRate() == null)
                 continue;
 
             final int currentSampleRate = Integer.parseInt(bestFormat.get().getAudioSampleRate());
-            final int anotherSampleRate = Integer.parseInt(trackFormat.getAudioSampleRate());
-            if (currentSampleRate < anotherSampleRate && sameQuality) {
+            final int sampleRate = Integer.parseInt(trackFormat.getAudioSampleRate());
+
+            if (currentSampleRate < sampleRate && sameQuality) {
                 bestFormat.set(trackFormat);
             }
         }
@@ -111,14 +117,13 @@ public class TrackFormatUtility {
                 continue;
             }
 
-            final SoundCloudTrackFormat currentTrackFormat = bestFormat.get();
-            
-            if (trackFormat.getProtocol().equals("hls") && !currentTrackFormat.getProtocol().equals("hls")) {
+            // Available: 'progressive' and 'hls'
+            if (trackFormat.getProtocol().equals("hls") && !bestFormat.get().getProtocol().equals("hls")) {
                 bestFormat.set(trackFormat);
                 continue;
             }
 
-            if (trackFormat.getMimeType().equals("audio/ogg") && !currentTrackFormat.getMimeType().equals("audio/ogg")) {
+            if (trackFormat.getMimeType().equals(MimeType.AUDIO_OGG) && !bestFormat.get().getMimeType().equals(MimeType.AUDIO_OGG)) {
                 bestFormat.set(trackFormat);
             }
 
@@ -140,18 +145,18 @@ public class TrackFormatUtility {
         MEDIUM("AUDIO_QUALITY_MEDIUM"),
         HIGH("AUDIO_QUALITY_HIGH"); //never seen
 
-        final String qualityId;
+        final String identifier;
 
-        private static int getOrdinalForQuality(final String qualityId) {
+        private static int getOrdinalForQuality(final String identifier) {
             return Arrays.stream(YouTubeAudioQuality.values())
-                    .filter(quality -> quality.getQualityId().equals(qualityId))
+                    .filter(quality -> quality.getIdentifier().equals(identifier))
                     .map(Enum::ordinal)
                     .findFirst()
                     .orElse(-1);
         }
 
-        public static boolean audioQualitySame(final String current, final String other) {
-            return YouTubeAudioQuality.getOrdinalForQuality(current) == YouTubeAudioQuality.getOrdinalForQuality(other);
+        public static boolean audioQualitySame(final String first, final String second) {
+            return YouTubeAudioQuality.getOrdinalForQuality(first) == YouTubeAudioQuality.getOrdinalForQuality(second);
         }
 
         public static boolean audioQualityBetter(final String current, final String other) {
