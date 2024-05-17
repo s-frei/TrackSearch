@@ -17,12 +17,14 @@
 package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.common.TrackSource;
+import io.sfrei.tracksearch.tracks.metadata.TrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
 import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import io.sfrei.tracksearch.utils.ReplaceUtility;
 import io.sfrei.tracksearch.utils.TimeUtility;
 
 import java.time.Duration;
+import java.util.List;
 
 public interface Track {
 
@@ -82,6 +84,13 @@ public interface Track {
      * @return the audio stream URL or null when resolving fails.
      */
     TrackStream getStream();
+
+    /**
+     * Get the available track formats.
+     *
+     * @return a list of available track formats.
+     */
+    List<? extends TrackFormat> getFormats();
 
     /**
      * Get metadata like, channel, views and so on.

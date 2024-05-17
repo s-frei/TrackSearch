@@ -17,15 +17,14 @@
 package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.common.TrackSource;
-import io.sfrei.tracksearch.tracks.metadata.TrackStream;
-import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
-import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
+import io.sfrei.tracksearch.tracks.metadata.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Duration;
+import java.util.List;
 
 public class YouTubeTrack extends BaseTrack implements Track {
 
@@ -50,6 +49,11 @@ public class YouTubeTrack extends BaseTrack implements Track {
     @Override
     public TrackStream getStream() {
         return trackStreamProvider.apply(this);
+    }
+
+    @Override
+    public List<YouTubeTrackFormat> getFormats() {
+        return trackInfo.getFormats();
     }
 
     @Getter

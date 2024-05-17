@@ -17,13 +17,12 @@
 package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.common.TrackSource;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
-import io.sfrei.tracksearch.tracks.metadata.TrackStream;
+import io.sfrei.tracksearch.tracks.metadata.*;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.Duration;
+import java.util.List;
 
 
 public class SoundCloudTrack extends BaseTrack implements Track {
@@ -48,6 +47,11 @@ public class SoundCloudTrack extends BaseTrack implements Track {
     @Override
     public TrackStream getStream() {
         return trackStreamProvider.apply(this);
+    }
+
+    @Override
+    public List<SoundCloudTrackFormat> getFormats() {
+        return trackInfo.getFormats();
     }
 
 }

@@ -20,6 +20,7 @@ import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.metadata.TrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
 import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.Getter;
@@ -37,16 +38,16 @@ import java.util.stream.Stream;
 
 import static io.sfrei.tracksearch.clients.TestSuite.SEARCH_KEYS;
 import static io.sfrei.tracksearch.clients.TestSuite.SINGLE_SEARCH_KEY;
+import static io.sfrei.tracksearch.clients.common.SharedClient.requestAndGetCode;
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 @Getter
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track> extends SharedClient {
+public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track> {
 
     protected final C trackSearchClient;
 
@@ -85,7 +86,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @MethodSource("trackURLs")
     public void trackForURL(String url) throws TrackSearchException {
         final Track trackForURL = trackSearchClient.getTrack(url);
-        checkTrackAndMetadata(trackForURL);
+        checkTrackMetadata(trackForURL);
     }
 
     @Order(3)
@@ -134,14 +135,8 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
 
     @Order(6)
     @ParameterizedTest
-    @MethodSource("getTracksForSearch")
-    public void checkTracksAndMetadata(TrackList<Track> trackList) {
-        for (Track track : trackList) {
-            checkTrackAndMetadata(track);
-        }
-    }
-
-    public static void checkTrackAndMetadata(Track track) {
+    @MethodSource("getAllTracksFromTrackLists")
+    public static void checkTrack(Track track) {
         log.trace("{}", track.pretty());
 
         final SoftAssertions assertions = new SoftAssertions();
@@ -167,8 +162,17 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .as("Track should have duration for '%s'", track.getUrl())
                 .isNotNull();
 
+        assertions.assertAll();
+    }
+
+    @Order(7)
+    @ParameterizedTest
+    @MethodSource("getAllTracksFromTrackLists")
+    public static void checkTrackInfo(Track track) {
+        log.trace("{}", track.pretty());
+
+        final SoftAssertions assertions = new SoftAssertions();
         final TrackMetadata trackMetadata = track.getTrackMetadata();
-        assertNotNull(trackMetadata);
 
         assertions.assertThat(trackMetadata)
                 .as("TrackMetadata should not be null for Track '%s'", track.getUrl())
@@ -201,14 +205,50 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
         assertions.assertAll();
     }
 
-    @Order(7)
+    @Order(8)
+    @ParameterizedTest
+    @MethodSource("getAllTracksFromTrackLists")
+    public static void checkTrackMetadata(Track track) {
+        log.trace("{}", track.pretty());
+
+        final SoftAssertions assertions = new SoftAssertions();
+        final List<? extends TrackFormat> formats = track.getFormats();
+
+        assertions.assertThat(formats)
+                .as("Track formats should not be null or empty for Track '%s'", track.getUrl())
+                .isNotNull()
+                .isNotEmpty();
+
+        for (TrackFormat format : formats) {
+
+            log.trace("MIME-TYPE - {}: {}", track.getSource(), format.getMimeType());
+
+            assertions.assertThat(format)
+                    .extracting(TrackFormat::getMimeType)
+                    .as("TrackFormat should have a mime type Track '%s'", track.getUrl())
+                    .asString()
+                    .isNotEmpty();
+
+            assertions.assertThat(format)
+                    .extracting(TrackFormat::getUrl)
+                    .as("TrackFormat should have a URL for Track '%s'", track.getUrl())
+                    .asString()
+                    .isNotEmpty();
+
+        }
+
+        assertions.assertAll();
+    }
+
+    @Order(9)
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void getTrackStream(Track track) {
         final TrackStream trackStream = assertDoesNotThrow(track::getStream,
                 String.format("Track stream resolving should not throw for: %s", track.getUrl()));
 
-        assertThat(trackStream.url())
+        final String streamUrl = trackStream.url();
+        assertThat(streamUrl)
                 .as("Track stream should have stream URL for Track '%s'", track.getUrl())
                 .isNotEmpty();
 
@@ -216,8 +256,8 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .as("Track stream should have format for Track '%s'", track.getUrl())
                 .isNotNull();
 
-        log.trace("StreamURL: {}", trackStream.url());
-        final int code = requestAndGetCode(trackStream.url());
+        log.trace("StreamURL: {}", streamUrl);
+        @SuppressWarnings("DataFlowIssue") final int code = requestAndGetCode(streamUrl);
 
         assertThat(code)
                 .is(new Condition<>(SharedClient::successResponseCode, "Stream URL response is 2xx"));
