@@ -27,18 +27,21 @@ public interface TrackList<T extends Track> extends List<T> {
 
     /**
      * The type of query tracks were returned for.
+     *
      * @return the used query type.
      */
     QueryType getQueryType();
 
     /**
      * Return the next track list for query.
+     *
      * @return the next track list.
      */
     TrackList<T> next();
 
     /**
      * Get all information used for the query.
+     *
      * @return all query information.
      */
     Map<String, String> getQueryInformation();
@@ -46,6 +49,7 @@ public interface TrackList<T extends Track> extends List<T> {
 
     /**
      * Get a query information parsed to an int.
+     *
      * @param key the key of the query information.
      * @return the int value of the query information.
      */
@@ -53,17 +57,34 @@ public interface TrackList<T extends Track> extends List<T> {
 
     /**
      * Add a query information value.
-     * @param key the key of the query information.
+     *
+     * @param key   the key of the query information.
      * @param value the value of the query information.
      */
     void addQueryInformationValue(String key, int value);
 
     /**
      * Get the value used for the query.
+     *
      * @return the query value.
      */
     default String getQueryValue() {
         return getQueryInformation().get(QUERY_KEY);
+    }
+
+    /**
+     * Check if query information contains all provided keys.
+     *
+     * @param keys the keys to check.
+     * @return if all keys contained in the query information.
+     */
+    default boolean hasQueryInformation(final String... keys) {
+        final Map<String, String> queryInformation = getQueryInformation();
+        for (final String key : keys) {
+            if (queryInformation.get(key) == null)
+                return false;
+        }
+        return true;
     }
 
 }

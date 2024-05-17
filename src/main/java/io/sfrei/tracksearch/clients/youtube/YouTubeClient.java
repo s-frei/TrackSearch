@@ -16,9 +16,9 @@
 
 package io.sfrei.tracksearch.clients.youtube;
 
+import io.sfrei.tracksearch.clients.SearchClient;
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.clients.common.ResponseProviderFactory;
-import io.sfrei.tracksearch.clients.SearchClient;
 import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
@@ -32,8 +32,7 @@ import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.CacheMap;
 import io.sfrei.tracksearch.utils.TrackFormatComparator;
-import io.sfrei.tracksearch.utils.TrackListUtility;
-import io.sfrei.tracksearch.utils.URLUtility;
+import io.sfrei.tracksearch.utils.URLModifier;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -132,7 +131,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
             params.putAll(DEFAULT_SEARCH_PARAMS);
 
             final GenericTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryValue(), params, QueryType.PAGING);
-            return TrackListUtility.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
+            return nextTracksForSearch.updatePagingValues(trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw unsupportedQueryTypeException(YouTubeException::new, trackListQueryType);
     }
@@ -148,7 +147,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
         final YouTubeTrackFormat trackFormat = TrackFormatComparator.getBestYouTubeTrackFormat(youtubeTrack, false);
 
         if (trackFormat.isStreamReady()) {
-            final String streamUrl = URLUtility.decode(trackFormat.getUrl());
+            final String streamUrl = URLModifier.decode(trackFormat.getUrl());
             return new TrackStream(streamUrl, trackFormat);
         }
 
@@ -166,7 +165,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
         final String signature = youTubeUtility.getSignature(trackFormat, scriptUrl, scriptContent);
         final String trackFormatUrl = trackFormat.getUrl();
 
-        final String streamUrl = URLUtility.addRequestParam(trackFormatUrl, trackFormat.getSigParam(), signature);
+        final String streamUrl = URLModifier.addRequestParam(trackFormatUrl, trackFormat.getSigParam(), signature);
         return new TrackStream(streamUrl, trackFormat);
     }
 
@@ -183,7 +182,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
 
     @Override
     public boolean hasPagingValues(@NonNull final TrackList<? extends Track> trackList) {
-        return TrackListUtility.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY, PAGING_INFORMATION);
+        return trackList.hasQueryInformation(POSITION_KEY, OFFSET_KEY, PAGING_INFORMATION);
     }
 
     @Override

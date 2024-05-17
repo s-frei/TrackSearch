@@ -23,8 +23,8 @@ import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.YouTubeTrack.YouTubeTrackBuilder;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
-import io.sfrei.tracksearch.utils.ReplaceUtility;
-import io.sfrei.tracksearch.utils.TimeUtility;
+import io.sfrei.tracksearch.utils.StringReplacer;
+import io.sfrei.tracksearch.utils.DurationParser;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,7 +45,7 @@ public class YouTubeListTrackDeserializer extends JsonDeserializer<YouTubeTrack.
         final String ref = rootElement.asString("videoId");
         final String title = rootElement.paths("title", "runs").firstElement().asString("text");
         final String timeString = rootElement.paths("lengthText").asString("simpleText");
-        final Duration duration = TimeUtility.getDurationForTimeString(timeString);
+        final Duration duration = DurationParser.getDurationForTimeString(timeString);
 
         if (title == null || duration == null || ref == null)
             return null;
@@ -70,7 +70,7 @@ public class YouTubeListTrackDeserializer extends JsonDeserializer<YouTubeTrack.
 
         final String streamAmountText = rootElement.paths("viewCountText").asString("simpleText");
         final String streamAmountDigits = streamAmountText == null || streamAmountText.isEmpty() ?
-                null : ReplaceUtility.replaceNonDigits(streamAmountText);
+                null : StringReplacer.replaceNonDigits(streamAmountText);
         final Long streamAmount = streamAmountDigits == null || streamAmountDigits.isEmpty() ?
                 0L : Long.parseLong(streamAmountDigits);
 

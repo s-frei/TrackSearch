@@ -20,8 +20,8 @@ import io.sfrei.tracksearch.clients.TrackSource;
 import io.sfrei.tracksearch.tracks.metadata.TrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
 import io.sfrei.tracksearch.tracks.metadata.TrackStream;
-import io.sfrei.tracksearch.utils.ReplaceUtility;
-import io.sfrei.tracksearch.utils.TimeUtility;
+import io.sfrei.tracksearch.utils.StringReplacer;
+import io.sfrei.tracksearch.utils.DurationParser;
 
 import java.time.Duration;
 import java.util.List;
@@ -48,7 +48,7 @@ public interface Track {
      * @return the clean track title.
      */
     default String getCleanTitle() {
-        return ReplaceUtility.cleanTitle(getTitle());
+        return StringReplacer.cleanTitle(getTitle());
     }
 
     /**
@@ -65,7 +65,7 @@ public interface Track {
      * @return the formatted duration.
      */
     default String durationFormatted() {
-        return TimeUtility.formatSeconds(getDuration());
+        return DurationParser.formatSeconds(getDuration());
     }
 
     /**

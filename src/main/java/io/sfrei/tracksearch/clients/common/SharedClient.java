@@ -17,7 +17,7 @@
 package io.sfrei.tracksearch.clients.common;
 
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
-import io.sfrei.tracksearch.utils.UserAgentUtility;
+import io.sfrei.tracksearch.utils.UserAgent;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +67,7 @@ public class SharedClient {
 
             final Request.Builder modifiedRequestBuilder = chain.request()
                     .newBuilder()
-                    .header("user-agent", UserAgentUtility.getRandomUserAgent());
+                    .header("user-agent", UserAgent.getRandom());
 
             final Request modifiedRequest = modifiedRequestBuilder.build();
 

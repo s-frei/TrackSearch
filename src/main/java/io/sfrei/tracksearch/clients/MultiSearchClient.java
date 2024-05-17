@@ -21,7 +21,6 @@ import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.*;
 import io.sfrei.tracksearch.tracks.metadata.TrackStream;
-import io.sfrei.tracksearch.utils.TrackListUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -29,10 +28,11 @@ import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
-@SuppressWarnings({"FieldCanBeLocal", "unchecked"})
+@SuppressWarnings({"unchecked"})
 public class MultiSearchClient implements MultiTrackSearchClient, SearchClient<Track> {
 
     public static final String POSITION_KEY = "multi" + TrackSearchConfig.POSITION_KEY_SUFFIX;
@@ -169,19 +169,33 @@ public class MultiSearchClient implements MultiTrackSearchClient, SearchClient<T
             throw new TrackSearchException("An error occurred acquiring a track list", e);
         }
 
-        TrackListUtility.mergePositionValues(list, POSITION_KEY, OFFSET_KEY);
+        mergePositionValues(list);
 
         return list;
     }
 
     @Override
     public boolean hasPagingValues(@NotNull final TrackList<? extends Track> trackList) {
-        return TrackListUtility.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
+        return trackList.hasQueryInformation(POSITION_KEY, OFFSET_KEY);
     }
 
     @Override
     public Logger log() {
         return log;
+    }
+
+    private void mergePositionValues(final GenericTrackList<? extends Track> trackList) {
+        final AtomicInteger position = new AtomicInteger(0);
+        final AtomicInteger offset = new AtomicInteger(0);
+
+        for (final String key : trackList.getQueryInformation().keySet()) {
+            if (key.contains(TrackSearchConfig.POSITION_KEY_SUFFIX)) {
+                position.getAndUpdate(pos -> pos + trackList.queryInformationAsInt(key));
+            } else if (key.contains(TrackSearchConfig.OFFSET_KEY_SUFFIX)) {
+                offset.getAndUpdate(off -> off + trackList.queryInformationAsInt(key));
+            }
+        }
+        trackList.setPagingValues(MultiSearchClient.POSITION_KEY, position.get(), MultiSearchClient.OFFSET_KEY, offset.get());
     }
 
 }

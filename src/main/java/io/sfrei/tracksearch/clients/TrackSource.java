@@ -24,7 +24,7 @@ public enum TrackSource {
 
     Youtube, Soundcloud;
 
-    @SuppressWarnings({"unchecked", "ClassEscapesDefinedScope"})
+    @SuppressWarnings({"unchecked"})
     <T extends Track> TrackSearchClient<T> createClient() {
         return (TrackSearchClient<T>) switch (this) {
             case Youtube -> new YouTubeClient();

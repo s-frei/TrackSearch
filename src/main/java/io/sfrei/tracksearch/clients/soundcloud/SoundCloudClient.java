@@ -18,7 +18,10 @@ package io.sfrei.tracksearch.clients.soundcloud;
 
 
 import io.sfrei.tracksearch.clients.SearchClient;
-import io.sfrei.tracksearch.clients.common.*;
+import io.sfrei.tracksearch.clients.common.QueryType;
+import io.sfrei.tracksearch.clients.common.ResponseProviderFactory;
+import io.sfrei.tracksearch.clients.common.ResponseWrapper;
+import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
@@ -29,7 +32,6 @@ import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import io.sfrei.tracksearch.utils.TrackFormatComparator;
-import io.sfrei.tracksearch.utils.TrackListUtility;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -117,7 +119,7 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
             final int queryOffset = TrackSearchConfig.playListOffset;
 
             final GenericTrackList<SoundCloudTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryValue(), queryPosition, queryOffset, QueryType.PAGING);
-            return TrackListUtility.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
+            return nextTracksForSearch.updatePagingValues(trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw unsupportedQueryTypeException(SoundCloudException::new, trackListQueryType);
     }
@@ -186,7 +188,7 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
 
     @Override
     public boolean hasPagingValues(@NonNull final TrackList<? extends Track> trackList) {
-        return TrackListUtility.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
+        return trackList.hasQueryInformation(POSITION_KEY, OFFSET_KEY);
     }
 
     @Override

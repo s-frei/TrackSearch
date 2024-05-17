@@ -23,7 +23,7 @@ import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.YouTubeTrack.YouTubeTrackBuilder;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
-import io.sfrei.tracksearch.utils.TimeUtility;
+import io.sfrei.tracksearch.utils.DurationParser;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +46,7 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
         final String ref = videoDetails.asString("videoId");
         final String title = videoDetails.asString("title");
         final Long lengthSeconds = Long.parseLong(videoDetails.asString("lengthSeconds"));
-        final Duration duration = TimeUtility.getDurationForSeconds(lengthSeconds);
+        final Duration duration = DurationParser.getDurationForSeconds(lengthSeconds);
 
         if (title == null || duration == null || ref == null)
             return null;

@@ -19,7 +19,7 @@ package io.sfrei.tracksearch.utils;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-public class ReplaceUtility {
+public class StringReplacer {
 
     public String cleanTitle(final String title) {
         return title

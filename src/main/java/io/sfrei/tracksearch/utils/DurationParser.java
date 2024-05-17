@@ -22,14 +22,14 @@ import lombok.experimental.UtilityClass;
 import java.time.Duration;
 
 @UtilityClass
-public class TimeUtility {
+public class DurationParser {
 
     public Duration getDurationForTimeString(@NonNull final String time) {
         String[] parts = time.split(":");
 
         long hours = 0;
         long minutes = 0;
-        long seconds = 0;
+        long seconds;
 
         switch (parts.length) {
             case 3:

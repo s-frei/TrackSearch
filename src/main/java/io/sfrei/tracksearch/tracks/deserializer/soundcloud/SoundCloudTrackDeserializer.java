@@ -24,7 +24,7 @@ import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack.SoundCloudTrackBuilder;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
-import io.sfrei.tracksearch.utils.TimeUtility;
+import io.sfrei.tracksearch.utils.DurationParser;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
 
         final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
         final String title = rootElement.asString("title");
-        final Duration duration = TimeUtility.getDurationForMilliseconds(rootElement.asLong("duration"));
+        final Duration duration = DurationParser.getDurationForMilliseconds(rootElement.asLong("duration"));
         final String url = rootElement.asString("permalink_url");
 
         if (title == null || duration == null || url == null)

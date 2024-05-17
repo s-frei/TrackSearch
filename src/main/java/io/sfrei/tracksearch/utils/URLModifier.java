@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class URLUtility {
+public class URLModifier {
 
     private static final String PARAMS_DELIMITER = "&";
     private static final Charset DECODE_CHARSET = StandardCharsets.UTF_8;

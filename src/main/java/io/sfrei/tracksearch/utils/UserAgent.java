@@ -18,7 +18,7 @@ package io.sfrei.tracksearch.utils;
 
 import java.util.Random;
 
-public class UserAgentUtility {
+public class UserAgent {
 
     /**
      * List obtained from <link><a href="https://gist.github.com/fijimunkii/952acac988f2d25bef7e0284bc63c406">...</a></link>
@@ -40,7 +40,7 @@ public class UserAgentUtility {
      * Get a random common user agent.
      * @return common user agent string.
      */
-    public static String getRandomUserAgent() {
+    public static String getRandom() {
         return USER_AGENTS[new Random().nextInt(USER_AGENTS.length)];
     }
     

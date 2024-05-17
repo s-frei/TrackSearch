@@ -72,4 +72,19 @@ public class GenericTrackList<T extends Track> extends ArrayList<T> implements T
         return nextTrackListFunction.apply(this);
     }
 
+    public TrackList<T> updatePagingValues(final TrackList<? extends Track> previousTrackList,
+                                           final String positionKey, String offsetKey) {
+
+        final String previousOffsetValue = previousTrackList.getQueryInformation().get(offsetKey);
+        final String newOffsetValue = getQueryInformation().get(offsetKey);
+
+        if (previousOffsetValue == null || newOffsetValue == null)
+            return setPagingValues(positionKey, 0, offsetKey, 0);
+
+        final int newPosition = Integer.parseInt(previousOffsetValue);
+        final int offset = Integer.parseInt(newOffsetValue);
+        final int newOffset = newPosition + offset;
+        return setPagingValues(positionKey, newPosition, offsetKey, newOffset);
+    }
+
 }

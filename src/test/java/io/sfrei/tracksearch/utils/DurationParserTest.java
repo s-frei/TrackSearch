@@ -26,7 +26,7 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TimeUtilityTest {
+class DurationParserTest {
 
     private static final String HOUR_TIME_STRING = "1:22:45";
     private static final String MINUTE_TIME_STRING = "3:45";
@@ -38,7 +38,7 @@ class TimeUtilityTest {
     @ValueSource(strings = {HOUR_TIME_STRING, MINUTE_TIME_STRING})
     public void canTransform(String timeString) {
 
-        final Duration duration = TimeUtility.getDurationForTimeString(timeString);
+        final Duration duration = DurationParser.getDurationForTimeString(timeString);
 
         assertThat(duration)
                 .as("Duration for %s should not be null", timeString)
@@ -54,12 +54,12 @@ class TimeUtilityTest {
     @Test
     public void correctlyTransformed() {
 
-        assertThat(TimeUtility.getDurationForTimeString(HOUR_TIME_STRING))
+        assertThat(DurationParser.getDurationForTimeString(HOUR_TIME_STRING))
                 .as("Seconds for %s should be exact", HOUR_TIME_STRING)
                 .extracting(Duration::toSeconds, as(InstanceOfAssertFactories.LONG))
                 .isEqualTo(HOUR_TIME_STRING_SECONDS);
 
-        assertThat(TimeUtility.getDurationForTimeString(MINUTE_TIME_STRING))
+        assertThat(DurationParser.getDurationForTimeString(MINUTE_TIME_STRING))
                 .as("Seconds for %s should be exact", MINUTE_TIME_STRING)
                 .extracting(Duration::toSeconds, as(InstanceOfAssertFactories.LONG))
                 .isEqualTo(MINUTE_TIME_STRING_SECONDS);

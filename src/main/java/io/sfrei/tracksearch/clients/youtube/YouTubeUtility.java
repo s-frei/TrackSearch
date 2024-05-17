@@ -31,9 +31,8 @@ import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.utils.CacheMap;
 import io.sfrei.tracksearch.utils.ObjectMapperBuilder;
-import io.sfrei.tracksearch.utils.URLUtility;
+import io.sfrei.tracksearch.utils.URLModifier;
 import io.sfrei.tracksearch.utils.json.JsonElement;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -257,7 +256,7 @@ class YouTubeUtility {
                         .build();
             } else {
                 final String cipher = cipherElement.asString();
-                final Map<String, String> params = URLUtility.splitParamsAndDecode(cipher);
+                final Map<String, String> params = URLModifier.splitParamsAndDecode(cipher);
                 return YouTubeTrackFormat.builder()
                         .mimeType(MimeType.byIdentifier(mimeType))
                         .audioQuality(audioQuality)
@@ -342,12 +341,9 @@ class YouTubeUtility {
         return signatureResolver.resolveSignature(sigValue);
     }
 
-    @Value
-    private static class SignaturePart {
-
-        String functionName;
-        SignatureOccurrence occurrence;
-        Integer parameter;
+    private record SignaturePart(String functionName,
+                                 YouTubeUtility.SignaturePart.SignatureOccurrence occurrence,
+                                 Integer parameter) {
 
         public enum SignatureOccurrence {
             SLICE, SPLICE, REVERSE, SWAP
@@ -369,8 +365,8 @@ class YouTubeUtility {
         private String resolveSignature(final String signatureValue) {
             final StringBuilder signature = new StringBuilder(signatureValue);
             for (final SignaturePart signaturePart : signatureParts) {
-                final Integer parameter = signaturePart.getParameter();
-                switch (signaturePart.getOccurrence()) {
+                final Integer parameter = signaturePart.parameter();
+                switch (signaturePart.occurrence()) {
                     case SLICE:
                     case SPLICE:
                         signature.delete(0, parameter);
