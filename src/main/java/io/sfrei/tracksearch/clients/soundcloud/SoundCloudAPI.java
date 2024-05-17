@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.sfrei.tracksearch.clients.soundcloud;
 
-import io.sfrei.tracksearch.clients.setup.ResponseWrapper;
+import io.sfrei.tracksearch.clients.common.ResponseWrapper;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;

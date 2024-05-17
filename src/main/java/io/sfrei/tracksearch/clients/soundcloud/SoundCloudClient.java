@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,34 @@
 package io.sfrei.tracksearch.clients.soundcloud;
 
 
-import io.sfrei.tracksearch.clients.interfaces.ClientHelper;
-import io.sfrei.tracksearch.clients.interfaces.Provider;
-import io.sfrei.tracksearch.clients.setup.*;
+import io.sfrei.tracksearch.clients.SearchClient;
+import io.sfrei.tracksearch.clients.common.QueryType;
+import io.sfrei.tracksearch.clients.common.ResponseProviderFactory;
+import io.sfrei.tracksearch.clients.common.ResponseWrapper;
+import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
-import io.sfrei.tracksearch.exceptions.UniformClientException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
-import io.sfrei.tracksearch.utils.TrackListUtility;
+import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
+import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
+import io.sfrei.tracksearch.utils.TrackFormatComparator;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
-import java.net.CookiePolicy;
 import java.util.*;
 
+import static io.sfrei.tracksearch.clients.common.SharedClient.*;
+
 @Slf4j
-public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
-        implements ClientHelper, Provider<SoundCloudTrack>, UniformClientException {
+public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
 
     public static final String URL = "https://soundcloud.com";
     private static final String INFORMATION_PREFIX = "sc";
@@ -52,22 +56,18 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
     private static final Set<String> VALID_URL_PREFIXES = Set.of(URL); // TODO: Extend
 
     private final SoundCloudAPI api;
-    private final SoundCloudUtility soundCloudUtility;
 
     private String clientID;
 
     public SoundCloudClient() {
 
-        super(CookiePolicy.ACCEPT_ALL, null);
-
         final Retrofit base = new Retrofit.Builder()
                 .baseUrl(URL)
-                .client(okHttpClient)
+                .client(OK_HTTP_CLIENT)
                 .addConverterFactory(ResponseProviderFactory.create())
                 .build();
 
         api = base.create(SoundCloudAPI.class);
-        soundCloudUtility = new SoundCloudUtility();
         refreshClientID();
     }
 
@@ -85,10 +85,10 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
         if (!isApplicableForURL(url))
             throw new SoundCloudException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
 
-        final String trackHTML = clientIDRequest(api.getForUrlWithClientID(url, clientID)).getContentOrThrow();
-        final String trackURL = soundCloudUtility.extractTrackURL(trackHTML);
-        final String trackJSON = clientIDRequest(api.getForUrlWithClientID(trackURL, clientID)).getContentOrThrow();
-        return soundCloudUtility.extractSoundCloudTrack(trackJSON, this::streamURLProvider);
+        final String trackHTML = clientIDRequest(api.getForUrlWithClientID(url, clientID)).contentOrThrow();
+        final String trackURL = SoundCloudUtility.extractTrackURL(trackHTML);
+        final String trackJSON = clientIDRequest(api.getForUrlWithClientID(trackURL, clientID)).contentOrThrow();
+        return SoundCloudUtility.extractSoundCloudTrack(trackJSON, this::trackStreamProvider);
     }
 
     private GenericTrackList<SoundCloudTrack> getTracksForSearch(final String search, int position, int offset, QueryType queryType)
@@ -96,9 +96,9 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
 
         final Map<String, String> pagingParams = getPagingParams(position, offset);
         final String tracksJSON = clientIDRequest(api.getSearchForKeywords(search, clientID, pagingParams))
-                .getContentOrThrow();
+                .contentOrThrow();
 
-        return soundCloudUtility.extractSoundCloudTracks(tracksJSON, queryType, search, this::provideNext, this::streamURLProvider);
+        return SoundCloudUtility.extractSoundCloudTracks(tracksJSON, queryType, search, this::provideNext, this::trackStreamProvider);
     }
 
     @Override
@@ -118,24 +118,30 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
             final int queryOffset = TrackSearchConfig.playListOffset;
 
             final GenericTrackList<SoundCloudTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryValue(), queryPosition, queryOffset, QueryType.PAGING);
-            return TrackListUtility.updatePagingValues(nextTracksForSearch, trackList, POSITION_KEY, OFFSET_KEY);
+            return nextTracksForSearch.updatePagingValues(trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw unsupportedQueryTypeException(SoundCloudException::new, trackListQueryType);
     }
 
     @Override
-    public String getStreamUrl(@NonNull final SoundCloudTrack soundCloudTrack) throws TrackSearchException {
-        final String url = soundCloudTrack.getUrl();
-        final String trackHTML = clientIDRequest(api.getForUrlWithClientID(url, clientID)).getContentOrThrow();
-        final String intermediateURL = soundCloudUtility.extractURLForStream(trackHTML);
-        final String streamJSON = clientIDRequest(api.getForUrlWithClientID(intermediateURL, clientID)).getContentOrThrow();
-        return soundCloudUtility.extractStreamUrl(streamJSON);
+    public void refreshTrackInfo(SoundCloudTrack track) throws TrackSearchException {
+        final String trackHTML = clientIDRequest(api.getForUrlWithClientID(track.getUrl(), clientID)).contentOrThrow();
+        final SoundCloudTrackInfo trackInfo = SoundCloudUtility.extractTrackInfoFromHTML(trackHTML);
+        track.setTrackInfo(trackInfo);
     }
 
     @Override
-    public String getStreamUrl(@NonNull SoundCloudTrack soundCloudTrack, final int retries) throws TrackSearchException {
-        return getStreamUrl(this, soundCloudTrack, this::requestAndGetCode, retries)
-                .orElseThrow(() -> noStreamUrlAfterRetriesException(SoundCloudException::new, retries));
+    public TrackStream getTrackStream(@NonNull final SoundCloudTrack soundCloudTrack) throws TrackSearchException {
+        final SoundCloudTrackFormat trackFormat = TrackFormatComparator.getBestSoundCloudTrackFormat(soundCloudTrack);
+        final String trackFormatJSON = clientIDRequest(api.getForUrlWithClientID(trackFormat.getUrl(), clientID)).contentOrThrow();
+        final String streamUrl = SoundCloudUtility.extractStreamUrl(trackFormatJSON);
+        return new TrackStream(streamUrl, trackFormat);
+    }
+
+    @Override
+    public TrackStream getTrackStream(@NonNull SoundCloudTrack soundCloudTrack, final int retries) throws TrackSearchException {
+        return tryResolveTrackStream(soundCloudTrack, retries)
+                .orElseThrow(() -> noTrackStreamAfterRetriesException(SoundCloudException::new, retries));
     }
 
     private ResponseWrapper clientIDRequest(final Call<ResponseWrapper> call) throws SoundCloudException {
@@ -144,8 +150,8 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
 
     private ResponseWrapper clientIDRequest(final Call<ResponseWrapper> call, final boolean firstRequest) throws SoundCloudException {
 
-        final ResponseWrapper response = Client.request(call);
-        if (response.contentPresent() && !response.isHttpCode(Client.UNAUTHORIZED)) {
+        final ResponseWrapper response = request(call);
+        if (response.contentPresent() && !response.isHttpCode(UNAUTHORIZED)) {
             return response;
         }
 
@@ -167,13 +173,13 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
     }
 
     private String getClientID() throws TrackSearchException {
-        final ResponseWrapper response = Client.request(api.getStartPage());
-        final String content = response.getContentOrThrow();
-        final List<String> crossOriginScripts = soundCloudUtility.getCrossOriginScripts(content);
+        final ResponseWrapper response = request(api.getStartPage());
+        final String content = response.contentOrThrow();
+        final List<String> crossOriginScripts = SoundCloudUtility.getCrossOriginScripts(content);
         for (final String scriptUrl : crossOriginScripts) {
-            final ResponseWrapper scriptResponse = requestURL(scriptUrl);
+            final ResponseWrapper scriptResponse = SharedClient.request(scriptUrl);
             if (scriptResponse.contentPresent()) {
-                final Optional<String> clientID = soundCloudUtility.getClientID(scriptResponse.getContent());
+                final Optional<String> clientID = SoundCloudUtility.getClientID(scriptResponse.getContent());
                 if (clientID.isPresent()) {
                     return clientID.get();
                 }
@@ -188,7 +194,7 @@ public class SoundCloudClient extends SingleSearchClient<SoundCloudTrack>
 
     @Override
     public boolean hasPagingValues(@NonNull final TrackList<? extends Track> trackList) {
-        return TrackListUtility.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
+        return trackList.hasQueryInformation(POSITION_KEY, OFFSET_KEY);
     }
 
     @Override

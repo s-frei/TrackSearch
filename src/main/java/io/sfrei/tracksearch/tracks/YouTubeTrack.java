@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.clients.interfaces.functional.StreamURLFunction;
-import io.sfrei.tracksearch.clients.setup.TrackSource;
+import io.sfrei.tracksearch.clients.TrackSource;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
+import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import lombok.Builder;
@@ -26,6 +27,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Duration;
+import java.util.List;
 
 public class YouTubeTrack extends BaseTrack implements Track {
 
@@ -36,20 +38,25 @@ public class YouTubeTrack extends BaseTrack implements Track {
     @Getter
     private final YouTubeTrackMetadata trackMetadata;
 
-    private final StreamURLFunction<YouTubeTrack> streamUrlFunction;
+    private final TrackStreamProvider<YouTubeTrack> trackStreamProvider;
 
     @Builder
     public YouTubeTrack(String title, Duration duration, String url, YouTubeTrackInfo trackInfo,
-                        YouTubeTrackMetadata trackMetadata, StreamURLFunction<YouTubeTrack> streamUrlFunction) {
+                        YouTubeTrackMetadata trackMetadata, TrackStreamProvider<YouTubeTrack> trackStreamProvider) {
         super(TrackSource.Youtube, title, duration, url);
         this.trackInfo = trackInfo;
         this.trackMetadata = trackMetadata;
-        this.streamUrlFunction = streamUrlFunction;
+        this.trackStreamProvider = trackStreamProvider;
     }
 
     @Override
-    public String getStreamUrl() {
-        return streamUrlFunction.apply(this);
+    public TrackStream getStream() {
+        return trackStreamProvider.apply(this);
+    }
+
+    @Override
+    public List<YouTubeTrackFormat> getFormats() {
+        return trackInfo.getFormats();
     }
 
     @Getter

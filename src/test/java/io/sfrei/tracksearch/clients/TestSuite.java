@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.interfaces.functional;
+package io.sfrei.tracksearch.clients;
 
-import io.sfrei.tracksearch.tracks.Track;
-import org.jetbrains.annotations.Nullable;
+import java.util.List;
 
-import java.util.function.Function;
+class TestSuite {
 
-@FunctionalInterface
-public interface StreamURLFunction<T extends Track> extends Function<T, String> {
+    protected static final String SINGLE_SEARCH_KEY = "Ben Böhmer";
 
-    /**
-     * Function to return the stream URL for given track.
-     * @param t the track to get the stream URL for.
-     * @return the stream URL or null when any exception occurred.
-     */
-    @Nullable
-    @Override
-    String apply(T t);
+    protected static final List<String> SEARCH_KEYS = List.of(
+            SINGLE_SEARCH_KEY,
+            "Chris Luno",
+            "Tale Of Us",
+            "Hans Zimmer",
+            "Paul Kalkbrenner",
+            "Einmusik",
+            "Mind Against",
+            "Adriatique",
+            "Fideles",
+            "Marek Hemmann",
+            "Christian Löffler"
+    );
 
 }

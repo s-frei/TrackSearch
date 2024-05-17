@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package io.sfrei.tracksearch.clients;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.NonNull;
 
 import java.util.Set;
@@ -28,7 +29,7 @@ import java.util.Set;
  *
  * @param <T> the track type the client implementing this is used for.
  */
-public interface TrackSearchClient<T extends Track> {
+interface TrackSearchClient<T extends Track> {
 
     /**
      * Retrieve all valid URL prefixes used to check {@link #isApplicableForURL(String)}.
@@ -76,23 +77,31 @@ public interface TrackSearchClient<T extends Track> {
     TrackList<T> getNext(@NonNull TrackList<? extends Track> trackList) throws TrackSearchException;
 
     /**
-     * Get the audio stream URL in the highest possible audio resolution.
+     * Reload the track information. This comes handy when the stream URL resolving fails.
+     *
+     * @param track the track to reload the information for.
+     * @throws TrackSearchException if information cannot be updated.
+     */
+    void refreshTrackInfo(T track) throws TrackSearchException;
+
+    /**
+     * Get the audio stream with the highest possible audio resolution.
      *
      * @param track from this client.
      * @return the audio stream URL.
      * @throws TrackSearchException when the URL could not be exposed.
      */
-    String getStreamUrl(@NonNull T track) throws TrackSearchException;
+    TrackStream getTrackStream(@NonNull T track) throws TrackSearchException;
 
     /**
-     * Get the audio stream URL in the highest possible audio resolution and retry when there was a failure.
+     * Get the audio stream with the highest possible audio resolution and retry when there was a failure.
      *
      * @param track   from this client.
      * @param retries retry when stream URL resolving was not successful. This is determined with another request/s.
      * @return the audio stream URL.
      * @throws TrackSearchException when the URL could not be exposed.
      */
-    String getStreamUrl(@NonNull T track, int retries) throws TrackSearchException;
+    TrackStream getTrackStream(@NonNull T track, int retries) throws TrackSearchException;
 
     /**
      * Check the track list for this client if the paging values to get next are present.

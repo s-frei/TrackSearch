@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,16 @@ package io.sfrei.tracksearch.tracks.deserializer.soundcloud;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import io.sfrei.tracksearch.clients.soundcloud.SoundCloudUtility;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack.SoundCloudTrackBuilder;
-import io.sfrei.tracksearch.tracks.metadata.FormatType;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
-import io.sfrei.tracksearch.utils.TimeUtility;
+import io.sfrei.tracksearch.utils.DurationParser;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrackBuilder> {
 
@@ -41,7 +38,7 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
 
         final JsonElement rootElement = JsonElement.of(ctxt.readTree(p));
         final String title = rootElement.asString("title");
-        final Duration duration = TimeUtility.getDurationForMilliseconds(rootElement.asLong("duration"));
+        final Duration duration = DurationParser.getDurationForMilliseconds(rootElement.asLong("duration"));
         final String url = rootElement.asString("permalink_url");
 
         if (title == null || duration == null || url == null)
@@ -54,7 +51,7 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
 
         // Metadata
 
-        final JsonElement owner = rootElement.path("user");
+        final JsonElement owner = rootElement.paths("user");
 
         final String channelName = owner.asString("username");
 
@@ -63,41 +60,19 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
         final Long playbackCount = rootElement.asLong("playback_count");
         final Long streamAmount = playbackCount == null ? 0L : playbackCount; // Apparently can be 'null' in the JSON
 
-        final String thumbNailUrl = rootElement.path("artwork_url")
+        final String thumbNailUrl = rootElement.paths("artwork_url")
                 .orElse(rootElement)
-                .path("user", "avatar_url") // Fallback to channel thumbnail
+                .paths("user", "avatar_url") // Fallback to channel thumbnail
                 .asString();
 
-        soundCloudTrackBuilder.trackMetadata(SoundCloudTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
+        soundCloudTrackBuilder.trackMetadata(new SoundCloudTrackMetadata(channelName, channelUrl, streamAmount, thumbNailUrl));
 
         // Formats
 
-        final List<SoundCloudTrackFormat> trackFormats = rootElement.path("media", "transcodings")
-                .arrayElements()
-                .map(SoundCloudTrackDeserializer::transcodingToTrackFormat)
-                .collect(Collectors.toList());
-
-        soundCloudTrackBuilder.trackInfo(new SoundCloudTrackInfo(trackFormats));
+        final SoundCloudTrackInfo soundCloudTrackInfo = SoundCloudUtility.extractTrackInfo(rootElement);
+        soundCloudTrackBuilder.trackInfo(soundCloudTrackInfo);
 
         return soundCloudTrackBuilder;
-    }
-
-    private static SoundCloudTrackFormat transcodingToTrackFormat(JsonElement transcoding) {
-
-        final String formatUrl = transcoding.asString("url");
-        final String audioQuality = transcoding.asString("quality");
-
-        final JsonElement formatElement = transcoding.path("format");
-        final String mimeType = formatElement.asString("mime_type");
-        final String protocol = formatElement.asString("protocol");
-
-        return SoundCloudTrackFormat.builder()
-                .mimeType(mimeType)
-                .formatType(FormatType.Audio)
-                .audioQuality(audioQuality)
-                .protocol(protocol)
-                .url(formatUrl)
-                .build();
     }
 
 }

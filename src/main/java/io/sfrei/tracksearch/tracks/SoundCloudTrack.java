@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,47 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.clients.interfaces.functional.StreamURLFunction;
-import io.sfrei.tracksearch.clients.setup.TrackSource;
+import io.sfrei.tracksearch.clients.TrackSource;
+import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Duration;
+import java.util.List;
 
 
 public class SoundCloudTrack extends BaseTrack implements Track {
 
     @Getter
-    private final SoundCloudTrackInfo trackInfo;
+    @Setter
+    private SoundCloudTrackInfo trackInfo;
 
     @Getter
     private final SoundCloudTrackMetadata trackMetadata;
 
-    private final StreamURLFunction<SoundCloudTrack> streamUrlFunction;
+    private final TrackStreamProvider<SoundCloudTrack> trackStreamProvider;
 
     @Builder
     public SoundCloudTrack(String title, Duration duration, String url, SoundCloudTrackInfo trackInfo,
-                           SoundCloudTrackMetadata trackMetadata, StreamURLFunction<SoundCloudTrack> streamUrlFunction) {
+                           SoundCloudTrackMetadata trackMetadata, TrackStreamProvider<SoundCloudTrack> trackStreamProvider) {
         super(TrackSource.Soundcloud, title, duration, url);
         this.trackInfo = trackInfo;
         this.trackMetadata = trackMetadata;
-        this.streamUrlFunction = streamUrlFunction;
+        this.trackStreamProvider = trackStreamProvider;
     }
 
     @Override
-    public String getStreamUrl() {
-        return streamUrlFunction.apply(this);
+    public TrackStream getStream() {
+        return trackStreamProvider.apply(this);
+    }
+
+    @Override
+    public List<SoundCloudTrackFormat> getFormats() {
+        return trackInfo.getFormats();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.setup;
+package io.sfrei.tracksearch.clients.common;
 
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import lombok.AccessLevel;
@@ -25,10 +25,10 @@ import lombok.NonNull;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResponseWrapper {
 
-    private Integer code;
+    private final Integer code;
 
     @Getter
-    private String content;
+    private final String content;
 
     private TrackSearchException exception;
 
@@ -48,7 +48,7 @@ public class ResponseWrapper {
         return new ResponseWrapper(null, null, exception);
     }
 
-    public String getContentOrThrow() throws TrackSearchException {
+    public String contentOrThrow() throws TrackSearchException {
         if (contentPresent()) return content;
         throw exception;
     }

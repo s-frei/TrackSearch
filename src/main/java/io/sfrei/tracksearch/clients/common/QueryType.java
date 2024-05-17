@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.interfaces;
+package io.sfrei.tracksearch.clients.common;
 
-import org.slf4j.Logger;
-
-public interface ClientLogger {
-
-    /**
-     * Obtain the logger from the implementing class.
-     * @return the logger.
-     */
-    Logger log();
-
+public enum QueryType {
+    UNKNOWN, SEARCH, PAGING, PLAYLIST, USER
 }

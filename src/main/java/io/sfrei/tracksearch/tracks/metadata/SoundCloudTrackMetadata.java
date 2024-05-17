@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,7 @@
 
 package io.sfrei.tracksearch.tracks.metadata;
 
-import lombok.ToString;
-import lombok.Value;
-
-@Value(staticConstructor = "of")
-@ToString
-public class SoundCloudTrackMetadata implements TrackMetadata {
-
-    String channelName;
-
-    String channelUrl;
-
-    Long streamAmount;
-
-    String thumbNailUrl;
+public record SoundCloudTrackMetadata(String channelName, String channelUrl, Long streamAmount,
+                                      String thumbNailUrl) implements TrackMetadata {
 
 }

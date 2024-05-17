@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package io.sfrei.tracksearch.utils;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-public class ReplaceUtility {
+public class StringReplacer {
 
     public String cleanTitle(final String title) {
         return title

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.clients.setup;
+package io.sfrei.tracksearch.clients.common;
 
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +47,7 @@ public class ResponseProviderFactory extends Converter.Factory {
         static final StringProvider INSTANCE = new StringProvider();
 
         @Override
-        public ResponseWrapper convert(ResponseBody responseBody) {
+        public ResponseWrapper convert(@NotNull ResponseBody responseBody) {
             return wrapResponse(responseBody);
         }
     }
@@ -56,7 +56,7 @@ public class ResponseProviderFactory extends Converter.Factory {
         if (responseBody != null) {
             try {
                 String body = new String(responseBody.string().getBytes(StandardCharsets.UTF_8));
-                return ResponseWrapper.content(Client.OK, body);
+                return ResponseWrapper.content(SharedClient.OK, body);
             } catch (IOException e) {
                 return ResponseWrapper.empty(new TrackSearchException("Cannot process response", e));
             }

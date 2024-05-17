@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.YouTubeTrack.YouTubeTrackBuilder;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
-import io.sfrei.tracksearch.utils.TimeUtility;
+import io.sfrei.tracksearch.utils.DurationParser;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,12 +41,12 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
 
         // Track
 
-        final JsonElement videoDetails = rootElement.path("videoDetails");
+        final JsonElement videoDetails = rootElement.paths("videoDetails");
 
         final String ref = videoDetails.asString("videoId");
         final String title = videoDetails.asString("title");
         final Long lengthSeconds = Long.parseLong(videoDetails.asString("lengthSeconds"));
-        final Duration duration = TimeUtility.getDurationForSeconds(lengthSeconds);
+        final Duration duration = DurationParser.getDurationForSeconds(lengthSeconds);
 
         if (title == null || duration == null || ref == null)
             return null;
@@ -61,7 +61,7 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
 
         // Metadata
 
-        final JsonElement owner = rootElement.path("microformat", "playerMicroformatRenderer");
+        final JsonElement owner = rootElement.paths("microformat", "playerMicroformatRenderer");
 
         final String channelName = owner.asString("ownerChannelName");
 
@@ -69,11 +69,11 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
 
         final long streamAmount = Long.parseLong(owner.asString("viewCount"));
 
-        final Stream<JsonElement> thumbNailStream = owner.path("thumbnail", "thumbnails").elements();
+        final Stream<JsonElement> thumbNailStream = owner.paths("thumbnail", "thumbnails").elements();
         final Optional<JsonElement> firstThumbnail = thumbNailStream.findFirst();
         final String thumbNailUrl = firstThumbnail.map(thumbNail -> thumbNail.asString("url")).orElse(null);
 
-        youTubeTrackBuilder.trackMetadata(YouTubeTrackMetadata.of(channelName, channelUrl, streamAmount, thumbNailUrl));
+        youTubeTrackBuilder.trackMetadata(new YouTubeTrackMetadata(channelName, channelUrl, streamAmount, thumbNailUrl));
 
         return listYouTubeTrackBuilder;
     }

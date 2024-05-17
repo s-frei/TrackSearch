@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,6 @@ public class SoundCloudException extends TrackSearchException {
 
     public SoundCloudException(String message) {
         super(message);
-    }
-
-    public SoundCloudException(String message, Throwable cause) {
-        super(message, cause);
     }
 
 }

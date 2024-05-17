@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.exceptions;
+package io.sfrei.tracksearch.tracks;
 
-public class TrackSearchException extends Exception {
+import org.jetbrains.annotations.Nullable;
 
-    public TrackSearchException(String message) {
-        super(message);
-    }
+import java.util.function.Function;
 
-    public TrackSearchException(Throwable cause) {
-        super(cause);
-    }
+@FunctionalInterface
+public interface TrackListProvider<T extends Track> extends Function<TrackList<T>, TrackList<T>> {
 
-    public TrackSearchException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    @Nullable
+    @Override
+    TrackList<T> apply(TrackList<T> trackList);
 
 }

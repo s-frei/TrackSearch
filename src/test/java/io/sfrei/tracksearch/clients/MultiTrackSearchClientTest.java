@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package io.sfrei.tracksearch.clients;
 
-import io.sfrei.tracksearch.clients.setup.TrackSource;
 import io.sfrei.tracksearch.clients.soundcloud.SoundCloudClientTest;
 import io.sfrei.tracksearch.clients.youtube.YouTubeClientTest;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
@@ -27,11 +26,13 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.sfrei.tracksearch.clients.setup.TrackSource.Soundcloud;
-import static io.sfrei.tracksearch.clients.setup.TrackSource.Youtube;
+import static io.sfrei.tracksearch.clients.TestSuite.SINGLE_SEARCH_KEY;
+import static io.sfrei.tracksearch.clients.TrackSource.Soundcloud;
+import static io.sfrei.tracksearch.clients.TrackSource.Youtube;
 
 /**
  * Even tho the clients are already tested separately
@@ -57,7 +58,7 @@ public class MultiTrackSearchClientTest extends ClientTest<MultiTrackSearchClien
 
     private void testSource(TrackSource source) throws TrackSearchException {
         log.debug("MultiTrackSearchClient with explicit source ->  {}", source);
-        final TrackList<Track> trackList = trackSearchClient.getTracksForSearch(SINGLE_SEARCH_KEY, TrackSource.setOf(source));
+        final TrackList<Track> trackList = trackSearchClient.getTracksForSearch(SINGLE_SEARCH_KEY, Set.of(source));
         log.debug("Found '{}' tracks for {}", trackList.size(), source);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.clients.interfaces.functional.NextTrackListFunction;
-import io.sfrei.tracksearch.clients.setup.QueryType;
+import io.sfrei.tracksearch.clients.common.QueryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,7 +40,7 @@ public class GenericTrackList<T extends Track> extends ArrayList<T> implements T
     private final Map<String, String> queryInformation = new HashMap<>();
 
     @ToString.Exclude
-    private final NextTrackListFunction<T> nextTrackListFunction;
+    private final TrackListProvider<T> nextTrackListFunction;
 
     public GenericTrackList<T> withTracks(Collection<T> tracks) {
         super.addAll(tracks);
@@ -71,6 +70,21 @@ public class GenericTrackList<T extends Track> extends ArrayList<T> implements T
     @Override
     public TrackList<T> next() {
         return nextTrackListFunction.apply(this);
+    }
+
+    public TrackList<T> updatePagingValues(final TrackList<? extends Track> previousTrackList,
+                                           final String positionKey, String offsetKey) {
+
+        final String previousOffsetValue = previousTrackList.getQueryInformation().get(offsetKey);
+        final String newOffsetValue = getQueryInformation().get(offsetKey);
+
+        if (previousOffsetValue == null || newOffsetValue == null)
+            return setPagingValues(positionKey, 0, offsetKey, 0);
+
+        final int newPosition = Integer.parseInt(previousOffsetValue);
+        final int offset = Integer.parseInt(newOffsetValue);
+        final int newOffset = newPosition + offset;
+        return setPagingValues(positionKey, newPosition, offsetKey, newOffset);
     }
 
 }

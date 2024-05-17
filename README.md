@@ -14,6 +14,7 @@
   <a href="https://mvnrepository.com/artifact/io.sfrei/tracksearch"> 
     <img alt="Maven Central release" src="https://img.shields.io/maven-central/v/io.sfrei/tracksearch">
   </a>
+  <br>
   <a href="https://github.com/s-frei/TrackSearch/actions/workflows/functionality-check.yml"> 
     <img alt="Functionality Test State" src="https://github.com/s-frei/TrackSearch/actions/workflows/functionality-check.yml/badge.svg">
   </a>
@@ -25,51 +26,56 @@
 
 ## What is it ?
 
-TrackSearch is for searching track metadata on different sources, like Youtube and SoundCloud for now and to expose the
-URL of the underlying audio stream in the highest resolution. That offers the possibility to hand them over to other
-programs which are able to process them, like [VLC](https://www.videolan.org/vlc/), or Firefox which can display the
-audio directly for example.
+*TrackSearch* is for searching track metadata on different sources, like *YouTube* and *SoundCloud* for now and to 
+expose the URL of the underlying (audio) stream with the best quality. That offers the possibility to hand them over 
+to other programs which are able to process them, like [VLC](https://www.videolan.org/vlc/), or *Firefox* which can 
+display (most) streams directly, for example.
 
 **Note:** TrackSearch isn't using any API-Key, it uses the public API (like your browser).
 
 ## Supported sources
 
 Since TrackSearch focuses on just exposing the audio streams and to search for music (although YouTube offers more than 
-music) I decided to add following providers first for now:
+music) I decided to add following providers for now:
 
-- YouTube
-- SoundCloud
+![youtube](https://img.shields.io/badge/-YouTube-FF0000?style=plastic&logo=youtube&logoColor=white)
+![soundcloud](https://img.shields.io/badge/-SoundCloud-FF3300?style=plastic&logo=soundcloud&logoColor=white)
 
-There could be more added if there is interesting content offered to go for.
+There could be more added if there are interesting sources to go for.
+
+**Note:** Those sources are accessed vie the public API without the use of any API key or similar.
 
 #### Current features :mag_right:
 
-- Search for keywords
-- Paging of track lists
-- Expose audio stream url
-- Interact with multiple clients asynchronous
-- Get track metadata like: duration, channel, views, thumbnail, ...
+- search
+- paging
+- (audio) stream url
+- format
+- multiple clients asynchronous
+- metadata like: duration, channel, views, thumbnail, ...
 
 ## How to use it ? :books:
 
 ### Dependency
 
-Maven dependency available on [Maven Central](https://search.maven.org/artifact/io.sfrei/tracksearch):
+*TrackSearch* is available on [Maven Central](https://search.maven.org/artifact/io.sfrei/tracksearch):
 
 ```xml
 <dependency>
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.9.0</version>
+    <version>0.10.0</version>
 </dependency>
 ```
 
-or from [GitHub Packages](https://github.com/s-frei/TrackSearch/packages) or directly from 
-[GitHub Releases](https://github.com/s-frei/TrackSearch/releases).
+```kotlin
+implementation("io.sfrei:tracksearch:0.10.0")
+```
+
+on [GitHub Packages](https://github.com/s-frei/TrackSearch/packages) or directly from 
+[GitHub Releases](https://github.com/s-frei/TrackSearch/releases/latest).
 
 ### Getting started
-
-For more information check the related interface documentation.
 
 ```java
 // Client to search on all available sources asynchronous
@@ -78,21 +84,28 @@ MultiTrackSearchClient searchClient = new MultiSearchClient();
 // Client for explicit source
 TrackSearchClient<SoundCloudTrack> explicitClient = new SoundCloudClient();
 
-// Search for tracks
-TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords");
+try {
+    // Search for tracks
+    TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords");
+    TrackStream stream = tracksForSearch.get(0).getStream();
 
-// Get the audio stream
-String streamUrl = tracksForSearch.get(anyPos).getStreamUrl();
+    // Stream URL with format
+    final String streamUrl = stream.url();
+    final TrackFormat format = stream.format();
 
-// Get next tracks page
-TrackList<Track> nextTracks = tracksForSearch.next();
+    // Get next tracks page
+    TrackList<Track> nextTracks = tracksForSearch.next();
 
-// Get a track for URL
-Track trackForURL = searchClient.getTrack("URL");
+    // Get a track for URL
+    SoundCloudTrack trackForURL = explicitClient.getTrack("<soundcloud-url>");
 
-// Get the audio stream (retrying on failure)
-searchClient.getStreamUrl(trackForURL, TrackSearchConfig.DEFAULT_RESOLVING_RETIRES);
+} catch (TrackSearchException e) {
+    // Damn
+}
 ```
+
+For more information check the related interface documentation or have a look into the 
+[tests](https://github.com/s-frei/TrackSearch/blob/develop/src/test/java/io/sfrei/tracksearch/clients/ClientTest.java).
 
 ## Why is this done ?
 
@@ -120,7 +133,7 @@ working. Test it on your own:
 $ ./mvnw test
 ```
 
-For detailed test (about 120 tracks for each client):
+For detailed test (about ~250 tracks for each client):
 
 ```sh
 $ ./mvnw test -P detailed-client-test
@@ -131,8 +144,3 @@ $ ./mvnw test -P detailed-client-test
 ## Contributing :handshake:
 
 Feel free to contribute! - [How?](https://github.com/s-frei/TrackSearch/blob/develop/CONTRIBUTING.md)
-
-#### Stuff to be added 
-
-- Direct audio stream URL resolving
-- Playlist URL search

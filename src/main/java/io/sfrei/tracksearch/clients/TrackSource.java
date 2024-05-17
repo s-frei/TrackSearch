@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.exceptions;
+package io.sfrei.tracksearch.clients;
 
-public class ResponseException extends TrackSearchException {
+import io.sfrei.tracksearch.clients.soundcloud.SoundCloudClient;
+import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
+import io.sfrei.tracksearch.tracks.Track;
 
-    public ResponseException(String message) {
-        super(message);
+public enum TrackSource {
+
+    Youtube, Soundcloud;
+
+    @SuppressWarnings({"unchecked"})
+    <T extends Track> TrackSearchClient<T> createClient() {
+        return (TrackSearchClient<T>) switch (this) {
+            case Youtube -> new YouTubeClient();
+            case Soundcloud -> new SoundCloudClient();
+        };
     }
 
 }

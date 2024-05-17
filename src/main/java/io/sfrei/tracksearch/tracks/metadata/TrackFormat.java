@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,10 @@
 
 package io.sfrei.tracksearch.tracks.metadata;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
+public interface TrackFormat {
 
-@Getter
-@ToString
-@SuperBuilder
-@AllArgsConstructor
-public class TrackFormat {
+    MimeType getMimeType();
 
-    private final String mimeType;
-
-    private final FormatType formatType;
-
-    private final String audioQuality;
-
-    private final String url;
+    String getUrl();
 
 }

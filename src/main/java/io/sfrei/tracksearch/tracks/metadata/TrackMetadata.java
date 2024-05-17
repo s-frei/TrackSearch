@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,27 +23,27 @@ public interface TrackMetadata {
      *
      * @return the channel name.
      */
-    String getChannelName();
+    String channelName();
 
     /**
      * Get the URL of the publishers channel.
      *
      * @return the channel URL.
      */
-    String getChannelUrl();
+    String channelUrl();
 
     /**
      * Get the amount of streams.
      *
      * @return the stream amount.
      */
-    Long getStreamAmount();
+    Long streamAmount();
 
     /**
      * Get the URL of the media thumbnail (small).
      *
      * @return the thumbnail URL.
      */
-    String getThumbNailUrl();
+    String thumbNailUrl();
 
 }

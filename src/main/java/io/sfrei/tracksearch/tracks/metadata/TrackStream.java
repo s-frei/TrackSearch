@@ -14,20 +14,6 @@
  * limitations under the License.
  */
 
-package io.sfrei.tracksearch.exceptions;
+package io.sfrei.tracksearch.tracks.metadata;
 
-public class TrackSearchException extends Exception {
-
-    public TrackSearchException(String message) {
-        super(message);
-    }
-
-    public TrackSearchException(Throwable cause) {
-        super(cause);
-    }
-
-    public TrackSearchException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-}
+public record TrackStream(String url, TrackFormat format) {}

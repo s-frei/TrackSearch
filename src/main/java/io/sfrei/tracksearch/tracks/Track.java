@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package io.sfrei.tracksearch.tracks;
 
-import io.sfrei.tracksearch.clients.setup.TrackSource;
+import io.sfrei.tracksearch.clients.TrackSource;
+import io.sfrei.tracksearch.tracks.metadata.TrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
-import io.sfrei.tracksearch.utils.ReplaceUtility;
-import io.sfrei.tracksearch.utils.TimeUtility;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
+import io.sfrei.tracksearch.utils.StringReplacer;
+import io.sfrei.tracksearch.utils.DurationParser;
 
 import java.time.Duration;
+import java.util.List;
 
 public interface Track {
 
@@ -45,7 +48,7 @@ public interface Track {
      * @return the clean track title.
      */
     default String getCleanTitle() {
-        return ReplaceUtility.cleanTitle(getTitle());
+        return StringReplacer.cleanTitle(getTitle());
     }
 
     /**
@@ -62,7 +65,7 @@ public interface Track {
      * @return the formatted duration.
      */
     default String durationFormatted() {
-        return TimeUtility.formatSeconds(getDuration());
+        return DurationParser.formatSeconds(getDuration());
     }
 
     /**
@@ -73,14 +76,21 @@ public interface Track {
     String getUrl();
 
     /**
-     * Get the audio stream URL in the highest possible quality. The resulting URL will be
+     * Get the audio stream in the highest possible quality. The resulting stream is
      * checked if it can be successfully accessed, if under some circumstances this fails,
      * the resolver will start some more attempts.
      * To override default {@link io.sfrei.tracksearch.config.TrackSearchConfig#resolvingRetries}
      *
      * @return the audio stream URL or null when resolving fails.
      */
-    String getStreamUrl();
+    TrackStream getStream();
+
+    /**
+     * Get the available track formats.
+     *
+     * @return a list of available track formats.
+     */
+    List<? extends TrackFormat> getFormats();
 
     /**
      * Get metadata like, channel, views and so on.

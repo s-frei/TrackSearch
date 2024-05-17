@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 s-frei (sfrei.io)
+ * Copyright (C) 2024 s-frei (sfrei.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,11 @@
 
 package io.sfrei.tracksearch.clients;
 
-import io.sfrei.tracksearch.clients.interfaces.Provider;
-import io.sfrei.tracksearch.clients.setup.QueryType;
-import io.sfrei.tracksearch.clients.setup.TrackSource;
+import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.*;
-import io.sfrei.tracksearch.utils.TrackListUtility;
+import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -30,11 +28,12 @@ import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
-@SuppressWarnings({"FieldCanBeLocal", "unchecked"})
-public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track> {
+@SuppressWarnings({"unchecked"})
+public class MultiSearchClient implements MultiTrackSearchClient, SearchClient<Track> {
 
     public static final String POSITION_KEY = "multi" + TrackSearchConfig.POSITION_KEY_SUFFIX;
     public static final String OFFSET_KEY = "multi" + TrackSearchConfig.OFFSET_KEY_SUFFIX;
@@ -91,22 +90,32 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
     }
 
     @Override
-    public String getStreamUrl(@NonNull final Track track) throws TrackSearchException {
-
+    public void refreshTrackInfo(Track track) throws TrackSearchException {
         if (track instanceof YouTubeTrack) {
-            return clientsBySource.get(TrackSource.Youtube).getStreamUrl(track);
+            clientsBySource.get(TrackSource.Youtube).refreshTrackInfo(track);
         } else if (track instanceof SoundCloudTrack) {
-            return clientsBySource.get(TrackSource.Soundcloud).getStreamUrl(track);
+            clientsBySource.get(TrackSource.Soundcloud).refreshTrackInfo(track);
+        } else  {
+            throw new TrackSearchException("Track type is unknown");
+        }
+    }
+
+    @Override
+    public TrackStream getTrackStream(@NonNull final Track track) throws TrackSearchException {
+        if (track instanceof YouTubeTrack) {
+            return clientsBySource.get(TrackSource.Youtube).getTrackStream(track);
+        } else if (track instanceof SoundCloudTrack) {
+            return clientsBySource.get(TrackSource.Soundcloud).getTrackStream(track);
         }
         throw new TrackSearchException("Track type is unknown");
     }
 
     @Override
-    public String getStreamUrl(@NonNull Track track, int retries) throws TrackSearchException {
+    public TrackStream getTrackStream(@NonNull Track track, int retries) throws TrackSearchException {
         if (track instanceof YouTubeTrack) {
-            return clientsBySource.get(TrackSource.Youtube).getStreamUrl(track, retries);
+            return clientsBySource.get(TrackSource.Youtube).getTrackStream(track, retries);
         } else if (track instanceof SoundCloudTrack) {
-            return clientsBySource.get(TrackSource.Soundcloud).getStreamUrl(track, retries);
+            return clientsBySource.get(TrackSource.Soundcloud).getTrackStream(track, retries);
         }
         throw new TrackSearchException("Track type is unknown");
     }
@@ -167,22 +176,36 @@ public class MultiSearchClient implements MultiTrackSearchClient, Provider<Track
         } catch (InterruptedException e) {
             throw new TrackSearchException(e);
         } catch (ExecutionException e) {
-            throw new TrackSearchException("An error occurred acquiring a tracklist", e);
+            throw new TrackSearchException("An error occurred acquiring a track list", e);
         }
 
-        TrackListUtility.mergePositionValues(list, POSITION_KEY, OFFSET_KEY);
+        mergePositionValues(list);
 
         return list;
     }
 
     @Override
     public boolean hasPagingValues(@NotNull final TrackList<? extends Track> trackList) {
-        return TrackListUtility.hasQueryInformation(trackList, POSITION_KEY, OFFSET_KEY);
+        return trackList.hasQueryInformation(POSITION_KEY, OFFSET_KEY);
     }
 
     @Override
     public Logger log() {
         return log;
+    }
+
+    private void mergePositionValues(final GenericTrackList<? extends Track> trackList) {
+        final AtomicInteger position = new AtomicInteger(0);
+        final AtomicInteger offset = new AtomicInteger(0);
+
+        for (final String key : trackList.getQueryInformation().keySet()) {
+            if (key.contains(TrackSearchConfig.POSITION_KEY_SUFFIX)) {
+                position.getAndUpdate(pos -> pos + trackList.queryInformationAsInt(key));
+            } else if (key.contains(TrackSearchConfig.OFFSET_KEY_SUFFIX)) {
+                offset.getAndUpdate(off -> off + trackList.queryInformationAsInt(key));
+            }
+        }
+        trackList.setPagingValues(MultiSearchClient.POSITION_KEY, position.get(), MultiSearchClient.OFFSET_KEY, offset.get());
     }
 
 }
