@@ -40,7 +40,7 @@ public abstract class BaseTrack implements Track {
     private final String url;
 
     private String pretty(String title) {
-        return String.format("%s: Title: '%s' - %s - URL: %s", source.name(), title, durationFormatted(), url);
+        return String.format("[%s] (%s) '%s' - %s", source.name(), durationFormatted(), title, url);
     }
 
     public String pretty() {
