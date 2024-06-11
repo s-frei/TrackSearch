@@ -261,4 +261,12 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .is(new Condition<>(SharedClient::successResponseCode, "Stream URL response is 2xx"));
     }
 
+    @Order(10)
+    @ParameterizedTest
+    @MethodSource("getAllTracksFromTrackLists")
+    public void refreshTrackInfo(T track) {
+        assertDoesNotThrow(() -> trackSearchClient.refreshTrackInfo(track),
+                String.format("Track info refresh should not throw for: %s", track.getUrl()));
+    }
+
 }
