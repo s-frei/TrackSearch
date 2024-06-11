@@ -24,6 +24,7 @@ import io.sfrei.tracksearch.tracks.metadata.TrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
 import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -49,6 +50,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track> {
 
+    private final boolean isGitHubAction;
+
     protected final C trackSearchClient;
 
     private final List<String> searchKeys;
@@ -65,9 +68,19 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
         this.trackSearchClient = searchClient;
         this.searchKeys = single ? List.of(SINGLE_SEARCH_KEY) : SEARCH_KEYS;
         tracksForSearch = new ArrayList<>();
+
+        final String gitHubActionsEnv = System.getenv("GITHUB_ACTIONS");
+        isGitHubAction = gitHubActionsEnv != null;
+
+        log.info("Tests running in GitHub Actions: {}", isGitHubAction);
     }
 
     public abstract List<String> trackURLs();
+
+    @SneakyThrows
+    private void delayWhenGitHubAction() {
+        if (isGitHubAction) Thread.sleep(1000);
+    }
 
     @Order(1)
     @ParameterizedTest
@@ -85,7 +98,10 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("trackURLs")
     public void trackForURL(String url) throws TrackSearchException {
-        final Track trackForURL = trackSearchClient.getTrack(url);
+        final T trackForURL = trackSearchClient.getTrack(url);
+        // Test single directly as resolving might differ from list results
+        checkTrack(trackForURL);
+        checkTrackMetadata(trackForURL);
         checkTrackFormats(trackForURL);
     }
 
@@ -137,7 +153,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void checkTrack(T track) {
-        log.trace("{}", track.pretty());
+        log.trace("Check track: {}", track.pretty());
 
         final SoftAssertions assertions = new SoftAssertions();
 
@@ -169,7 +185,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void checkTrackMetadata(T track) {
-        log.trace("{}", track.pretty());
+        log.trace("Check track metadata: {}", track.pretty());
 
         final SoftAssertions assertions = new SoftAssertions();
         final TrackMetadata trackMetadata = track.getTrackMetadata();
@@ -209,7 +225,8 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void checkTrackFormats(Track track) {
-        log.trace("{}", track.pretty());
+        log.trace("Check track formats: {}", track.pretty());
+        delayWhenGitHubAction();
 
         final SoftAssertions assertions = new SoftAssertions();
         final List<? extends TrackFormat> formats = track.getFormats();
@@ -242,6 +259,9 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void checkTrackStream(Track track) {
+        log.trace("Check track stream: {}", track.pretty());
+        delayWhenGitHubAction();
+
         final TrackStream trackStream = assertDoesNotThrow(track::getStream,
                 String.format("Track stream resolving should not throw for: %s", track.getUrl()));
 
@@ -265,6 +285,9 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void refreshTrackInfo(T track) {
+        log.trace("Refresh track info: {}", track.pretty());
+        delayWhenGitHubAction();
+
         assertDoesNotThrow(() -> trackSearchClient.refreshTrackInfo(track),
                 String.format("Track info refresh should not throw for: %s", track.getUrl()));
     }
