@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.11.0 - unreleased
+-------------------
+
+Nothing changed yet...
+
 0.10.1
 ------
 
