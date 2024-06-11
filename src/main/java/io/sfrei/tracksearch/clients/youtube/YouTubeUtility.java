@@ -20,10 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
-import io.sfrei.tracksearch.tracks.GenericTrackList;
-import io.sfrei.tracksearch.tracks.TrackListProvider;
-import io.sfrei.tracksearch.tracks.TrackStreamProvider;
-import io.sfrei.tracksearch.tracks.YouTubeTrack;
+import io.sfrei.tracksearch.tracks.*;
 import io.sfrei.tracksearch.tracks.deserializer.youtube.YouTubeListTrackDeserializer;
 import io.sfrei.tracksearch.tracks.deserializer.youtube.YouTubeURLTrackDeserializer;
 import io.sfrei.tracksearch.tracks.metadata.MimeType;
@@ -78,7 +75,9 @@ class YouTubeUtility {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
 
-    static YouTubeTrack extractYouTubeTrack(final String json, final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
+    static YouTubeTrack extractYouTubeTrack(final String json,
+                                            final TrackInfoProvider<YouTubeTrack, YouTubeTrackInfo> trackInfoProvider,
+                                            final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
             throws YouTubeException {
 
         final JsonElement trackJsonElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -87,12 +86,14 @@ class YouTubeUtility {
         return playerResponseFromTrackJSON(trackJsonElement)
                 .mapCatching(MAPPER, YouTubeTrack.URLYouTubeTrackBuilder.class).getBuilder()
                 .trackStreamProvider(trackStreamProvider)
+                .trackInfoProvider(trackInfoProvider)
                 .build();
     }
 
     static GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String json, final QueryType queryType, final String query,
-                                                        final TrackListProvider<YouTubeTrack> nextTrackListFunction,
-                                                        final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
+                                                               final TrackListProvider<YouTubeTrack> nextTrackListFunction,
+                                                               final TrackInfoProvider<YouTubeTrack, YouTubeTrackInfo> trackInfoProvider,
+                                                               final TrackStreamProvider<YouTubeTrack> trackStreamProvider)
             throws YouTubeException {
 
         final JsonElement rootElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -136,6 +137,7 @@ class YouTubeUtility {
                 .filter(Objects::nonNull)
                 .map(YouTubeTrack.ListYouTubeTrackBuilder::getBuilder)
                 .peek(youTubeTrackBuilder -> youTubeTrackBuilder.trackStreamProvider(trackStreamProvider))
+                .peek(youTubeTrackBuilder -> youTubeTrackBuilder.trackInfoProvider(trackInfoProvider))
                 .map(YouTubeTrack.YouTubeTrackBuilder::build)
                 .collect(Collectors.toList());
 

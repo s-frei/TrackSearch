@@ -25,28 +25,39 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.List;
 
 public class YouTubeTrack extends BaseTrack implements Track {
 
-    @Getter
     @Setter
+    @Nullable
     private YouTubeTrackInfo trackInfo;
 
     @Getter
     private final YouTubeTrackMetadata trackMetadata;
 
+    private final TrackInfoProvider<YouTubeTrack, YouTubeTrackInfo> trackInfoProvider;
+
     private final TrackStreamProvider<YouTubeTrack> trackStreamProvider;
 
     @Builder
-    public YouTubeTrack(String title, Duration duration, String url, YouTubeTrackInfo trackInfo,
-                        YouTubeTrackMetadata trackMetadata, TrackStreamProvider<YouTubeTrack> trackStreamProvider) {
+    public YouTubeTrack(String title, Duration duration, String url, @Nullable YouTubeTrackInfo trackInfo,
+                        YouTubeTrackMetadata trackMetadata,
+                        TrackInfoProvider<YouTubeTrack, YouTubeTrackInfo> trackInfoProvider,
+                        TrackStreamProvider<YouTubeTrack> trackStreamProvider) {
         super(TrackSource.Youtube, title, duration, url);
         this.trackInfo = trackInfo;
         this.trackMetadata = trackMetadata;
+        this.trackInfoProvider = trackInfoProvider;
         this.trackStreamProvider = trackStreamProvider;
+    }
+
+    public YouTubeTrackInfo getTrackInfo() {
+        if (trackInfo == null) trackInfo = trackInfoProvider.apply(this);
+        return trackInfo;
     }
 
     @Override
@@ -56,7 +67,7 @@ public class YouTubeTrack extends BaseTrack implements Track {
 
     @Override
     public List<YouTubeTrackFormat> getFormats() {
-        return trackInfo.getFormats();
+        return getTrackInfo().getFormats();
     }
 
     @Getter

@@ -43,7 +43,7 @@ public class TrackFormatComparator {
             throws TrackSearchException {
 
         final AtomicReference<YouTubeTrackFormat> bestFormat = new AtomicReference<>(null);
-        final List<YouTubeTrackFormat> formats = youtubeTrack.getTrackInfo().getFormats();
+        final List<YouTubeTrackFormat> formats = youtubeTrack.getFormats();
 
         for (YouTubeTrackFormat trackFormat : formats) {
 
@@ -108,7 +108,7 @@ public class TrackFormatComparator {
     public SoundCloudTrackFormat getBestSoundCloudTrackFormat(final SoundCloudTrack soundCloudTrack) throws SoundCloudException {
 
         final AtomicReference<SoundCloudTrackFormat> bestFormat = new AtomicReference<>(null);
-        final List<SoundCloudTrackFormat> formats = soundCloudTrack.getTrackInfo().getFormats();
+        final List<SoundCloudTrackFormat> formats = soundCloudTrack.getFormats();
 
         for (SoundCloudTrackFormat trackFormat : formats) {
 

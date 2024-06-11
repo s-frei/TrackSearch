@@ -18,6 +18,7 @@ package io.sfrei.tracksearch.clients.soundcloud;
 
 
 import io.sfrei.tracksearch.clients.SearchClient;
+import io.sfrei.tracksearch.clients.TrackProviders;
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.clients.common.ResponseProviderFactory;
 import io.sfrei.tracksearch.clients.common.ResponseWrapper;
@@ -25,13 +26,8 @@ import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
-import io.sfrei.tracksearch.tracks.GenericTrackList;
-import io.sfrei.tracksearch.tracks.SoundCloudTrack;
-import io.sfrei.tracksearch.tracks.Track;
-import io.sfrei.tracksearch.tracks.TrackList;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
-import io.sfrei.tracksearch.tracks.metadata.TrackStream;
+import io.sfrei.tracksearch.tracks.*;
+import io.sfrei.tracksearch.tracks.metadata.*;
 import io.sfrei.tracksearch.utils.TrackFormatComparator;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +40,7 @@ import java.util.*;
 import static io.sfrei.tracksearch.clients.common.SharedClient.*;
 
 @Slf4j
-public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
+public class SoundCloudClient implements SearchClient<SoundCloudTrack>, TrackProviders<SoundCloudTrack> {
 
     public static final String URL = "https://soundcloud.com";
     private static final String INFORMATION_PREFIX = "sc";
@@ -124,10 +120,15 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack> {
     }
 
     @Override
-    public void refreshTrackInfo(SoundCloudTrack track) throws TrackSearchException {
+    @SuppressWarnings("unchecked")
+    public SoundCloudTrackInfo getTrackInfo(SoundCloudTrack track) throws TrackSearchException {
         final String trackHTML = clientIDRequest(api.getForUrlWithClientID(track.getUrl(), clientID)).contentOrThrow();
-        final SoundCloudTrackInfo trackInfo = SoundCloudUtility.extractTrackInfoFromHTML(trackHTML);
-        track.setTrackInfo(trackInfo);
+        return SoundCloudUtility.extractTrackInfoFromHTML(trackHTML);
+    }
+
+    @Override
+    public void refreshTrackInfo(SoundCloudTrack track) throws TrackSearchException {
+        track.setTrackInfo(getTrackInfo(track));
     }
 
     @Override
