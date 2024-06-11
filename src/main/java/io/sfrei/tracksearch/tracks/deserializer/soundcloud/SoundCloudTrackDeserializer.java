@@ -67,7 +67,7 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
 
         soundCloudTrackBuilder.trackMetadata(new SoundCloudTrackMetadata(channelName, channelUrl, streamAmount, thumbNailUrl));
 
-        // Formats
+        // Info
 
         final SoundCloudTrackInfo soundCloudTrackInfo = SoundCloudUtility.extractTrackInfo(rootElement);
         soundCloudTrackBuilder.trackInfo(soundCloudTrackInfo);

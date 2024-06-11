@@ -23,9 +23,9 @@ public final class TrackSearchConfig {
     public static final String HEADER_LANGUAGE_ENGLISH = "Accept-Language: en";
     public static final String HEADER_YOUTUBE_CLIENT_NAME = "x-youtube-client-name: 1";
     public static final String HEADER_YOUTUBE_CLIENT_VERSION = "x-youtube-client-version: 2.20211004.00.00";
-    public static final int DEFAULT_RESOLVING_RETIRES = 4;
+    private static final int DEFAULT_RESOLVING_RETRIES = 5;
 
     public static Integer playListOffset = 20;
-    public static Integer resolvingRetries = DEFAULT_RESOLVING_RETIRES;
+    public static Integer resolvingRetries = DEFAULT_RESOLVING_RETRIES;
 
 }

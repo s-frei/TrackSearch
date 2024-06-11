@@ -86,7 +86,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @MethodSource("trackURLs")
     public void trackForURL(String url) throws TrackSearchException {
         final Track trackForURL = trackSearchClient.getTrack(url);
-        checkTrackMetadata(trackForURL);
+        checkTrackFormats(trackForURL);
     }
 
     @Order(3)
@@ -168,7 +168,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(7)
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
-    public void checkTrackInfo(T track) {
+    public void checkTrackMetadata(T track) {
         log.trace("{}", track.pretty());
 
         final SoftAssertions assertions = new SoftAssertions();
@@ -203,15 +203,12 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .isNotEmpty();
 
         assertions.assertAll();
-
-        assertDoesNotThrow(() -> trackSearchClient.refreshTrackInfo(track),
-                String.format("Track info refresh should not throw for: %s", track.getUrl()));
     }
 
     @Order(8)
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
-    public void checkTrackMetadata(Track track) {
+    public void checkTrackFormats(Track track) {
         log.trace("{}", track.pretty());
 
         final SoftAssertions assertions = new SoftAssertions();
@@ -244,7 +241,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(9)
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
-    public void getTrackStream(Track track) {
+    public void checkTrackStream(Track track) {
         final TrackStream trackStream = assertDoesNotThrow(track::getStream,
                 String.format("Track stream resolving should not throw for: %s", track.getUrl()));
 

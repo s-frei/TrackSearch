@@ -19,7 +19,6 @@ package io.sfrei.tracksearch.clients;
 import io.sfrei.tracksearch.clients.common.ClientLogger;
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.clients.common.SharedClient;
-import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
@@ -31,7 +30,7 @@ import java.util.function.Function;
 
 public interface SearchClient<T extends Track> extends TrackSearchClient<T>, ClientLogger {
 
-    default void throwIfPagingValueMissing(SearchClient<?> source, TrackList<? extends Track> trackList)
+    default void throwIfPagingValueMissing(TrackProviders<? extends Track> source, TrackList<? extends Track> trackList)
             throws TrackSearchException {
 
         if (!hasPagingValues(trackList))
@@ -40,8 +39,8 @@ public interface SearchClient<T extends Track> extends TrackSearchClient<T>, Cli
     }
 
     default TrackSearchException noTrackStreamAfterRetriesException(Function<String, TrackSearchException> exceptionConstructor,
-                                                                    int tries) {
-        return exceptionConstructor.apply(String.format("Not able to get stream URL after %s tries", tries));
+                                                                    int retries) {
+        return exceptionConstructor.apply(String.format("Not able to get stream URL after %s tries", retries + 1));
     }
 
     default TrackSearchException unsupportedQueryTypeException(Function<String, TrackSearchException> exceptionConstructor, QueryType queryType) {
@@ -64,7 +63,7 @@ public interface SearchClient<T extends Track> extends TrackSearchClient<T>, Cli
             } catch (TrackSearchException e) {
                 retries--;
                 if (retries > 0) {
-                    log().warn("Not able getting stream for - {} tries left: {}", retries, e.getMessage());
+                    log().warn("Not able getting stream for: {} - {} tries left - cause: {}", track.getUrl(), retries, e.getMessage());
                     try {
                         log().trace("Refreshing track information...");
                         refreshTrackInfo(track);
@@ -86,17 +85,6 @@ public interface SearchClient<T extends Track> extends TrackSearchClient<T>, Cli
             return getNext(trackList);
         } catch (TrackSearchException e) {
             log().error("Error occurred acquiring next track list", e);
-        }
-        return null;
-    }
-
-
-    @Nullable
-    default TrackStream trackStreamProvider(final T track) {
-        try {
-            return getTrackStream(track, TrackSearchConfig.resolvingRetries);
-        } catch (TrackSearchException e) {
-            log().error("Error occurred acquiring stream URL for: {}", track.getUrl(), e);
         }
         return null;
     }

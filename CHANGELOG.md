@@ -4,7 +4,9 @@ Changelog
 0.11.0 - unreleased
 -------------------
 
-Nothing to see here yet...
+**Bugfixes:**
+
+- Fix YouTube tracks parsing through parse missing info on demand
 
 0.10.0
 ------
