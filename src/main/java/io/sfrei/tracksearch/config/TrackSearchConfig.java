@@ -20,9 +20,7 @@ public final class TrackSearchConfig {
 
     public static final String POSITION_KEY_SUFFIX = "Position";
     public static final String OFFSET_KEY_SUFFIX = "Offset";
-    public static final String HEADER_LANGUAGE_ENGLISH = "Accept-Language: en";
-    public static final String HEADER_YOUTUBE_CLIENT_NAME = "x-youtube-client-name: 1";
-    public static final String HEADER_YOUTUBE_CLIENT_VERSION = "x-youtube-client-version: 2.20211004.00.00";
+
     private static final int DEFAULT_RESOLVING_RETRIES = 5;
 
     public static Integer playListOffset = 20;

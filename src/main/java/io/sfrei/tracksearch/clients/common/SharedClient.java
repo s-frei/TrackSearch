@@ -33,6 +33,7 @@ import java.util.List;
 public class SharedClient {
 
     public static final int OK = 200;
+    public static final String HEADER_LANGUAGE_ENGLISH = "Accept-Language: en";
     private static final int PARTIAL_CONTENT = 206;
     public static final int UNAUTHORIZED = 401;
 
