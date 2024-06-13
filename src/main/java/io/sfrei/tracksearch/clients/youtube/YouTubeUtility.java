@@ -31,16 +31,16 @@ import io.sfrei.tracksearch.utils.ObjectMapperBuilder;
 import io.sfrei.tracksearch.utils.URLModifier;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-class YouTubeUtility {
+public final class YouTubeUtility {
 
     private static final String JS_SPLICE = ".splice";
     private static final String JS_SLICE = ".slice";
@@ -171,10 +171,10 @@ class YouTubeUtility {
                 .asString("token");
     }
 
-    static YouTubeTrackInfo extractTrackInfo(final String json, final String trackUrl)
+    static YouTubeTrackInfo extractTrackInfo(final String trackJson, final String trackUrl)
             throws YouTubeException {
 
-        final JsonElement jsonElement = JsonElement.readTreeCatching(MAPPER, json)
+        final JsonElement jsonElement = JsonElement.readTreeCatching(MAPPER, trackJson)
                 .orElseThrow(() -> new YouTubeException("Failed parsing Youtube track JSON"));
 
         final JsonElement playerElement;
@@ -184,25 +184,30 @@ class YouTubeUtility {
             playerElement = jsonElement.findElement("player");
         }
 
-        AtomicReference<String> scriptUrl = new AtomicReference<>(null);
-
-        final JsonElement streamingData;
+        String scriptUrl = null;
 
         final JsonElement playerArgs = playerElement.paths("args");
         if (playerElement.isPresent() && playerArgs.isPresent()) {
 
-            scriptUrl.set(playerElement.paths("assets").asString("js"));
+            scriptUrl =playerElement.paths("assets").asString("js");
 
-            streamingData = playerArgs.paths("player_response")
+            final JsonElement streamingData = playerArgs.paths("player_response")
                     .reReadTree(MAPPER)
                     .orElseThrow(() -> new YouTubeException("Failed parsing player response JSON"))
                     .paths("streamingData");
 
+            return extractTrackInfoFromStreamingData(streamingData, trackUrl, scriptUrl);
         } else {
             final JsonElement playerResponse = playerResponseFromTrackJSON(jsonElement);
 
-            streamingData = playerResponse.asUnresolved().paths("streamingData");
+            final JsonElement streamingData = playerResponse.asUnresolved().paths("streamingData");
+            return extractTrackInfoFromStreamingData(streamingData, trackUrl, scriptUrl);
         }
+    }
+
+    public static @NotNull YouTubeTrackInfo extractTrackInfoFromStreamingData(
+            final JsonElement streamingData, final String trackUrl, String scriptUrl
+    ) throws YouTubeException {
 
         final JsonElement formatsElement = streamingData.paths("formats");
         final Stream<YouTubeTrackFormat> formats = formatsElement.isPresent() ?
@@ -213,7 +218,7 @@ class YouTubeUtility {
 
         final List<YouTubeTrackFormat> trackFormats = Stream.concat(formats, adaptiveFormats).collect(Collectors.toList());
 
-        if (trackFormats.stream().anyMatch(YouTubeTrackFormat::isStreamNotReady) && scriptUrl.get() == null) {
+        if (trackFormats.stream().anyMatch(YouTubeTrackFormat::isStreamNotReady) && scriptUrl == null) {
             log.trace("Try to get player script trough embedded URL");
             final String embeddedUrl = trackUrl.replace("youtube.com/", "youtube.com/embed/");
             final String embeddedPageContent = SharedClient.request(embeddedUrl).getContent();
@@ -221,13 +226,12 @@ class YouTubeUtility {
                 final Matcher matcher = EMBEDDED_PLAYER_SCRIPT_PATTERN.matcher(embeddedPageContent);
                 if (matcher.find()) {
                     log.trace("Found player script in embedded URL: '{}'", embeddedUrl);
-                    scriptUrl.set(matcher.group(1));
+                    scriptUrl = matcher.group(1);
                 }
             }
         }
 
-        return new YouTubeTrackInfo(trackFormats, scriptUrl.get());
-
+        return new YouTubeTrackInfo(trackFormats, scriptUrl);
     }
 
     private static JsonElement playerResponseFromTrackJSON(JsonElement jsonElement) {
