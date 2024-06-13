@@ -61,7 +61,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     private Stream<Named<T>> getAllTracksFromTrackLists() {
         return tracksForSearch.stream()
                 .flatMap(trackList -> trackList.getPayload().stream())
-                .map(track -> Named.of(String.format("%s - %s", track.getTitle(), track.getUrl()), track));
+                .map(track -> Named.of(track.pretty(), track));
     }
 
     public ClientTest(C searchClient, boolean single) {
@@ -97,7 +97,8 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(2)
     @ParameterizedTest
     @MethodSource("trackURLs")
-    public void trackForURL(String url) throws TrackSearchException {
+    public void checkTrackForURL(String url) throws TrackSearchException {
+        log.trace("[trackForURL]: {}", url);
         final T trackForURL = trackSearchClient.getTrack(url);
         // Test single directly as resolving might differ from list results
         checkTrack(trackForURL);
@@ -108,7 +109,8 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(3)
     @ParameterizedTest
     @MethodSource("getSearchKeys")
-    public void tracksForSearch(String key) throws TrackSearchException {
+    public void checkTracksForSearch(String key) throws TrackSearchException {
+        log.trace("[checkTracksForSearch]: {}", key);
         TrackList<T> tracksForSearch = trackSearchClient.getTracksForSearch(key);
 
         assertThat(tracksForSearch.isEmpty())
@@ -121,7 +123,8 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(4)
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
-    public void trackListGotPagingValues(TrackList<T> trackList) {
+    public void checkPagingValuesPresent(TrackList<T> trackList) {
+        log.trace("[checkPagingValuesPresent]: {}", trackList.getQueryInformation());
         final boolean hasPagingValues = trackSearchClient.hasPagingValues(trackList);
 
         assertThat(hasPagingValues)
@@ -132,9 +135,8 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @Order(5)
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
-    public void getNextTracks(TrackList<T> trackList) throws TrackSearchException {
-
-        log.trace("Get next: {}", trackList);
+    public void checkNextTracks(TrackList<T> trackList) throws TrackSearchException {
+        log.trace("[checkNextTracks]: {}", trackList.getQueryInformation());
         TrackList<T> nextTracksForSearch = trackSearchClient.getNext(trackList);
 
         assertThat(nextTracksForSearch.isEmpty())
@@ -153,7 +155,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void checkTrack(T track) {
-        log.trace("Check track: {}", track.pretty());
+        log.trace("[checkTrack]: {}", track.pretty());
 
         final SoftAssertions assertions = new SoftAssertions();
 
@@ -185,7 +187,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void checkTrackMetadata(T track) {
-        log.trace("Check track metadata: {}", track.pretty());
+        log.trace("[checkTrackMetadata]: {}", track.pretty());
 
         final SoftAssertions assertions = new SoftAssertions();
         final TrackMetadata trackMetadata = track.getTrackMetadata();
@@ -225,7 +227,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void checkTrackFormats(Track track) {
-        log.trace("Check track formats: {}", track.pretty());
+        log.trace("[checkTrackFormats]: {}", track.pretty());
         delayWhenGitHubAction();
 
         final SoftAssertions assertions = new SoftAssertions();
@@ -259,7 +261,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void checkTrackStream(Track track) {
-        log.trace("Check track stream: {}", track.pretty());
+        log.trace("[checkTrackStream]: {}", track.pretty());
         delayWhenGitHubAction();
 
         final TrackStream trackStream = assertDoesNotThrow(track::getStream,
@@ -285,7 +287,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getAllTracksFromTrackLists")
     public void refreshTrackInfo(T track) {
-        log.trace("Refresh track info: {}", track.pretty());
+        log.trace("[refreshTrackInfo]: {}", track.pretty());
         delayWhenGitHubAction();
 
         assertDoesNotThrow(() -> trackSearchClient.refreshTrackInfo(track),
