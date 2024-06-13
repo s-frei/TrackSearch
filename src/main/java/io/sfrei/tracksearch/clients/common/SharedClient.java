@@ -37,7 +37,7 @@ public class SharedClient {
     private static final int PARTIAL_CONTENT = 206;
     public static final int UNAUTHORIZED = 401;
 
-    private static final CookieManager COOKIE_MANAGER = new CookieManager();
+    private static final CookieManager COOKIE_MANAGER = new CookieManager(null, CookiePolicy.ACCEPT_NONE);
     public static final OkHttpClient OK_HTTP_CLIENT;
 
     static {
@@ -48,6 +48,8 @@ public class SharedClient {
                 .connectionSpecs(List.of(ConnectionSpec.RESTRICTED_TLS))
                 .addInterceptor(new LoggingAndHeaderInterceptor())
                 .cookieJar(new JavaNetCookieJar(COOKIE_MANAGER))
+                .retryOnConnectionFailure(true)
+                .followRedirects(false)
                 .build();
     }
 
@@ -68,7 +70,7 @@ public class SharedClient {
 
             final Request.Builder modifiedRequestBuilder = chain.request()
                     .newBuilder()
-                    .header("user-agent", UserAgent.getRandom());
+                    .header("User-Agent", UserAgent.getRandom());
 
             final Request modifiedRequest = modifiedRequestBuilder.build();
 
@@ -122,11 +124,14 @@ public class SharedClient {
         return code != null && (code == OK || code == PARTIAL_CONTENT);
     }
 
-    public static Integer requestAndGetCode(String url) {
+    public static Integer requestAndGetCode(String url, String referer, String origin) {
         final Request request = new Request.Builder().url(url)
-                .header("connection", "close")
-                .header("range", "bytes=0-1")
+                .header("Connection", "close")
+                .header("Range", "bytes=0-1")
+                .header("Referer", referer)
+                .header("Origin", origin)
                 .build();
+
         try (final okhttp3.Response response = OK_HTTP_CLIENT.newCall(request).execute()) {
             return response.code();
         } catch (IOException e) {

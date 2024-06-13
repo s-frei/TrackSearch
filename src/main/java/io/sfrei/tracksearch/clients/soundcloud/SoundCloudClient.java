@@ -23,6 +23,7 @@ import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.clients.common.ResponseProviderFactory;
 import io.sfrei.tracksearch.clients.common.ResponseWrapper;
 import io.sfrei.tracksearch.clients.common.SharedClient;
+import io.sfrei.tracksearch.clients.youtube.YouTubeAPI;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.SoundCloudException;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
@@ -141,7 +142,7 @@ public class SoundCloudClient implements SearchClient<SoundCloudTrack>, TrackPro
 
     @Override
     public TrackStream getTrackStream(@NonNull SoundCloudTrack soundCloudTrack, final int retries) throws TrackSearchException {
-        return tryResolveTrackStream(soundCloudTrack, retries)
+        return tryResolveTrackStream(soundCloudTrack, retries, SoundCloudAPI.SOUNDCLOUD_REFERER, SoundCloudAPI.SOUNDCLOUD_ORIGIN)
                 .orElseThrow(() -> noTrackStreamAfterRetriesException(SoundCloudException::new, retries));
     }
 

@@ -47,14 +47,14 @@ public interface SearchClient<T extends Track> extends TrackSearchClient<T>, Cli
         return exceptionConstructor.apply(String.format("Query type %s not supported", queryType));
     }
 
-    default Optional<TrackStream> tryResolveTrackStream(T track, int retries) {
+    default Optional<TrackStream> tryResolveTrackStream(T track, int retries, String referer, String origin) {
         log().trace("Get track stream for: {}", track);
 
         do {
 
             try {
                 final TrackStream trackStream = getTrackStream(track);
-                final Integer code = SharedClient.requestAndGetCode(trackStream.url());
+                final Integer code = SharedClient.requestAndGetCode(trackStream.url(), referer, origin);
 
                 if (SharedClient.successResponseCode(code)) return Optional.of(trackStream);
 

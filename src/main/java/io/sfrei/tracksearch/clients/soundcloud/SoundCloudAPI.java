@@ -25,8 +25,11 @@ import java.util.Map;
 
 public interface SoundCloudAPI {
 
-    String HEADER_SOUNDCLOUD_REFERER = SoundCloudClient.URL + "/";
-    String HEADER_SOUNDCLOUD_ORIGIN = SoundCloudClient.URL;
+    String SOUNDCLOUD_ORIGIN = SoundCloudClient.URL;
+    String SOUNDCLOUD_REFERER = SOUNDCLOUD_ORIGIN + "/";
+
+    String HEADER_SOUNDCLOUD_REFERER = "Referer: " + SOUNDCLOUD_REFERER;
+    String HEADER_SOUNDCLOUD_ORIGIN = "Origin: " + SOUNDCLOUD_ORIGIN;
 
     @GET("/")
     @Headers({

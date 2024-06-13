@@ -16,7 +16,6 @@
 
 package io.sfrei.tracksearch.clients;
 
-import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
@@ -26,7 +25,6 @@ import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.*;
@@ -39,7 +37,6 @@ import java.util.stream.Stream;
 
 import static io.sfrei.tracksearch.clients.TestSuite.SEARCH_KEYS;
 import static io.sfrei.tracksearch.clients.TestSuite.SINGLE_SEARCH_KEY;
-import static io.sfrei.tracksearch.clients.common.SharedClient.requestAndGetCode;
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -277,10 +274,6 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .isNotNull();
 
         log.trace("StreamURL: {}", streamUrl);
-        @SuppressWarnings("DataFlowIssue") final int code = requestAndGetCode(streamUrl);
-
-        assertThat(code)
-                .is(new Condition<>(SharedClient::successResponseCode, "Stream URL response is 2xx"));
     }
 
     @Order(10)

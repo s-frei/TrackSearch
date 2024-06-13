@@ -166,7 +166,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack>, TrackProviders
 
     @Override
     public TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
-        return tryResolveTrackStream(youtubeTrack, retries)
+        return tryResolveTrackStream(youtubeTrack, retries, YouTubeAPI.YOUTUBE_REFERER, YouTubeAPI.YOUTUBE_ORIGIN)
                 .orElseThrow(() -> noTrackStreamAfterRetriesException(YouTubeException::new, retries));
     }
 

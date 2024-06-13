@@ -25,8 +25,11 @@ import java.util.Map;
 
 public interface YouTubeAPI {
 
-    String HEADER_YOUTUBE_REFERER = YouTubeClient.URL + "/";
-    String HEADER_YOUTUBE_ORIGIN = YouTubeClient.URL;
+    String YOUTUBE_ORIGIN = YouTubeClient.URL;
+    String YOUTUBE_REFERER = YOUTUBE_ORIGIN + "/";
+
+    String HEADER_YOUTUBE_REFERER = "Referer: " + YOUTUBE_REFERER;
+    String HEADER_YOUTUBE_ORIGIN = "Origin: " + YOUTUBE_ORIGIN;
     String HEADER_YOUTUBE_CLIENT_NAME = "X-Youtube-Client-Name: 1";
     String HEADER_YOUTUBE_CLIENT_VERSION = "X-Youtube-Client-Version: 2.20240612.01.00";
 
