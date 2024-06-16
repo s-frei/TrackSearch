@@ -19,6 +19,7 @@ package io.sfrei.tracksearch.clients.youtube;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.clients.common.SharedClient;
+import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.*;
 import io.sfrei.tracksearch.tracks.deserializer.youtube.YouTubeListTrackDeserializer;
@@ -74,6 +75,8 @@ public final class YouTubeUtility {
     private static String wrap(String functionContent) {
         return "(" + VAR_NAME + ":function" + functionContent + FUNCTION_END + ")";
     }
+
+    private static final CacheMap<String, String> SCRIPT_CACHE = new CacheMap<>();
 
     static YouTubeTrack extractYouTubeTrack(final String json,
                                             final TrackInfoProvider<YouTubeTrack, YouTubeTrackInfo> trackInfoProvider,
@@ -238,7 +241,8 @@ public final class YouTubeUtility {
         return jsonElement.elementAtIndex(2)
                 .paths("playerResponse")
                 .orElse(jsonElement)
-                .paths("playerResponse");
+                .paths("playerResponse")
+                .orElse(jsonElement);
     }
 
     private static Stream<YouTubeTrackFormat> getFormatsFromStream(final Stream<JsonElement> formats) {
@@ -302,6 +306,20 @@ public final class YouTubeUtility {
     private static String getFunctionName(final String wholeFunction) {
         final String[] split = wholeFunction.split(":function");
         return split.length > 0 ? split[0] : null;
+    }
+
+    static String getSignature(final YouTubeTrackFormat youtubeTrackFormat, String scriptUrl) throws TrackSearchException {
+
+        final String scriptContent;
+        if (SCRIPT_CACHE.containsKey(scriptUrl)) {
+            log.trace("Use cached script for: {}", scriptUrl);
+            scriptContent = SCRIPT_CACHE.get(scriptUrl);
+        } else {
+            scriptContent = SharedClient.request(YouTubeClient.URL + scriptUrl).contentOrThrow();
+            SCRIPT_CACHE.put(scriptUrl, scriptContent);
+        }
+
+        return getSignature(youtubeTrackFormat, scriptUrl, scriptContent);
     }
 
     static String getSignature(final YouTubeTrackFormat youtubeTrackFormat, String scriptUrl, final String scriptBody)
@@ -381,8 +399,8 @@ public final class YouTubeUtility {
                         signature.reverse();
                         break;
                     case SWAP:
-                        int charPos = parameter % signatureValue.length();
                         char swapChar = signature.charAt(0);
+                        int charPos = parameter % signatureValue.length();
                         signature.setCharAt(0, signature.charAt(charPos));
                         signature.setCharAt(charPos, swapChar);
                         break;

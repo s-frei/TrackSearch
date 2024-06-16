@@ -20,7 +20,6 @@ import io.sfrei.tracksearch.clients.SearchClient;
 import io.sfrei.tracksearch.clients.TrackProviders;
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.clients.common.ResponseProviderFactory;
-import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.exceptions.YouTubeException;
@@ -31,11 +30,11 @@ import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
-import io.sfrei.tracksearch.utils.CacheMap;
 import io.sfrei.tracksearch.utils.TrackFormatComparator;
 import io.sfrei.tracksearch.utils.URLModifier;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import retrofit2.Retrofit;
 
@@ -63,8 +62,6 @@ public class YouTubeClient implements SearchClient<YouTubeTrack>, TrackProviders
 
     private final YouTubeAPI api;
 
-    private final CacheMap<String, String> scriptCache;
-
     public YouTubeClient() {
 
         final Retrofit base = new Retrofit.Builder()
@@ -74,7 +71,6 @@ public class YouTubeClient implements SearchClient<YouTubeTrack>, TrackProviders
                 .build();
 
         api = base.create(YouTubeAPI.class);
-        scriptCache = new CacheMap<>();
     }
 
     public static Map<String, String> makeQueryInformation(final String query, final String pagingToken) {
@@ -140,32 +136,24 @@ public class YouTubeClient implements SearchClient<YouTubeTrack>, TrackProviders
     @Override
     public TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack) throws TrackSearchException {
         final YouTubeTrackFormat trackFormat = TrackFormatComparator.getBestYouTubeTrackFormat(youtubeTrack, false);
+        return getTrackStream(youtubeTrack, trackFormat);
+    }
 
+    private @NotNull TrackStream getTrackStream(@NonNull YouTubeTrack youtubeTrack, YouTubeTrackFormat trackFormat) throws TrackSearchException {
         if (trackFormat.isStreamReady()) {
             final String streamUrl = URLModifier.decode(trackFormat.getUrl());
             return new TrackStream(streamUrl, trackFormat);
         }
 
         final String scriptUrl = youtubeTrack.getTrackInfo().getScriptUrlOrThrow();
+        final String signature = YouTubeUtility.getSignature(trackFormat, scriptUrl);
 
-        final String scriptContent;
-        if (scriptCache.containsKey(scriptUrl)) {
-            log.trace("Use cached script for: {}", scriptUrl);
-            scriptContent = scriptCache.get(scriptUrl);
-        } else {
-            scriptContent = SharedClient.request(URL + scriptUrl).contentOrThrow();
-            scriptCache.put(scriptUrl, scriptContent);
-        }
-
-        final String signature = YouTubeUtility.getSignature(trackFormat, scriptUrl, scriptContent);
-        final String trackFormatUrl = trackFormat.getUrl();
-
-        final String streamUrl = URLModifier.addRequestParam(trackFormatUrl, trackFormat.getSigParam(), signature);
+        final String streamUrl = URLModifier.addRequestParam(trackFormat.getUrl(), trackFormat.getSigParam(), signature);
         return new TrackStream(streamUrl, trackFormat);
     }
 
     @Override
-    public TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
+    public @NotNull TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
         return tryResolveTrackStream(youtubeTrack, retries, YouTubeAPI.YOUTUBE_REFERER, YouTubeAPI.YOUTUBE_ORIGIN)
                 .orElseThrow(() -> noTrackStreamAfterRetriesException(YouTubeException::new, retries));
     }
