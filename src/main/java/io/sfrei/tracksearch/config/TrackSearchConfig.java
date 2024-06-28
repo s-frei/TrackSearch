@@ -21,9 +21,6 @@ public final class TrackSearchConfig {
     public static final String POSITION_KEY_SUFFIX = "Position";
     public static final String OFFSET_KEY_SUFFIX = "Offset";
 
-    private static final int DEFAULT_RESOLVING_RETRIES = 14;
-
     public static Integer playListOffset = 20;
-    public static Integer resolvingRetries = DEFAULT_RESOLVING_RETRIES;
 
 }

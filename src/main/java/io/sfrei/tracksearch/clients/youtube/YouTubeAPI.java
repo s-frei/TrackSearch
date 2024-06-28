@@ -48,7 +48,6 @@ public interface YouTubeAPI {
             HEADER_YOUTUBE_REFERER,
             HEADER_YOUTUBE_ORIGIN
     })
-
     Call<ResponseWrapper> getSearchForKeywords(
             @Query("search_query") String search,
             @QueryMap Map<String, String> params

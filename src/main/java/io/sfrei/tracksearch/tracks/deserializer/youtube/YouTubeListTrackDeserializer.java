@@ -23,8 +23,8 @@ import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.YouTubeTrack.YouTubeTrackBuilder;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
-import io.sfrei.tracksearch.utils.StringReplacer;
 import io.sfrei.tracksearch.utils.DurationParser;
+import io.sfrei.tracksearch.utils.StringReplacer;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
 

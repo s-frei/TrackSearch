@@ -32,20 +32,20 @@ public class ResponseWrapper {
 
     private TrackSearchException exception;
 
-    public boolean contentPresent() {
-        return content != null;
-    }
-
-    public boolean isHttpCode(int code) {
-        return this.code == code;
-    }
-
     public static ResponseWrapper content(Integer code, @NonNull String content) {
         return new ResponseWrapper(code, content, null);
     }
 
     public static ResponseWrapper empty(TrackSearchException exception) {
         return new ResponseWrapper(null, null, exception);
+    }
+
+    public boolean contentPresent() {
+        return content != null;
+    }
+
+    public boolean isHttpCode(int code) {
+        return this.code == code;
     }
 
     public String contentOrThrow() throws TrackSearchException {

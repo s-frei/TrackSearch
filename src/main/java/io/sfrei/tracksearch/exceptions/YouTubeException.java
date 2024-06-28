@@ -22,8 +22,4 @@ public class YouTubeException extends TrackSearchException {
         super(message);
     }
 
-    public YouTubeException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

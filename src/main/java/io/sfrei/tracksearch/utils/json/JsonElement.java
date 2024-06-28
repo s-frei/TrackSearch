@@ -52,12 +52,12 @@ public class JsonElement extends JsonNodeResolver {
         }
     }
 
-    public Optional<JsonElement> reReadTree(final ObjectMapper mapper) {
-        return readTreeCatching(mapper, asString(node()));
-    }
-
     public static JsonElement of(JsonNode node) {
         return new JsonElement(node, false);
+    }
+
+    public Optional<JsonElement> reReadTree(final ObjectMapper mapper) {
+        return readTreeCatching(mapper, asString(node()));
     }
 
     private JsonElement resolved() {

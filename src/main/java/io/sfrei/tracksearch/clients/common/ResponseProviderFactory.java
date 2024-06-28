@@ -35,6 +35,18 @@ public class ResponseProviderFactory extends Converter.Factory {
         return new ResponseProviderFactory();
     }
 
+    public static ResponseWrapper wrapResponse(ResponseBody responseBody) {
+        if (responseBody != null) {
+            try {
+                String body = new String(responseBody.string().getBytes(StandardCharsets.UTF_8));
+                return ResponseWrapper.content(SharedClient.OK, body);
+            } catch (IOException e) {
+                return ResponseWrapper.empty(new TrackSearchException("Cannot process response", e));
+            }
+        }
+        return ResponseWrapper.empty(new TrackSearchException("No response body"));
+    }
+
     @Override
     public Converter<ResponseBody, ?> responseBodyConverter(@NotNull Type type,
                                                             @NotNull Annotation[] annotations,
@@ -50,18 +62,6 @@ public class ResponseProviderFactory extends Converter.Factory {
         public ResponseWrapper convert(@NotNull ResponseBody responseBody) {
             return wrapResponse(responseBody);
         }
-    }
-
-    public static ResponseWrapper wrapResponse(ResponseBody responseBody) {
-        if (responseBody != null) {
-            try {
-                String body = new String(responseBody.string().getBytes(StandardCharsets.UTF_8));
-                return ResponseWrapper.content(SharedClient.OK, body);
-            } catch (IOException e) {
-                return ResponseWrapper.empty(new TrackSearchException("Cannot process response", e));
-            }
-        }
-        return ResponseWrapper.empty(new TrackSearchException("No response body"));
     }
 
 }

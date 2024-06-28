@@ -35,9 +35,8 @@ public class SharedClient {
     public static final int OK = 200;
     public static final String HEADER_LANGUAGE_ENGLISH = "Accept-Language: en";
     public static final int UNAUTHORIZED = 401;
-
-    private static final CookieManager COOKIE_MANAGER = new CookieManager(null, CookiePolicy.ACCEPT_NONE);
     public static final OkHttpClient OK_HTTP_CLIENT;
+    private static final CookieManager COOKIE_MANAGER = new CookieManager(null, CookiePolicy.ACCEPT_NONE);
 
     static {
 
@@ -59,35 +58,6 @@ public class SharedClient {
     @NotNull
     protected static TrackSearchException requestException(String url, IOException e) {
         return new TrackSearchException(String.format("Failed requesting: %s", url), e);
-    }
-
-    private static final class LoggingAndHeaderInterceptor implements Interceptor {
-
-        @NotNull
-        @Override
-        public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
-
-            final Request.Builder modifiedRequestBuilder = chain.request()
-                    .newBuilder()
-                    .header("User-Agent", UserAgent.getRandom());
-
-            final Request modifiedRequest = modifiedRequestBuilder.build();
-
-            final String url = modifiedRequest.url().toString();
-
-            final okhttp3.Response response;
-            try {
-                response = chain.proceed(modifiedRequest);
-            } catch (IOException e) {
-                log.error("Failed request: {}", url, e);
-                throw e;
-            }
-
-            if (!response.isSuccessful())
-                logResponseCode(url, response.code());
-
-            return response;
-        }
     }
 
     private static void logRequest(String url) {
@@ -120,6 +90,35 @@ public class SharedClient {
             return ResponseProviderFactory.wrapResponse(response.body());
         } catch (IOException e) {
             return ResponseWrapper.empty(requestException(url, e));
+        }
+    }
+
+    private static final class LoggingAndHeaderInterceptor implements Interceptor {
+
+        @NotNull
+        @Override
+        public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
+
+            final Request.Builder modifiedRequestBuilder = chain.request()
+                    .newBuilder()
+                    .header("User-Agent", UserAgent.getRandom());
+
+            final Request modifiedRequest = modifiedRequestBuilder.build();
+
+            final String url = modifiedRequest.url().toString();
+
+            final okhttp3.Response response;
+            try {
+                response = chain.proceed(modifiedRequest);
+            } catch (IOException e) {
+                log.error("Failed request: {}", url, e);
+                throw e;
+            }
+
+            if (!response.isSuccessful())
+                logResponseCode(url, response.code());
+
+            return response;
         }
     }
 

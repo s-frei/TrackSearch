@@ -96,7 +96,7 @@ public final class SoundCloudUtility {
     }
 
     static GenericTrackList<SoundCloudTrack> extractSoundCloudTracks(final String json, final QueryType queryType, final String query,
-                                                              final TrackListProvider<SoundCloudTrack> nextTrackListFunction)
+                                                                     final TrackListProvider<SoundCloudTrack> nextTrackListFunction)
             throws SoundCloudException {
 
         final JsonElement responseElement = JsonElement.readTreeCatching(MAPPER, json)
