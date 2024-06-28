@@ -48,7 +48,7 @@ public class SharedClient {
                 .addInterceptor(new LoggingAndHeaderInterceptor())
                 .cookieJar(new JavaNetCookieJar(COOKIE_MANAGER))
                 .retryOnConnectionFailure(true)
-                .followRedirects(false)
+                .followRedirects(true)
                 .build();
     }
 

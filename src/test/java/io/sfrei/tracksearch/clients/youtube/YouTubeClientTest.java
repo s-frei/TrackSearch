@@ -33,7 +33,7 @@ public class YouTubeClientTest extends ClientTest<YouTubeClient, YouTubeTrack> {
     );
 
     public YouTubeClientTest() {
-        super(new YouTubeClient(), true);
+        super(new YouTubeClient(), false);
     }
 
     @Override

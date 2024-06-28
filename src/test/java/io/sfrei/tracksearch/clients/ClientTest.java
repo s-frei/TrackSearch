@@ -20,6 +20,7 @@ import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
+import jdk.dynalink.linker.GuardedInvocationTransformer;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track> {
 
+    public static final int GH_ACTION_DELAY = 3000;
     private final boolean isGitHubAction;
 
     protected final C trackSearchClient;
@@ -77,7 +79,10 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @SuppressWarnings("unused")
     @SneakyThrows
     private void delayWhenGitHubAction() {
-        if (isGitHubAction) Thread.sleep(1000);
+        if (isGitHubAction) {
+            log.trace("GitHub delay for: {}ms", GH_ACTION_DELAY);
+            Thread.sleep(GH_ACTION_DELAY);
+        }
     }
 
     @Order(1)
@@ -106,6 +111,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getSearchKeys")
     public void checkTracksForSearch(String key) throws TrackSearchException {
+        delayWhenGitHubAction();
         log.trace("[checkTracksForSearch]: {}", key);
         TrackList<T> tracksForSearch = trackSearchClient.getTracksForSearch(key);
 
@@ -132,6 +138,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     @ParameterizedTest
     @MethodSource("getTracksForSearch")
     public void checkNextTracks(TrackList<T> trackList) throws TrackSearchException {
+        delayWhenGitHubAction();
         log.trace("[checkNextTracks]: {}", trackList.getQueryInformation());
         TrackList<T> nextTracksForSearch = trackSearchClient.getNext(trackList);
 
@@ -139,6 +146,7 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .as("Paged TrackList should contain tracks for: %s", trackList.getQueryInformation())
                 .isFalse();
 
+        delayWhenGitHubAction();
         log.trace("Get next again: {}", nextTracksForSearch);
         TrackList<T> moreTracksForSearch = nextTracksForSearch.next();
 
