@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.1.0 - unreleased
+------------------
+
+Nothing changed yet...
+
 1.0.0
 -----
 
@@ -14,6 +19,7 @@ From now on only metadata extraction is improved and maintained.
 **Features:**
 
 - Extract YouTube data from JSON wrapped in HTML
+- Updated dependencies
 
 **Bugfixes:**
 
