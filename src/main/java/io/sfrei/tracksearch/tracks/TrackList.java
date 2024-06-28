@@ -81,7 +81,7 @@ public interface TrackList<T extends Track> extends List<T> {
     default boolean hasQueryInformation(final String... keys) {
         final Map<String, String> queryInformation = getQueryInformation();
         for (final String key : keys) {
-            if (queryInformation.get(key) == null)
+            if (queryInformation.get(key) == null || queryInformation.get(key).isEmpty())
                 return false;
         }
         return true;

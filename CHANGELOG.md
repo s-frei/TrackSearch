@@ -1,6 +1,24 @@
 Changelog
 =========
 
+1.0.0
+-----
+
+**Breaking:**
+
+:warning: Removed capabilities to expose stream and extract formats :warning:<br>
+explained here [README](https://github.com/s-frei/TrackSearch?tab=readme-ov-file#stream)
+
+From now on only metadata extraction is improved and maintained. 
+
+**Features:**
+
+- Extract YouTube data from JSON wrapped in HTML
+
+**Bugfixes:**
+
+- Fixed YouTube paging
+
 0.10.1
 ------
 

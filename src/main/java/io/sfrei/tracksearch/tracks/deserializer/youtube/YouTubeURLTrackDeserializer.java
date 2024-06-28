@@ -75,8 +75,6 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
 
         youTubeTrackBuilder.trackMetadata(new YouTubeTrackMetadata(channelName, channelUrl, streamAmount, thumbNailUrl));
 
-        // Info - cannot be obtained here
-
         return listYouTubeTrackBuilder;
     }
 

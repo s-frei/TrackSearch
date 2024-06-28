@@ -33,11 +33,10 @@ import java.util.List;
 public class SharedClient {
 
     public static final int OK = 200;
-    private static final int PARTIAL_CONTENT = 206;
+    public static final String HEADER_LANGUAGE_ENGLISH = "Accept-Language: en";
     public static final int UNAUTHORIZED = 401;
-
-    private static final CookieManager COOKIE_MANAGER = new CookieManager();
     public static final OkHttpClient OK_HTTP_CLIENT;
+    private static final CookieManager COOKIE_MANAGER = new CookieManager(null, CookiePolicy.ACCEPT_NONE);
 
     static {
 
@@ -47,6 +46,8 @@ public class SharedClient {
                 .connectionSpecs(List.of(ConnectionSpec.RESTRICTED_TLS))
                 .addInterceptor(new LoggingAndHeaderInterceptor())
                 .cookieJar(new JavaNetCookieJar(COOKIE_MANAGER))
+                .retryOnConnectionFailure(true)
+                .followRedirects(true)
                 .build();
     }
 
@@ -59,38 +60,13 @@ public class SharedClient {
         return new TrackSearchException(String.format("Failed requesting: %s", url), e);
     }
 
-    private static final class LoggingAndHeaderInterceptor implements Interceptor {
-
-        @NotNull
-        @Override
-        public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
-
-            final Request.Builder modifiedRequestBuilder = chain.request()
-                    .newBuilder()
-                    .header("user-agent", UserAgent.getRandom());
-
-            final Request modifiedRequest = modifiedRequestBuilder.build();
-
-            final String url = modifiedRequest.url().toString();
-
-            final okhttp3.Response response;
-            try {
-                response = chain.proceed(modifiedRequest);
-            } catch (IOException e) {
-                log.error("Failed request: {}", url, e);
-                throw e;
-            }
-
-            if (!response.isSuccessful())
-                logResponseCode(url, response.code());
-
-            return response;
-        }
+    private static void logRequest(String url) {
+        log.trace("Request: {}", url);
     }
 
     public static ResponseWrapper request(Call<ResponseWrapper> call) {
         final String url = call.request().url().toString();
-        log.trace("Requesting: {}", url);
+        logRequest(url);
         try {
             final Response<ResponseWrapper> response = call.execute();
 
@@ -108,7 +84,7 @@ public class SharedClient {
     }
 
     public static ResponseWrapper request(String url) {
-        log.trace("Requesting: {}", url);
+        logRequest(url);
         final Request request = new Request.Builder().url(url).build();
         try (final okhttp3.Response response = OK_HTTP_CLIENT.newCall(request).execute()) {
             return ResponseProviderFactory.wrapResponse(response.body());
@@ -117,19 +93,32 @@ public class SharedClient {
         }
     }
 
-    public static boolean successResponseCode(Integer code) {
-        return code != null && (code == OK || code == PARTIAL_CONTENT);
-    }
+    private static final class LoggingAndHeaderInterceptor implements Interceptor {
 
-    public static Integer requestAndGetCode(String url) {
-        final Request request = new Request.Builder().url(url)
-                .header("connection", "close")
-                .header("range", "bytes=0-1")
-                .build();
-        try (final okhttp3.Response response = OK_HTTP_CLIENT.newCall(request).execute()) {
-            return response.code();
-        } catch (IOException e) {
-            return null;
+        @NotNull
+        @Override
+        public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
+
+            final Request.Builder modifiedRequestBuilder = chain.request()
+                    .newBuilder()
+                    .header("User-Agent", UserAgent.getRandom());
+
+            final Request modifiedRequest = modifiedRequestBuilder.build();
+
+            final String url = modifiedRequest.url().toString();
+
+            final okhttp3.Response response;
+            try {
+                response = chain.proceed(modifiedRequest);
+            } catch (IOException e) {
+                log.error("Failed request: {}", url, e);
+                throw e;
+            }
+
+            if (!response.isSuccessful())
+                logResponseCode(url, response.code());
+
+            return response;
         }
     }
 

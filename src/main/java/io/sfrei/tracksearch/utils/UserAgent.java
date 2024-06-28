@@ -38,10 +38,11 @@ public class UserAgent {
 
     /**
      * Get a random common user agent.
+     *
      * @return common user agent string.
      */
     public static String getRandom() {
         return USER_AGENTS[new Random().nextInt(USER_AGENTS.length)];
     }
-    
+
 }

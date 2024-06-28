@@ -23,11 +23,7 @@ import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.TrackListProvider;
-import io.sfrei.tracksearch.tracks.TrackStreamProvider;
 import io.sfrei.tracksearch.tracks.deserializer.soundcloud.SoundCloudTrackDeserializer;
-import io.sfrei.tracksearch.tracks.metadata.MimeType;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.utils.ObjectMapperBuilder;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +45,6 @@ import java.util.stream.Collectors;
 public final class SoundCloudUtility {
 
     private static final String SOUNDCLOUD_CLIENT_ID_PREFIX = "client_id:";
-    private static final String HYDRATABLE_SCRIPT_PREFIX = "window.__sc_hydration = ";
     private static final String SOUNDCLOUD_CLIENT_ID_REGEX = SOUNDCLOUD_CLIENT_ID_PREFIX + "\"[a-zA-Z0-9]+\"";
     private static final Pattern SOUNDCLOUD_CLIENT_ID_PATTERN = Pattern.compile(SOUNDCLOUD_CLIENT_ID_REGEX);
 
@@ -90,21 +85,18 @@ public final class SoundCloudUtility {
                 .orElseThrow(() -> new TrackSearchException("Failed extracting track URL"));
     }
 
-    static SoundCloudTrack extractSoundCloudTrack(final String json,
-                                           final TrackStreamProvider<SoundCloudTrack> trackStreamProvider)
+    static SoundCloudTrack extractSoundCloudTrack(final String json)
             throws SoundCloudException {
 
         final JsonElement trackJsonElement = JsonElement.readTreeCatching(MAPPER, json)
                 .orElseThrow(() -> new SoundCloudException("Cannot parse SoundCloud track JSON"));
 
         return trackJsonElement.mapCatching(MAPPER, SoundCloudTrack.SoundCloudTrackBuilder.class)
-                .trackStreamProvider(trackStreamProvider)
                 .build();
     }
 
     static GenericTrackList<SoundCloudTrack> extractSoundCloudTracks(final String json, final QueryType queryType, final String query,
-                                                              final TrackListProvider<SoundCloudTrack> nextTrackListFunction,
-                                                              final TrackStreamProvider<SoundCloudTrack> trackStreamProvider)
+                                                                     final TrackListProvider<SoundCloudTrack> nextTrackListFunction)
             throws SoundCloudException {
 
         final JsonElement responseElement = JsonElement.readTreeCatching(MAPPER, json)
@@ -114,7 +106,6 @@ public final class SoundCloudUtility {
         final List<SoundCloudTrack> scTracks = responseElement.elements()
                 .map(element -> element.mapCatching(MAPPER, SoundCloudTrack.SoundCloudTrackBuilder.class))
                 .filter(Objects::nonNull)
-                .peek(soundCloudTrackBuilder -> soundCloudTrackBuilder.trackStreamProvider(trackStreamProvider))
                 .map(SoundCloudTrack.SoundCloudTrackBuilder::build)
                 .collect(Collectors.toList());
 
@@ -125,58 +116,6 @@ public final class SoundCloudUtility {
         trackList.addQueryInformationValue(SoundCloudClient.OFFSET_KEY, tracksSize);
         log.debug("Found {} SoundCloud tracks for {}: {}", tracksSize, queryType, query);
         return trackList;
-    }
-
-    static SoundCloudTrackInfo extractTrackInfoFromHTML(final String html) throws SoundCloudException {
-
-        Document document = Jsoup.parse(html);
-
-        final Optional<String> hydrationData = document.select("script").stream()
-                .filter(scriptTag -> scriptTag.data().startsWith(HYDRATABLE_SCRIPT_PREFIX))
-                .findFirst()
-                .map(element -> element.data().replaceFirst(HYDRATABLE_SCRIPT_PREFIX, ""));
-
-        if (hydrationData.isEmpty()) throw new SoundCloudException("Hydration data could not be found in HTML");
-
-        final JsonElement hydrationDataElement = JsonElement.readTreeCatching(MAPPER, hydrationData.get())
-                .orElseThrow(() -> new SoundCloudException("Cannot parse hydration data JSON"));
-
-        final Optional<JsonElement> hydratableSoundElement = hydrationDataElement.arrayElements()
-                .filter(element -> element.asString("hydratable").equals("sound"))
-                .findFirst();
-
-        if (hydratableSoundElement.isEmpty())
-            throw new SoundCloudException("Hydratable sound element not be found in JSON");
-
-        return extractTrackInfo(hydratableSoundElement.get().paths("data"));
-    }
-
-    public static SoundCloudTrackInfo extractTrackInfo(final JsonElement jsonElement) {
-
-        final List<SoundCloudTrackFormat> trackFormats = jsonElement.paths("media", "transcodings")
-                .arrayElements()
-                .map(transcoding -> {
-                    final JsonElement formatElement = transcoding.paths("format");
-                    final String mimeType = formatElement.asString("mime_type");
-                    final String protocol = formatElement.asString("protocol");
-
-                    final String url = transcoding.asString("url");
-
-                    return SoundCloudTrackFormat.builder()
-                            .mimeType(MimeType.byIdentifier(mimeType))
-                            .protocol(protocol)
-                            .url(url)
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        return new SoundCloudTrackInfo(trackFormats);
-    }
-
-    static String extractStreamUrl(final String json) throws SoundCloudException {
-        return JsonElement.readTreeCatching(MAPPER, json)
-                .map(element -> element.asString("url"))
-                .orElseThrow(() -> new SoundCloudException("Cannot extract stream URL from JSON"));
     }
 
 }

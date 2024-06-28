@@ -17,26 +17,49 @@
 package io.sfrei.tracksearch.clients.soundcloud;
 
 import io.sfrei.tracksearch.clients.common.ResponseWrapper;
+import io.sfrei.tracksearch.clients.common.SharedClient;
 import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-import retrofit2.http.QueryMap;
-import retrofit2.http.Url;
+import retrofit2.http.*;
 
 import java.util.Map;
 
 public interface SoundCloudAPI {
 
+    String SOUNDCLOUD_ORIGIN = SoundCloudClient.URL;
+    String SOUNDCLOUD_REFERER = SOUNDCLOUD_ORIGIN + "/";
+
+    String HEADER_SOUNDCLOUD_REFERER = "Referer: " + SOUNDCLOUD_REFERER;
+    String HEADER_SOUNDCLOUD_ORIGIN = "Origin: " + SOUNDCLOUD_ORIGIN;
+
     @GET("/")
+    @Headers({
+            SharedClient.HEADER_LANGUAGE_ENGLISH,
+            HEADER_SOUNDCLOUD_REFERER,
+            HEADER_SOUNDCLOUD_ORIGIN
+    })
     Call<ResponseWrapper> getStartPage();
 
     @GET
-    Call<ResponseWrapper> getForUrlWithClientID(@Url String url,
-                                                @Query("client_id") String clientID);
+    @Headers({
+            SharedClient.HEADER_LANGUAGE_ENGLISH,
+            HEADER_SOUNDCLOUD_REFERER,
+            HEADER_SOUNDCLOUD_ORIGIN
+    })
+    Call<ResponseWrapper> getForUrlWithClientID(
+            @Url String url,
+            @Query("client_id") String clientID
+    );
 
     @GET("https://api-v2.soundcloud.com/search/tracks")
-    Call<ResponseWrapper> getSearchForKeywords(@Query("q") String search,
-                                               @Query("client_id") String clientID,
-                                               @QueryMap Map<String, String> pagingParams);
+    @Headers({
+            SharedClient.HEADER_LANGUAGE_ENGLISH,
+            HEADER_SOUNDCLOUD_REFERER,
+            HEADER_SOUNDCLOUD_ORIGIN
+    })
+    Call<ResponseWrapper> getSearchForKeywords(
+            @Query("q") String search,
+            @Query("client_id") String clientID,
+            @QueryMap Map<String, String> pagingParams
+    );
 
 }

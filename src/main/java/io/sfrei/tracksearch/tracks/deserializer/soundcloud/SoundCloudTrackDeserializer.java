@@ -19,10 +19,8 @@ package io.sfrei.tracksearch.tracks.deserializer.soundcloud;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import io.sfrei.tracksearch.clients.soundcloud.SoundCloudUtility;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack;
 import io.sfrei.tracksearch.tracks.SoundCloudTrack.SoundCloudTrackBuilder;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
 import io.sfrei.tracksearch.utils.DurationParser;
 import io.sfrei.tracksearch.utils.json.JsonElement;
@@ -66,11 +64,6 @@ public class SoundCloudTrackDeserializer extends JsonDeserializer<SoundCloudTrac
                 .asString();
 
         soundCloudTrackBuilder.trackMetadata(new SoundCloudTrackMetadata(channelName, channelUrl, streamAmount, thumbNailUrl));
-
-        // Info
-
-        final SoundCloudTrackInfo soundCloudTrackInfo = SoundCloudUtility.extractTrackInfo(rootElement);
-        soundCloudTrackBuilder.trackInfo(soundCloudTrackInfo);
 
         return soundCloudTrackBuilder;
     }

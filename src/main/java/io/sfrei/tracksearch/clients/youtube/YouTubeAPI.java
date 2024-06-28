@@ -17,7 +17,7 @@
 package io.sfrei.tracksearch.clients.youtube;
 
 import io.sfrei.tracksearch.clients.common.ResponseWrapper;
-import io.sfrei.tracksearch.config.TrackSearchConfig;
+import io.sfrei.tracksearch.clients.common.SharedClient;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -25,22 +25,32 @@ import java.util.Map;
 
 public interface YouTubeAPI {
 
+    String YOUTUBE_ORIGIN = YouTubeClient.URL;
+    String YOUTUBE_REFERER = YOUTUBE_ORIGIN + "/";
+
+    String HEADER_YOUTUBE_REFERER = "Referer: " + YOUTUBE_REFERER;
+    String HEADER_YOUTUBE_ORIGIN = "Origin: " + YOUTUBE_ORIGIN;
+
     @GET
     @Headers({
-            TrackSearchConfig.HEADER_LANGUAGE_ENGLISH,
-            TrackSearchConfig.HEADER_YOUTUBE_CLIENT_NAME,
-            TrackSearchConfig.HEADER_YOUTUBE_CLIENT_VERSION
+            SharedClient.HEADER_LANGUAGE_ENGLISH,
+            HEADER_YOUTUBE_REFERER,
+            HEADER_YOUTUBE_ORIGIN
     })
-    Call<ResponseWrapper> getForUrlWithParams(@Url String url,
-                                              @QueryMap Map<String, String> params);
+    Call<ResponseWrapper> getForUrlWithParams(
+            @Url String url,
+            @QueryMap Map<String, String> params
+    );
 
     @GET("/results")
     @Headers({
-            TrackSearchConfig.HEADER_LANGUAGE_ENGLISH,
-            TrackSearchConfig.HEADER_YOUTUBE_CLIENT_NAME,
-            TrackSearchConfig.HEADER_YOUTUBE_CLIENT_VERSION
+            SharedClient.HEADER_LANGUAGE_ENGLISH,
+            HEADER_YOUTUBE_REFERER,
+            HEADER_YOUTUBE_ORIGIN
     })
-    Call<ResponseWrapper> getSearchForKeywords(@Query("search_query") String search,
-                                               @QueryMap Map<String, String> params);
+    Call<ResponseWrapper> getSearchForKeywords(
+            @Query("search_query") String search,
+            @QueryMap Map<String, String> params
+    );
 
 }

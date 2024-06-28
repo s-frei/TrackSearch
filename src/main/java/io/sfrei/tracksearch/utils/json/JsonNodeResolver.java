@@ -54,7 +54,7 @@ public abstract class JsonNodeResolver {
         return isNodeNull(node) ? null : node.asText();
     }
 
-    protected Long getAsLong(final JsonNode node) {
+    protected Long asLong(final JsonNode node) {
         return isNodeNull(node) ? null : node.asLong();
     }
 

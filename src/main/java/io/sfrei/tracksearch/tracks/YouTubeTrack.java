@@ -17,57 +17,23 @@
 package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.TrackSource;
-import io.sfrei.tracksearch.tracks.metadata.TrackStream;
-import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
-import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.List;
 
+@Getter
 public class YouTubeTrack extends BaseTrack implements Track {
 
-    @Setter
-    @Nullable
-    private YouTubeTrackInfo trackInfo;
-
-    @Getter
     private final YouTubeTrackMetadata trackMetadata;
 
-    private final TrackInfoProvider<YouTubeTrack, YouTubeTrackInfo> trackInfoProvider;
-
-    private final TrackStreamProvider<YouTubeTrack> trackStreamProvider;
-
     @Builder
-    public YouTubeTrack(String title, Duration duration, String url, @Nullable YouTubeTrackInfo trackInfo,
-                        YouTubeTrackMetadata trackMetadata,
-                        TrackInfoProvider<YouTubeTrack, YouTubeTrackInfo> trackInfoProvider,
-                        TrackStreamProvider<YouTubeTrack> trackStreamProvider) {
+    public YouTubeTrack(String title, Duration duration, String url,
+                        YouTubeTrackMetadata trackMetadata) {
         super(TrackSource.Youtube, title, duration, url);
-        this.trackInfo = trackInfo;
         this.trackMetadata = trackMetadata;
-        this.trackInfoProvider = trackInfoProvider;
-        this.trackStreamProvider = trackStreamProvider;
-    }
-
-    public YouTubeTrackInfo getTrackInfo() {
-        if (trackInfo == null) trackInfo = trackInfoProvider.apply(this);
-        return trackInfo;
-    }
-
-    @Override
-    public TrackStream getStream() {
-        return trackStreamProvider.apply(this);
-    }
-
-    @Override
-    public List<YouTubeTrackFormat> getFormats() {
-        return getTrackInfo().getFormats();
     }
 
     @Getter

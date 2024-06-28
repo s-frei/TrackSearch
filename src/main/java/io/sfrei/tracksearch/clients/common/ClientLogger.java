@@ -22,6 +22,7 @@ public interface ClientLogger {
 
     /**
      * Obtain the logger from the implementing class.
+     *
      * @return the logger.
      */
     Logger log();

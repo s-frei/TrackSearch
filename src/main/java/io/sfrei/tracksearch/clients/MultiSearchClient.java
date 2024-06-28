@@ -19,8 +19,9 @@ package io.sfrei.tracksearch.clients;
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
-import io.sfrei.tracksearch.tracks.*;
-import io.sfrei.tracksearch.tracks.metadata.TrackStream;
+import io.sfrei.tracksearch.tracks.GenericTrackList;
+import io.sfrei.tracksearch.tracks.Track;
+import io.sfrei.tracksearch.tracks.TrackList;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -87,37 +88,6 @@ public class MultiSearchClient implements MultiTrackSearchClient, SearchClient<T
                 .collect(Collectors.toList());
 
         return getNext(trackList, callClient);
-    }
-
-    @Override
-    public void refreshTrackInfo(Track track) throws TrackSearchException {
-        if (track instanceof YouTubeTrack) {
-            clientsBySource.get(TrackSource.Youtube).refreshTrackInfo(track);
-        } else if (track instanceof SoundCloudTrack) {
-            clientsBySource.get(TrackSource.Soundcloud).refreshTrackInfo(track);
-        } else  {
-            throw new TrackSearchException("Track type is unknown");
-        }
-    }
-
-    @Override
-    public TrackStream getTrackStream(@NonNull final Track track) throws TrackSearchException {
-        if (track instanceof YouTubeTrack) {
-            return clientsBySource.get(TrackSource.Youtube).getTrackStream(track);
-        } else if (track instanceof SoundCloudTrack) {
-            return clientsBySource.get(TrackSource.Soundcloud).getTrackStream(track);
-        }
-        throw new TrackSearchException("Track type is unknown");
-    }
-
-    @Override
-    public TrackStream getTrackStream(@NonNull Track track, int retries) throws TrackSearchException {
-        if (track instanceof YouTubeTrack) {
-            return clientsBySource.get(TrackSource.Youtube).getTrackStream(track, retries);
-        } else if (track instanceof SoundCloudTrack) {
-            return clientsBySource.get(TrackSource.Soundcloud).getTrackStream(track, retries);
-        }
-        throw new TrackSearchException("Track type is unknown");
     }
 
     @Override

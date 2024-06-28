@@ -17,46 +17,23 @@
 package io.sfrei.tracksearch.tracks;
 
 import io.sfrei.tracksearch.clients.TrackSource;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackFormat;
-import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.SoundCloudTrackMetadata;
-import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Duration;
-import java.util.List;
 
 
+@Getter
 public class SoundCloudTrack extends BaseTrack implements Track {
 
-    @Getter
-    @Setter
-    private SoundCloudTrackInfo trackInfo;
-
-    @Getter
     private final SoundCloudTrackMetadata trackMetadata;
 
-    private final TrackStreamProvider<SoundCloudTrack> trackStreamProvider;
-
     @Builder
-    public SoundCloudTrack(String title, Duration duration, String url, SoundCloudTrackInfo trackInfo,
-                           SoundCloudTrackMetadata trackMetadata, TrackStreamProvider<SoundCloudTrack> trackStreamProvider) {
+    public SoundCloudTrack(String title, Duration duration, String url,
+                           SoundCloudTrackMetadata trackMetadata) {
         super(TrackSource.Soundcloud, title, duration, url);
-        this.trackInfo = trackInfo;
         this.trackMetadata = trackMetadata;
-        this.trackStreamProvider = trackStreamProvider;
-    }
-
-    @Override
-    public TrackStream getStream() {
-        return trackStreamProvider.apply(this);
-    }
-
-    @Override
-    public List<SoundCloudTrackFormat> getFormats() {
-        return trackInfo.getFormats();
     }
 
 }

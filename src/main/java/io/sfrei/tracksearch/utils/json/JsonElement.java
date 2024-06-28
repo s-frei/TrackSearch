@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 
+@SuppressWarnings("unused")
 @Slf4j
 public class JsonElement extends JsonNodeResolver {
 
@@ -51,12 +52,12 @@ public class JsonElement extends JsonNodeResolver {
         }
     }
 
-    public Optional<JsonElement> reReadTree(final ObjectMapper mapper) {
-        return readTreeCatching(mapper, asString(node()));
-    }
-
     public static JsonElement of(JsonNode node) {
         return new JsonElement(node, false);
+    }
+
+    public Optional<JsonElement> reReadTree(final ObjectMapper mapper) {
+        return readTreeCatching(mapper, asString(node()));
     }
 
     private JsonElement resolved() {
@@ -85,7 +86,7 @@ public class JsonElement extends JsonNodeResolver {
     }
 
     public Long asLong(final String... paths) {
-        return getAsLong(paths(paths).node());
+        return super.asLong(paths(paths).node());
     }
 
     public JsonElement paths(final String... paths) {

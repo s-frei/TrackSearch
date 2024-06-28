@@ -18,19 +18,16 @@ package io.sfrei.tracksearch.clients;
 
 import io.sfrei.tracksearch.clients.common.ClientLogger;
 import io.sfrei.tracksearch.clients.common.QueryType;
-import io.sfrei.tracksearch.clients.common.SharedClient;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
-import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 public interface SearchClient<T extends Track> extends TrackSearchClient<T>, ClientLogger {
 
-    default void throwIfPagingValueMissing(TrackProviders<? extends Track> source, TrackList<? extends Track> trackList)
+    default void throwIfPagingValueMissing(SearchClient<? extends Track> source, TrackList<? extends Track> trackList)
             throws TrackSearchException {
 
         if (!hasPagingValues(trackList))
@@ -38,44 +35,8 @@ public interface SearchClient<T extends Track> extends TrackSearchClient<T>, Cli
 
     }
 
-    default TrackSearchException noTrackStreamAfterRetriesException(Function<String, TrackSearchException> exceptionConstructor,
-                                                                    int retries) {
-        return exceptionConstructor.apply(String.format("Not able to get stream URL after %s tries", retries + 1));
-    }
-
     default TrackSearchException unsupportedQueryTypeException(Function<String, TrackSearchException> exceptionConstructor, QueryType queryType) {
         return exceptionConstructor.apply(String.format("Query type %s not supported", queryType));
-    }
-
-    default Optional<TrackStream> tryResolveTrackStream(T track, int retries) {
-        log().trace("Get track stream for: {}", track);
-
-        do {
-
-            try {
-                final TrackStream trackStream = getTrackStream(track);
-                final Integer code = SharedClient.requestAndGetCode(trackStream.url());
-
-                if (SharedClient.successResponseCode(code)) return Optional.of(trackStream);
-
-                throw new TrackSearchException(String.format("Failed getting stream URL - response %s", code));
-
-            } catch (TrackSearchException e) {
-                retries--;
-                if (retries > 0) {
-                    log().warn("Not able getting stream for: {} - {} tries left - cause: {}", track.getUrl(), retries, e.getMessage());
-                    try {
-                        log().trace("Refreshing track information...");
-                        refreshTrackInfo(track);
-                    } catch (TrackSearchException ex) {
-                        log().error("Failed refreshing track information", e);
-                    }
-                }
-            }
-
-        } while (retries >= 0);
-
-        return Optional.empty();
     }
 
 
