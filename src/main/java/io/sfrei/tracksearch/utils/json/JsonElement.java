@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 
+@SuppressWarnings("unused")
 @Slf4j
 public class JsonElement extends JsonNodeResolver {
 

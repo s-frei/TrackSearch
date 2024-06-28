@@ -34,7 +34,6 @@ public class SharedClient {
 
     public static final int OK = 200;
     public static final String HEADER_LANGUAGE_ENGLISH = "Accept-Language: en";
-    private static final int PARTIAL_CONTENT = 206;
     public static final int UNAUTHORIZED = 401;
 
     private static final CookieManager COOKIE_MANAGER = new CookieManager(null, CookiePolicy.ACCEPT_NONE);
@@ -91,9 +90,13 @@ public class SharedClient {
         }
     }
 
+    private static void logRequest(String url) {
+        log.trace("Request: {}", url);
+    }
+
     public static ResponseWrapper request(Call<ResponseWrapper> call) {
         final String url = call.request().url().toString();
-        log.trace("Requesting: {}", url);
+        logRequest(url);
         try {
             final Response<ResponseWrapper> response = call.execute();
 
@@ -111,31 +114,12 @@ public class SharedClient {
     }
 
     public static ResponseWrapper request(String url) {
-        log.trace("Requesting: {}", url);
+        logRequest(url);
         final Request request = new Request.Builder().url(url).build();
         try (final okhttp3.Response response = OK_HTTP_CLIENT.newCall(request).execute()) {
             return ResponseProviderFactory.wrapResponse(response.body());
         } catch (IOException e) {
             return ResponseWrapper.empty(requestException(url, e));
-        }
-    }
-
-    public static boolean successResponseCode(Integer code) {
-        return code != null && (code == OK || code == PARTIAL_CONTENT);
-    }
-
-    public static Integer requestAndGetCode(String url, String referer, String origin) {
-        final Request request = new Request.Builder().url(url)
-                .header("Connection", "close")
-                .header("Range", "bytes=0-1")
-                .header("Referer", referer)
-                .header("Origin", origin)
-                .build();
-
-        try (final okhttp3.Response response = OK_HTTP_CLIENT.newCall(request).execute()) {
-            return response.code();
-        } catch (IOException e) {
-            return null;
         }
     }
 

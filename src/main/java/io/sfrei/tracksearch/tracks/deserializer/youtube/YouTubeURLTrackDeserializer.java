@@ -20,11 +20,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import io.sfrei.tracksearch.clients.youtube.YouTubeClient;
-import io.sfrei.tracksearch.clients.youtube.YouTubeUtility;
-import io.sfrei.tracksearch.exceptions.YouTubeException;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
 import io.sfrei.tracksearch.tracks.YouTubeTrack.YouTubeTrackBuilder;
-import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
 import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackMetadata;
 import io.sfrei.tracksearch.utils.DurationParser;
 import io.sfrei.tracksearch.utils.json.JsonElement;
@@ -77,16 +74,6 @@ public class YouTubeURLTrackDeserializer extends JsonDeserializer<YouTubeTrack.U
         final String thumbNailUrl = firstThumbnail.map(thumbNail -> thumbNail.asString("url")).orElse(null);
 
         youTubeTrackBuilder.trackMetadata(new YouTubeTrackMetadata(channelName, channelUrl, streamAmount, thumbNailUrl));
-
-        // Info
-
-        try {
-            final JsonElement streamingData = rootElement.paths("streamingData");
-            final YouTubeTrackInfo trackInfo = YouTubeUtility.extractTrackInfoFromStreamingData(streamingData, url, null);
-            youTubeTrackBuilder.trackInfo(trackInfo);
-        } catch (YouTubeException e) {
-            log.warn("Failed extracting track info of: {}", url);
-        }
 
         return listYouTubeTrackBuilder;
     }

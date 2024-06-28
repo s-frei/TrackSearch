@@ -17,7 +17,6 @@
 package io.sfrei.tracksearch.clients.youtube;
 
 import io.sfrei.tracksearch.clients.SearchClient;
-import io.sfrei.tracksearch.clients.TrackProviders;
 import io.sfrei.tracksearch.clients.common.QueryType;
 import io.sfrei.tracksearch.clients.common.ResponseProviderFactory;
 import io.sfrei.tracksearch.config.TrackSearchConfig;
@@ -27,14 +26,8 @@ import io.sfrei.tracksearch.tracks.GenericTrackList;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
 import io.sfrei.tracksearch.tracks.YouTubeTrack;
-import io.sfrei.tracksearch.tracks.metadata.TrackStream;
-import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackFormat;
-import io.sfrei.tracksearch.tracks.metadata.YouTubeTrackInfo;
-import io.sfrei.tracksearch.utils.TrackFormatComparator;
-import io.sfrei.tracksearch.utils.URLModifier;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import retrofit2.Retrofit;
 
@@ -46,7 +39,7 @@ import static io.sfrei.tracksearch.clients.common.SharedClient.OK_HTTP_CLIENT;
 import static io.sfrei.tracksearch.clients.common.SharedClient.request;
 
 @Slf4j
-public class YouTubeClient implements SearchClient<YouTubeTrack>, TrackProviders<YouTubeTrack> {
+public class YouTubeClient implements SearchClient<YouTubeTrack> {
 
     public static final String URL = "https://www.youtube.com";
     public static final String PAGING_KEY = "ctoken";
@@ -88,14 +81,14 @@ public class YouTubeClient implements SearchClient<YouTubeTrack>, TrackProviders
             throw new YouTubeException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
 
         final String trackJSON = request(api.getForUrlWithParams(url, TRACK_PARAMS)).contentOrThrow();
-        return YouTubeUtility.extractYouTubeTrack(trackJSON, this::trackInfoProvider, this::trackStreamProvider);
+        return YouTubeUtility.extractYouTubeTrack(trackJSON);
     }
 
     private GenericTrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search, @NonNull final Map<String, String> params, QueryType queryType)
             throws TrackSearchException {
 
         final String tracksJSON = request(api.getSearchForKeywords(search, params)).contentOrThrow();
-        return YouTubeUtility.extractYouTubeTracks(tracksJSON, queryType, search, this::provideNext, this::trackInfoProvider, this::trackStreamProvider);
+        return YouTubeUtility.extractYouTubeTracks(tracksJSON, queryType, search, this::provideNext);
     }
 
     @Override
@@ -118,44 +111,6 @@ public class YouTubeClient implements SearchClient<YouTubeTrack>, TrackProviders
             return nextTracksForSearch.updatePagingValues(trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw unsupportedQueryTypeException(YouTubeException::new, trackListQueryType);
-    }
-
-     @Override
-     @SuppressWarnings("unchecked")
-     public YouTubeTrackInfo getTrackInfo(YouTubeTrack youTubeTrack) throws TrackSearchException {
-        final String trackJSON = request(api.getForUrlWithParams(youTubeTrack.getUrl(), TRACK_PARAMS)).contentOrThrow();
-        return YouTubeUtility.extractTrackInfo(trackJSON, youTubeTrack.getUrl());
-    }
-
-    @Override
-    public void refreshTrackInfo(YouTubeTrack youTubeTrack) throws TrackSearchException {
-        final YouTubeTrackInfo trackInfo = this.getTrackInfo(youTubeTrack);
-        youTubeTrack.setTrackInfo(trackInfo);
-    }
-
-    @Override
-    public TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack) throws TrackSearchException {
-        final YouTubeTrackFormat trackFormat = TrackFormatComparator.getBestYouTubeTrackFormat(youtubeTrack, false);
-        return getTrackStream(youtubeTrack, trackFormat);
-    }
-
-    private @NotNull TrackStream getTrackStream(@NonNull YouTubeTrack youtubeTrack, YouTubeTrackFormat trackFormat) throws TrackSearchException {
-        if (trackFormat.isStreamReady()) {
-            final String streamUrl = URLModifier.decode(trackFormat.getUrl());
-            return new TrackStream(streamUrl, trackFormat);
-        }
-
-        final String scriptUrl = youtubeTrack.getTrackInfo().getScriptUrlOrThrow();
-        final String signature = YouTubeUtility.getSignature(trackFormat, scriptUrl);
-
-        final String streamUrl = URLModifier.addRequestParam(trackFormat.getUrl(), trackFormat.getSigParam(), signature);
-        return new TrackStream(streamUrl, trackFormat);
-    }
-
-    @Override
-    public @NotNull TrackStream getTrackStream(@NonNull final YouTubeTrack youtubeTrack, final int retries) throws TrackSearchException {
-        return tryResolveTrackStream(youtubeTrack, retries, YouTubeAPI.YOUTUBE_REFERER, YouTubeAPI.YOUTUBE_ORIGIN)
-                .orElseThrow(() -> noTrackStreamAfterRetriesException(YouTubeException::new, retries));
     }
 
     private Map<String, String> getPagingParams(final Map<String, String> queryInformation) {

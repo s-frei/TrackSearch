@@ -19,9 +19,7 @@ package io.sfrei.tracksearch.clients;
 import io.sfrei.tracksearch.exceptions.TrackSearchException;
 import io.sfrei.tracksearch.tracks.Track;
 import io.sfrei.tracksearch.tracks.TrackList;
-import io.sfrei.tracksearch.tracks.metadata.TrackFormat;
 import io.sfrei.tracksearch.tracks.metadata.TrackMetadata;
-import io.sfrei.tracksearch.tracks.metadata.TrackStream;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +37,6 @@ import static io.sfrei.tracksearch.clients.TestSuite.SEARCH_KEYS;
 import static io.sfrei.tracksearch.clients.TestSuite.SINGLE_SEARCH_KEY;
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @Slf4j
 @Getter
@@ -74,6 +71,10 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
 
     public abstract List<String> trackURLs();
 
+    /**
+     * Avoid to many requests 429
+     */
+    @SuppressWarnings("unused")
     @SneakyThrows
     private void delayWhenGitHubAction() {
         if (isGitHubAction) Thread.sleep(1000);
@@ -97,10 +98,8 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
     public void checkTrackForURL(String url) throws TrackSearchException {
         log.trace("[trackForURL]: {}", url);
         final T trackForURL = trackSearchClient.getTrack(url);
-        // Test single directly as resolving might differ from list results
         checkTrack(trackForURL);
         checkTrackMetadata(trackForURL);
-        checkTrackFormats(trackForURL);
     }
 
     @Order(3)
@@ -218,73 +217,6 @@ public abstract class ClientTest<C extends TrackSearchClient<T>, T extends Track
                 .isNotEmpty();
 
         assertions.assertAll();
-    }
-
-    @Order(8)
-    @ParameterizedTest
-    @MethodSource("getAllTracksFromTrackLists")
-    public void checkTrackFormats(Track track) {
-        log.trace("[checkTrackFormats]: {}", track.pretty());
-        delayWhenGitHubAction();
-
-        final SoftAssertions assertions = new SoftAssertions();
-        final List<? extends TrackFormat> formats = track.getFormats();
-
-        assertions.assertThat(formats)
-                .as("Track formats should not be null or empty for Track '%s'", track.getUrl())
-                .isNotNull()
-                .isNotEmpty();
-
-        for (TrackFormat format : formats) {
-
-            assertions.assertThat(format)
-                    .extracting(TrackFormat::getMimeType)
-                    .as("TrackFormat should have a mime type Track '%s'", track.getUrl())
-                    .asString()
-                    .isNotEmpty();
-
-            assertions.assertThat(format)
-                    .extracting(TrackFormat::getUrl)
-                    .as("TrackFormat should have a URL for Track '%s'", track.getUrl())
-                    .asString()
-                    .isNotEmpty();
-
-        }
-
-        assertions.assertAll();
-    }
-
-    @Order(9)
-    @ParameterizedTest
-    @MethodSource("getAllTracksFromTrackLists")
-    public void checkTrackStream(Track track) {
-        log.trace("[checkTrackStream]: {}", track.pretty());
-        delayWhenGitHubAction();
-
-        final TrackStream trackStream = assertDoesNotThrow(track::getStream,
-                String.format("Track stream resolving should not throw for: %s", track.getUrl()));
-
-        final String streamUrl = trackStream.url();
-        assertThat(streamUrl)
-                .as("Track stream should have stream URL for Track '%s'", track.getUrl())
-                .isNotEmpty();
-
-        assertThat(trackStream.format())
-                .as("Track stream should have format for Track '%s'", track.getUrl())
-                .isNotNull();
-
-        log.trace("StreamURL: {}", streamUrl);
-    }
-
-    @Order(10)
-    @ParameterizedTest
-    @MethodSource("getAllTracksFromTrackLists")
-    public void refreshTrackInfo(T track) {
-        log.trace("[refreshTrackInfo]: {}", track.pretty());
-        delayWhenGitHubAction();
-
-        assertDoesNotThrow(() -> trackSearchClient.refreshTrackInfo(track),
-                String.format("Track info refresh should not throw for: %s", track.getUrl()));
     }
 
 }
