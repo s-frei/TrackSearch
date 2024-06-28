@@ -26,33 +26,41 @@
 
 ## What is it ?
 
-*TrackSearch* is for searching track metadata on different sources, like *YouTube* and *SoundCloud* for now and to 
-expose the URL of the underlying (audio) stream with the best quality. That offers the possibility to hand them over 
-to other programs which are able to process them, like [VLC](https://www.videolan.org/vlc/), or *Firefox* which can 
-display (most) streams directly, for example.
+*TrackSearch* is for searching track metadata on different sources, like *YouTube* and *SoundCloud* for now.
 
 **Note:** TrackSearch isn't using any API-Key, it uses the public API (like your browser).
 
 ## Supported sources
 
-Since TrackSearch focuses on just exposing the audio streams and to search for music (although YouTube offers more than 
-music) I decided to add following providers for now:
+Since TrackSearch focuses on searching for music (although YouTube offers more than music) 
+I decided to add following providers for now:
 
 ![youtube](https://img.shields.io/badge/-YouTube-FF0000?style=plastic&logo=youtube&logoColor=white)
 ![soundcloud](https://img.shields.io/badge/-SoundCloud-FF3300?style=plastic&logo=soundcloud&logoColor=white)
 
 There could be more added if there are interesting sources to go for.
 
-**Note:** Those sources are accessed vie the public API without the use of any API key or similar.
-
 #### Current features :mag_right:
 
 - search
 - paging
-- (audio) stream url
-- format
 - multiple clients asynchronous
 - metadata like: duration, channel, views, thumbnail, ...
+
+## Stream
+
+With release [1.0.0](https://github.com/s-frei/TrackSearch/releases/tag/1.0.0) the capability of getting all available
+audio formats and the actual stream URL was removed, as it takes too much effort to maintain it and there are other
+*huge* projects that offer that with a large community like [yt-dlp](https://github.com/yt-dlp/yt-dlp). 
+
+To get the stripped functionality back use e.g.:
+
+```shell
+yt-dlp -J <url> | jq '.formats | map(select(.vcodec == "none"))'
+```
+
+I decided against implementing a simple wrapper to bring back the stripped functionalities as usage will differ
+from user to user.
 
 ## How to use it ? :books:
 
@@ -85,19 +93,24 @@ MultiTrackSearchClient searchClient = new MultiSearchClient();
 TrackSearchClient<SoundCloudTrack> explicitClient = new SoundCloudClient();
 
 try {
-    // Search for tracks
-    TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("your keywords");
-    TrackStream stream = tracksForSearch.get(0).getStream();
+    TrackList<Track> tracksForSearch = searchClient.getTracksForSearch("<your keywords>");
+    Track track = tracksForSearch.get(0);
 
-    // Stream URL with format
-    final String streamUrl = stream.url();
-    final TrackFormat format = stream.format();
+    final String url = track.getUrl();
+    final String title = track.getTitle();
+    final Duration duration = track.getDuration();
+
+    final TrackMetadata trackMetadata = track.getTrackMetadata();
+    final String channelName = trackMetadata.channelName();
+    final String channelUrl = trackMetadata.channelUrl();
+    final String thumbNailUrl = trackMetadata.thumbNailUrl();
+    final Long streamAmount = trackMetadata.streamAmount();
 
     // Get next tracks page
     TrackList<Track> nextTracks = tracksForSearch.next();
 
     // Get a track for URL
-    SoundCloudTrack trackForURL = explicitClient.getTrack("<soundcloud-url>");
+    SoundCloudTrack trackForUrl = explicitClient.getTrack("<soundcloud-url>");
 
 } catch (TrackSearchException e) {
     // Damn
