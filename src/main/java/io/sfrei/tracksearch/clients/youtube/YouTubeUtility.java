@@ -27,6 +27,9 @@ import io.sfrei.tracksearch.tracks.deserializer.youtube.YouTubeURLTrackDeseriali
 import io.sfrei.tracksearch.utils.ObjectMapperBuilder;
 import io.sfrei.tracksearch.utils.json.JsonElement;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import java.util.List;
 import java.util.Map;
@@ -36,57 +39,71 @@ import java.util.stream.Collectors;
 @Slf4j
 public final class YouTubeUtility {
 
+    public static final String VAR_YT_INITIAL_DATA = "var ytInitialData =";
+    public static final String VAR_YT_INITIAL_PLAYER_RESPONSE = "var ytInitialPlayerResponse =";
+
     private static final ObjectMapper MAPPER = ObjectMapperBuilder.create()
             .addDeserializer(YouTubeTrack.ListYouTubeTrackBuilder.class, new YouTubeListTrackDeserializer())
             .addDeserializer(YouTubeTrack.URLYouTubeTrackBuilder.class, new YouTubeURLTrackDeserializer())
             .get();
 
+    private static String extractJsonFromHtml(String html, String varType) throws YouTubeException {
+        final Document document = Jsoup.parse(html);
+        return document.select("script[nonce]").stream()
+                .map(Element::data)
+                .filter(data -> data.startsWith(varType))
+                .findFirst()
+                .map(scriptContent -> scriptContent.replaceFirst(varType, ""))
+                .map(scriptContent -> scriptContent.substring(0, scriptContent.lastIndexOf("}") + 1))
+                .orElseThrow(() -> new YouTubeException("Could not extract JSON data from HTML"));
+    }
 
-    static YouTubeTrack extractYouTubeTrack(final String json)
+    static YouTubeTrack extractYouTubeTrack(final String html)
             throws YouTubeException {
 
+        final String json = extractJsonFromHtml(html, VAR_YT_INITIAL_PLAYER_RESPONSE);
         final JsonElement trackJsonElement = JsonElement.readTreeCatching(MAPPER, json)
                 .orElseThrow(() -> new YouTubeException("Cannot parse YouTubeTrack JSON"));
 
-        return playerResponseFromTrackJSON(trackJsonElement)
-                .mapCatching(MAPPER, YouTubeTrack.URLYouTubeTrackBuilder.class).getBuilder()
+        return trackJsonElement.mapCatching(MAPPER, YouTubeTrack.URLYouTubeTrackBuilder.class)
+                .getBuilder()
                 .build();
     }
 
-    static GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String json, final QueryType queryType, final String query,
+    static GenericTrackList<YouTubeTrack> extractYouTubeTracks(final String html, final QueryType queryType, final String query,
                                                                final TrackListProvider<YouTubeTrack> nextTrackListFunction)
             throws YouTubeException {
+
+        final String json = extractJsonFromHtml(html, VAR_YT_INITIAL_DATA);
 
         final JsonElement rootElement = JsonElement.readTreeCatching(MAPPER, json)
                 .orElseThrow(() -> new YouTubeException("Cannot parse YouTubeTracks JSON"));
 
-        final JsonElement responseElement = rootElement.paths("response").orElse(rootElement).elementAtIndex(1).paths("response");
-
-        final JsonElement defaultElement = responseElement.asUnresolved()
+        final JsonElement defaultElement = rootElement.asUnresolved()
                 .paths("contents", "twoColumnSearchResultsRenderer", "primaryContents", "sectionListRenderer", "contents");
 
         final JsonElement contentHolder = defaultElement
                 .lastForPath("itemSectionRenderer") // Avoid sponsored
-                .orElse(responseElement)
+                .orElse(rootElement)
                 .paths("onResponseReceivedCommands")
                 .firstElement()
                 .paths("appendContinuationItemsAction", "continuationItems")
                 .firstElement()
                 .paths("itemSectionRenderer")
-                .orElse(responseElement)
+                .orElse(rootElement)
                 .paths("onResponseReceivedCommands")
                 .firstElement()
                 .paths("appendContinuationItemsAction", "continuationItems")
                 .firstElement()
                 .paths("itemSectionRenderer")
-                .orElse(responseElement)
+                .orElse(rootElement)
                 .paths("continuationContents", "itemSectionContinuation", "itemSectionContinuation")
-                .orElse(responseElement)
+                .orElse(rootElement)
                 .paths("continuationContents", "sectionListContinuation", "contents")
                 .firstElement()
                 .paths("itemSectionRenderer");
 
-        final String cToken = extractCToken(responseElement, defaultElement, contentHolder);
+        final String cToken = extractCToken(rootElement, defaultElement, contentHolder);
 
         final JsonElement contents = contentHolder.asUnresolved().paths("contents");
         final List<YouTubeTrack> ytTracks = contents.elements()
@@ -128,14 +145,6 @@ public final class YouTubeUtility {
                 .findElement("continuationItemRenderer")
                 .paths("continuationEndpoint", "continuationCommand")
                 .asString("token");
-    }
-
-    private static JsonElement playerResponseFromTrackJSON(JsonElement jsonElement) {
-        return jsonElement.elementAtIndex(2)
-                .paths("playerResponse")
-                .orElse(jsonElement)
-                .paths("playerResponse")
-                .orElse(jsonElement);
     }
 
 }

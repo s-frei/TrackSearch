@@ -30,16 +30,12 @@ public interface YouTubeAPI {
 
     String HEADER_YOUTUBE_REFERER = "Referer: " + YOUTUBE_REFERER;
     String HEADER_YOUTUBE_ORIGIN = "Origin: " + YOUTUBE_ORIGIN;
-    String HEADER_YOUTUBE_CLIENT_NAME = "X-Youtube-Client-Name: 1";
-    String HEADER_YOUTUBE_CLIENT_VERSION = "X-Youtube-Client-Version: 2.20240612.01.00";
 
     @GET
     @Headers({
             SharedClient.HEADER_LANGUAGE_ENGLISH,
             HEADER_YOUTUBE_REFERER,
-            HEADER_YOUTUBE_ORIGIN,
-            HEADER_YOUTUBE_CLIENT_NAME,
-            HEADER_YOUTUBE_CLIENT_VERSION
+            HEADER_YOUTUBE_ORIGIN
     })
     Call<ResponseWrapper> getForUrlWithParams(
             @Url String url,
@@ -50,9 +46,7 @@ public interface YouTubeAPI {
     @Headers({
             SharedClient.HEADER_LANGUAGE_ENGLISH,
             HEADER_YOUTUBE_REFERER,
-            HEADER_YOUTUBE_ORIGIN,
-            HEADER_YOUTUBE_CLIENT_NAME,
-            HEADER_YOUTUBE_CLIENT_VERSION
+            HEADER_YOUTUBE_ORIGIN
     })
 
     Call<ResponseWrapper> getSearchForKeywords(

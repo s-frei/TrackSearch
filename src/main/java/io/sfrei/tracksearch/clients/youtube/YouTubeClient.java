@@ -49,8 +49,6 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
     private static final String PAGING_INFORMATION = INFORMATION_PREFIX + "PagingToken";
     private static final String ADDITIONAL_PAGING_KEY = "continuation";
 
-    public static final Map<String, String> TRACK_PARAMS = Map.of("pbj", "1", "hl", "en", "alt", "json");
-
     private static final Set<String> VALID_URL_PREFIXES = Set.of(URL); // TODO: Extend
 
     private final YouTubeAPI api;
@@ -80,7 +78,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
         if (!isApplicableForURL(url))
             throw new YouTubeException(String.format("%s not applicable for URL: %s", this.getClass().getSimpleName(), url));
 
-        final String trackJSON = request(api.getForUrlWithParams(url, TRACK_PARAMS)).contentOrThrow();
+        final String trackJSON = request(api.getForUrlWithParams(url, Map.of())).contentOrThrow();
         return YouTubeUtility.extractYouTubeTrack(trackJSON);
     }
 
@@ -93,7 +91,7 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
 
     @Override
     public TrackList<YouTubeTrack> getTracksForSearch(@NonNull final String search) throws TrackSearchException {
-        final TrackList<YouTubeTrack> trackList = getTracksForSearch(search, TRACK_PARAMS, QueryType.SEARCH);
+        final TrackList<YouTubeTrack> trackList = getTracksForSearch(search, Map.of(), QueryType.SEARCH);
         trackList.addQueryInformationValue(POSITION_KEY, 0);
         return trackList;
     }
@@ -104,10 +102,9 @@ public class YouTubeClient implements SearchClient<YouTubeTrack> {
 
         final QueryType trackListQueryType = trackList.getQueryType();
         if (trackListQueryType.equals(QueryType.SEARCH) || trackListQueryType.equals(QueryType.PAGING)) {
-            final HashMap<String, String> params = new HashMap<>(TRACK_PARAMS);
-            params.putAll(getPagingParams(trackList.getQueryInformation()));
+            final Map<String, String> paginParams = getPagingParams(trackList.getQueryInformation());
 
-            final GenericTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryValue(), params, QueryType.PAGING);
+            final GenericTrackList<YouTubeTrack> nextTracksForSearch = getTracksForSearch(trackList.getQueryValue(), paginParams, QueryType.PAGING);
             return nextTracksForSearch.updatePagingValues(trackList, POSITION_KEY, OFFSET_KEY);
         }
         throw unsupportedQueryTypeException(YouTubeException::new, trackListQueryType);
