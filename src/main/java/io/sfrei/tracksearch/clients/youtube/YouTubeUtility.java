@@ -103,7 +103,7 @@ public final class YouTubeUtility {
                 .firstElement()
                 .paths("itemSectionRenderer");
 
-        final String cToken = extractCToken(rootElement, defaultElement, contentHolder);
+        final String cToken = extractCToken(rootElement, defaultElement);
 
         final JsonElement contents = contentHolder.asUnresolved().paths("contents");
         final List<YouTubeTrack> ytTracks = contents.elements()
@@ -127,15 +127,10 @@ public final class YouTubeUtility {
         return trackList;
     }
 
-    private static String extractCToken(JsonElement responseElement, JsonElement defaultElement, JsonElement contentHolder) {
-        if (contentHolder.nodePresent("continuations")) {
-            return contentHolder.asUnresolved()
-                    .paths("continuations")
-                    .firstElement()
-                    .paths("nextContinuationData")
-                    .asString("continuation");
-        }
-        return responseElement.asUnresolved()
+    // onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[1].continuationItemRenderer.continuationEndpoint.continuationCommand.token
+    // contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[1].continuationItemRenderer.continuationEndpoint.continuationCommand.token
+    private static String extractCToken(JsonElement rootElement, JsonElement defaultElement) {
+        final JsonElement continuationCommand = rootElement.asUnresolved()
                 .paths("onResponseReceivedCommands")
                 .firstElement()
                 .paths("appendContinuationItemsAction", "continuationItems")
@@ -143,8 +138,8 @@ public final class YouTubeUtility {
                 .paths("continuationItemRenderer", "continuationEndpoint", "continuationCommand")
                 .orElse(defaultElement)
                 .findElement("continuationItemRenderer")
-                .paths("continuationEndpoint", "continuationCommand")
-                .asString("token");
+                .paths("continuationEndpoint", "continuationCommand");
+        return continuationCommand.asUnresolved().asString("token");
     }
 
 }

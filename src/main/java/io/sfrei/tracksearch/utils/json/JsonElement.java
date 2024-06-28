@@ -86,7 +86,7 @@ public class JsonElement extends JsonNodeResolver {
     }
 
     public Long asLong(final String... paths) {
-        return getAsLong(paths(paths).node());
+        return super.asLong(paths(paths).node());
     }
 
     public JsonElement paths(final String... paths) {
