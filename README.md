@@ -72,12 +72,12 @@ from user to user.
 <dependency>
     <groupId>io.sfrei</groupId>
     <artifactId>tracksearch</artifactId>
-    <version>0.10.1</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
 ```kotlin
-implementation("io.sfrei:tracksearch:0.10.1")
+implementation("io.sfrei:tracksearch:1.0.0")
 ```
 
 on [GitHub Packages](https://github.com/s-frei/TrackSearch/packages) or directly from 
